@@ -61,7 +61,7 @@ Los archivos se van agregando a medida que avanzan las fases (ver "Estado por fa
 1. Clonar el repositorio:
 
    ```bash
-   git clone https://github.com/<usuario>/Trabajo-Practico-Final-LD2.git
+   git clone https://github.com/AlesioRios/Trabajo-Practico-Final-LD2.git
    cd Trabajo-Practico-Final-LD2
    ```
 
