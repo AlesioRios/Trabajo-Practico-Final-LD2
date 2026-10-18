@@ -14,7 +14,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 | Nombre | Usuario de GitHub |
 |---|---|
 | Alesio Ríos | AlesioRios |
-| Juan Cruz Brown | juancruzbrown910-cpu |
+| Juan Cruz Brown | jcbrown910 |
 | Milagros González | miligonzalzz |
 
 ## Estructura del proyecto
