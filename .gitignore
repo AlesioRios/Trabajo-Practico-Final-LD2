@@ -1,0 +1,29 @@
+# Datos originales de la cátedra: NO se versionan (ver README, sección "Datos").
+# Lo que sí se versiona es data/checksums.json para verificarlos.
+*.xlsx
+*.xls
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secretos y configuración local
+.env
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
