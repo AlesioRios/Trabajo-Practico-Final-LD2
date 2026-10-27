@@ -42,6 +42,9 @@ La consigna completa está en [`consigna.md`](consigna.md).
 ├── results/
 │   ├── predicciones.csv
 │   └── experiment_logs.csv
+├── tests/                                      (pruebas con datos sintéticos)
+├── docs/
+│   └── decisions/                              (decisiones de diseño, una por archivo)
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
