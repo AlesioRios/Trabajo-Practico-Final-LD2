@@ -22,6 +22,9 @@ env/
 # Secretos y configuración local
 .env
 
+# Notas locales de trabajo (no se comparten)
+estado.md
+
 # Sistema operativo / editores
 .DS_Store
 Thumbs.db

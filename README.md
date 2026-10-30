@@ -144,3 +144,8 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [ ] Fase 2 - Preprocesamiento y selección de variables
 - [ ] Fase 3 - Entrenamiento y versionado de modelos
 - [ ] Fase 4 - Pipeline de predicción
+
+## Decisiones y acuerdos
+
+- [`docs/acuerdos-de-datos.md`](docs/acuerdos-de-datos.md): formato de los datos, funciones compartidas y reglas de trabajo del equipo.
+- [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
