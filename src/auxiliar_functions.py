@@ -7,12 +7,15 @@ sumaron dos grupos más:
 - Presentación de tablas: estilizar, mostrar_lado_a_lado, tabla_simple.
 - Lectura y unificación de los Excel de la planta: leer_consolidado_ee,
   cierres_por_bloque, unir_versiones, construir_diario.
+- Análisis exploratorio: medir_efecto_por_grupo (¿cambia el consumo según el día de la
+  semana, el mes, el año?).
 
 Las funciones de datos las reutilizan preprocessing_pipeline.py y predict.py:
 el Excel oculto de la cátedra tiene que procesarse igual que el de entrenamiento.
 """
 
 import pandas as pd
+from scipy.stats import kruskal
 
 SEMILLA = 42
 
@@ -242,3 +245,52 @@ def construir_diario(mejores):
     diario["consumo_dia"] = diario[COLUMNA_CONSUMO].where(diario["valido"])
     diario["objetivo"] = diario["consumo_dia"].shift(-1)
     return diario
+
+
+# ---------------------------------------------------------------------------
+# Análisis exploratorio
+# ---------------------------------------------------------------------------
+
+def medir_efecto_por_grupo(tabla, columna_grupo, columna_valor, orden=None):
+    """Mide cuánto cambia `columna_valor` entre los grupos de `columna_grupo`.
+
+    Responde preguntas como "¿importa el día de la semana (o el mes, o el año)?". Los
+    valores vacíos de `columna_valor` se ignoran. `orden` es la lista de grupos en el
+    orden en que se quieren las filas del resumen (por defecto, el alfabético).
+
+    Devuelve dos tablas:
+    - resumen: una fila por grupo con `Días` (cuántos valores), `Promedio` y `Mediana`.
+    - medidas: cuatro números en la columna `Valor`: la diferencia entre el grupo de
+      promedio más alto y el de más bajo (en unidades de la columna y como % del promedio
+      general), el % de la variación total que explican los grupos (eta cuadrado) y el
+      p-valor de la prueba de Kruskal-Wallis (hipótesis nula: todos los grupos tienen la
+      misma distribución).
+
+    Esa prueba supone observaciones independientes; en una serie temporal los días
+    consecutivos se parecen, así que el p-valor puede salir más chico de lo que
+    correspondería. Hay que leerlo junto con el % explicado, no solo.
+    """
+    tabla = tabla.dropna(subset=[columna_valor])
+    por_grupo = tabla.groupby(columna_grupo)[columna_valor]
+
+    resumen = por_grupo.agg(["count", "mean", "median"])
+    if orden is not None:
+        resumen = resumen.reindex(orden)
+    resumen.columns = ["Días", "Promedio", "Mediana"]
+    resumen.index.name = columna_grupo
+
+    promedio_general = tabla[columna_valor].mean()
+    promedio_del_grupo = por_grupo.transform("mean")
+    variacion_entre_grupos = ((promedio_del_grupo - promedio_general) ** 2).sum()
+    variacion_total = ((tabla[columna_valor] - promedio_general) ** 2).sum()
+
+    diferencia = resumen["Promedio"].max() - resumen["Promedio"].min()
+    _, p_valor = kruskal(*[valores.to_numpy() for _, valores in por_grupo])
+
+    medidas = pd.DataFrame({"Valor": {
+        "Diferencia entre el grupo más alto y el más bajo": diferencia,
+        "Esa diferencia, como % del promedio general": 100 * diferencia / promedio_general,
+        "% de la variación total explicado por los grupos": 100 * variacion_entre_grupos / variacion_total,
+        "p-valor de la prueba de Kruskal-Wallis": p_valor,
+    }})
+    return resumen, medidas

@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 # Los scripts del TP importan como `from auxiliar_functions import ...`, igual acá.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -18,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from auxiliar_functions import (  # noqa: E402
     cierres_por_bloque,
     construir_diario,
+    medir_efecto_por_grupo,
     numerar_bloques,
     unir_versiones,
 )
@@ -98,3 +100,41 @@ def test_construir_diario_marca_los_invalidos_sin_imputar_y_corre_el_objetivo():
     # segundo bloque del 02/01 mira al 03/01) o si no hay siguiente (el último).
     esperado = [250, 100, np.nan, 260, 240, 215, np.nan]
     np.testing.assert_array_equal(diario["objetivo"].to_numpy(dtype=float), np.array(esperado, dtype=float))
+
+
+def test_medir_efecto_por_grupo_cuando_el_grupo_explica_casi_todo():
+    # Promedio general 13; lunes promedia 11 y martes 15. Variación entre grupos = 16,
+    # variación total = 20, así que los grupos explican el 80 %.
+    tabla = pd.DataFrame({"dia": ["Lunes", "Lunes", "Martes", "Martes"], "consumo": [10, 12, 14, 16]})
+
+    resumen, medidas = medir_efecto_por_grupo(tabla, "dia", "consumo", orden=["Martes", "Lunes"])
+
+    assert resumen.index.tolist() == ["Martes", "Lunes"]           # respeta el orden pedido
+    assert resumen.loc["Lunes", "Promedio"] == 11
+    assert resumen.loc["Martes", ["Días", "Promedio", "Mediana"]].tolist() == [2, 15, 15]
+    valores = medidas["Valor"].tolist()
+    assert valores[0] == 4                                          # 15 - 11
+    assert valores[1] == pytest.approx(100 * 4 / 13)
+    assert valores[2] == pytest.approx(80)
+    assert 0 < valores[3] < 1
+
+
+def test_medir_efecto_por_grupo_cuando_el_grupo_no_explica_nada():
+    # Los dos grupos promedian 13: la variación entre grupos es 0 y Kruskal-Wallis da p = 1.
+    tabla = pd.DataFrame({"dia": ["Lunes", "Lunes", "Martes", "Martes"], "consumo": [10, 16, 12, 14]})
+
+    _, medidas = medir_efecto_por_grupo(tabla, "dia", "consumo")
+
+    valores = medidas["Valor"].tolist()
+    assert valores[0] == 0
+    assert valores[2] == pytest.approx(0)
+    assert valores[3] == pytest.approx(1)
+
+
+def test_medir_efecto_por_grupo_ignora_los_valores_vacios():
+    tabla = pd.DataFrame({"dia": ["Lunes", "Lunes", "Lunes", "Martes", "Martes"],
+                          "consumo": [10, np.nan, 12, 14, 16]})
+
+    resumen, _ = medir_efecto_por_grupo(tabla, "dia", "consumo")
+
+    assert resumen["Días"].to_dict() == {"Lunes": 2, "Martes": 2}   # el vacío no cuenta
