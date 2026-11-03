@@ -33,7 +33,8 @@ Una fila por **día** (bloque de lecturas de 00:00 a 23:59), en el orden origina
 | 19 variables `... (Kw)` y `KW Gral Planta` | Acumulados del día a la hora de cierre, por área de la planta. `Frio (Kw)` es la variable a predecir. |
 | `filas` | Cantidad de lecturas del bloque (25 en un día normal). |
 | `archivo` | Excel de donde se tomó el día (`2020-2022`, `2021-2023`, `2022-2023`). |
-| `completo`, `plausible`, `valido` | Controles de calidad (ADR 0004). `valido` es el que se usa. |
+| `completo`, `plausible`, `valido` | Controles de calidad (ADR 0004 y 0005). `valido` es el que se usa. |
+| `lectura_inicial`, `mayor_incremento`, `menor_incremento`, `tipo_falla` | Cómo evolucionó el contador dentro del día: primera lectura (debería ser casi 0), mayor y menor cambio entre lecturas seguidas, y el tipo de falla que de ahí sale (ADR 0005). |
 | `consumo_dia` | Consumo de cierre del día; **vacío** si el día es inválido. |
 | `objetivo` | `consumo_dia` del **día siguiente**, o sea de la fila que sigue. Vacío si ese día es inválido o no existe. |
 

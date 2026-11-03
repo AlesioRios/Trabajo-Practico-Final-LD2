@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from auxiliar_functions import (  # noqa: E402
     cierres_por_bloque,
+    clasificar_fallas,
     construir_diario,
     medir_efecto_por_grupo,
     numerar_bloques,
@@ -99,6 +100,46 @@ def test_construir_diario_marca_los_invalidos_sin_imputar_y_corre_el_objetivo():
     # objetivo = consumo del bloque siguiente. Vacío si el siguiente es inválido (el
     # segundo bloque del 02/01 mira al 03/01) o si no hay siguiente (el último).
     esperado = [250, 100, np.nan, 260, 240, 215, np.nan]
+    np.testing.assert_array_equal(diario["objetivo"].to_numpy(dtype=float), np.array(esperado, dtype=float))
+
+
+def archivo_con_fallas():
+    """Cinco días, uno de cada caso que distingue el ADR 0005 (el segundo valor es la lectura de las 12:00)."""
+    return pd.concat([
+        un_dia("2021-02-01", [0, 100, 200, 220]),       # normal
+        un_dia("2021-02-02", [0, 100, 30000, 30100]),   # el contador salta y se queda arriba
+        un_dia("2021-02-03", [0, 100, 9000, 280]),      # una lectura errónea que se corrige sola
+        un_dia("2021-02-04", [8000, 0, 100, 200]),      # arranca en 8.000 y se reinicia a la hora siguiente
+        un_dia("2021-02-05", [300, 400, 500, 600]),     # arranca en 300 sin reinicio
+    ], ignore_index=True)
+
+
+def test_cierres_por_bloque_mide_como_evoluciono_el_contador_dentro_del_dia():
+    cierres = cierres_por_bloque(archivo_con_fallas(), "a")
+
+    assert cierres["lectura_inicial"].tolist() == [0, 0, 0, 8000, 300]
+    assert cierres["mayor_incremento"].tolist() == [100, 29900, 8900, 100, 100]
+    assert cierres["menor_incremento"].tolist() == [20, 100, -8720, -8000, 100]
+
+
+def test_clasificar_fallas_distingue_el_salto_que_se_corrige_del_que_no():
+    tipos = clasificar_fallas(cierres_por_bloque(archivo_con_fallas(), "a"))
+
+    assert tipos.tolist() == [
+        "Sin falla grave", "Salto no corregido", "Salto corregido", "Reinicio tardío", "Sin falla grave",
+    ]
+
+
+def test_construir_diario_invalida_el_salto_no_corregido_y_el_arranque_distinto_de_cero():
+    cierres = cierres_por_bloque(archivo_con_fallas(), "a")
+
+    diario = construir_diario(unir_versiones(cierres))
+
+    # Válidos: el normal y el de la lectura que se corrigió sola (su cierre, 280, es confiable).
+    assert diario["valido"].tolist() == [True, False, True, False, False]
+    # El del 05/02 solo se invalida por arrancar en 300: su tipo de falla es "Sin falla grave".
+    assert diario["tipo_falla"].tolist()[4] == "Sin falla grave"
+    esperado = [np.nan, 280, np.nan, np.nan, np.nan]   # objetivo = consumo del día siguiente
     np.testing.assert_array_equal(diario["objetivo"].to_numpy(dtype=float), np.array(esperado, dtype=float))
 
 

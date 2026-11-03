@@ -6,7 +6,7 @@ sumaron dos grupos más:
 
 - Presentación de tablas: estilizar, mostrar_lado_a_lado, tabla_simple.
 - Lectura y unificación de los Excel de la planta: leer_consolidado_ee,
-  cierres_por_bloque, unir_versiones, construir_diario.
+  cierres_por_bloque, unir_versiones, clasificar_fallas, construir_diario.
 - Análisis exploratorio: medir_efecto_por_grupo (¿cambia el consumo según el día de la
   semana, el mes, el año?).
 
@@ -26,6 +26,18 @@ HORA_CIERRE = "23:59:00"
 # Corte provisorio: los consumos de cierre normales van de ~11.000 a ~30.000 kW y los
 # errores de la planta son del orden de millones. No es la regla final de atípicos.
 CONSUMO_MAXIMO_PLAUSIBLE = 100_000
+
+# Un día normal sube unos 1.300 a 1.500 kW por hora y el 95 % de los días no pasa de 2.212 en
+# ninguna hora. Un salto de más de 5.000 entre dos lecturas seguidas es más del doble de eso
+# y no es creíble para este sistema (ADR 0005).
+UMBRAL_SALTO = 5_000
+
+# El totalizador se reinicia a 0 a las 00:00; hasta 100 kW de lectura inicial es ruido de medición.
+UMBRAL_LECTURA_INICIAL = 100
+
+# Tipos de falla que dejan inservible el cierre del día (ADR 0005). "Salto corregido" no está
+# acá: la lectura errónea se corrigió sola antes de las 23:59 y el cierre es confiable.
+FALLAS_INVALIDANTES = ("Salto no corregido", "Reinicio tardío")
 
 COLUMNA_CONSUMO = "Frio (Kw)"
 
@@ -200,9 +212,19 @@ def cierres_por_bloque(tabla, archivo):
     Agrega: `bloque` (orden dentro de su fecha rotulada; 0 si la fecha no se repite),
     `filas` (cuántas lecturas tiene el bloque), `archivo` (de dónde viene), `completo`
     (llega a las 23:59) y `plausible` (consumo menor al corte provisorio).
+
+    También agrega tres medidas de cómo evolucionó el contador dentro del día (ADR 0005):
+    `lectura_inicial` (la primera lectura, que debería ser casi 0 porque el totalizador se
+    reinicia a medianoche), `mayor_incremento` y `menor_incremento` (el mayor y el menor
+    cambio entre dos lecturas seguidas; este último es negativo si el contador bajó).
     """
     numero_de_bloque = numerar_bloques(tabla)
-    cierres = tabla.groupby(numero_de_bloque).tail(1).copy()
+    por_bloque = tabla.groupby(numero_de_bloque)
+    cierres = por_bloque.tail(1).copy()
+    cierres["lectura_inicial"] = por_bloque[COLUMNA_CONSUMO].head(1).to_numpy()
+    incrementos = por_bloque[COLUMNA_CONSUMO].diff().groupby(numero_de_bloque)
+    cierres["mayor_incremento"] = incrementos.max().to_numpy()
+    cierres["menor_incremento"] = incrementos.min().to_numpy()
     cierres["filas"] = tabla.groupby(numero_de_bloque).size().to_numpy()
     cierres["bloque"] = cierres.groupby("DIA").cumcount()
     cierres["archivo"] = archivo
@@ -229,10 +251,37 @@ def unir_versiones(cierres):
     )
 
 
+def clasificar_fallas(diario):
+    """Tipo de falla del contador de cada día, según cómo evolucionó dentro de la jornada.
+
+    Necesita las columnas `mayor_incremento` y `menor_incremento` (ver cierres_por_bloque).
+    Un "gran salto" es un incremento de más de UMBRAL_SALTO entre dos lecturas seguidas. Se
+    distingue por la suma del mayor y el menor incremento (`neto`): si la lectura errónea
+    se corrigió sola, la subida y la bajada se compensan y la suma queda chica.
+
+    - "Salto corregido": gran salto y neto menor a UMBRAL_SALTO. Un pico de una lectura;
+      el cierre del día es confiable.
+    - "Salto no corregido": gran salto y neto de UMBRAL_SALTO o más. El contador saltó y se
+      quedó arriba, así que el cierre queda inflado.
+    - "Reinicio tardío": sin gran salto, pero el contador bajó más de UMBRAL_SALTO. El
+      totalizador se reinició horas después de la medianoche.
+    - "Sin falla grave": el resto.
+    """
+    neto = diario["mayor_incremento"] + diario["menor_incremento"]
+    gran_salto = diario["mayor_incremento"] > UMBRAL_SALTO
+    tipo = pd.Series("Sin falla grave", index=diario.index)
+    tipo.loc[gran_salto & (neto < UMBRAL_SALTO)] = "Salto corregido"
+    tipo.loc[gran_salto & (neto >= UMBRAL_SALTO)] = "Salto no corregido"
+    tipo.loc[~gran_salto & (diario["menor_incremento"] < -UMBRAL_SALTO)] = "Reinicio tardío"
+    return tipo
+
+
 def construir_diario(mejores):
     """Agrega la marca de día válido y el objetivo: el consumo del día siguiente.
 
-    - `valido`: el día llega a las 23:59 y su consumo es plausible.
+    - `tipo_falla`: ver clasificar_fallas.
+    - `valido`: el día llega a las 23:59, su consumo es plausible, el contador arranca en
+      0 y no tiene una falla que invalide el cierre (ADR 0004 y 0005).
     - `consumo_dia`: el consumo de cierre, vacío en los días inválidos (no se imputa).
     - `objetivo`: el consumo del bloque siguiente (`shift(-1)`). Queda vacío si el día
       siguiente es inválido o si no hay día siguiente.
@@ -241,7 +290,9 @@ def construir_diario(mejores):
     siguiente del calendario, porque las etiquetas de fecha tienen desfasajes.
     """
     diario = mejores.copy()
-    diario["valido"] = diario["completo"] & diario["plausible"]
+    diario["tipo_falla"] = clasificar_fallas(diario)
+    falla_grave = diario["tipo_falla"].isin(FALLAS_INVALIDANTES) | (diario["lectura_inicial"] > UMBRAL_LECTURA_INICIAL)
+    diario["valido"] = diario["completo"] & diario["plausible"] & ~falla_grave
     diario["consumo_dia"] = diario[COLUMNA_CONSUMO].where(diario["valido"])
     diario["objetivo"] = diario["consumo_dia"].shift(-1)
     return diario

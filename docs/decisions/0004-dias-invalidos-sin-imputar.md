@@ -35,3 +35,5 @@ Resultado sobre los 1.212 días únicos: 1.205 válidos, 7 inválidos, 1.204 fil
 
 ## Pendiente
 El corte de 100.000 solo separa los errores de millones. Entre los días válidos el consumo va de 2.310 a 56.128 kW, con 11.051 y 35.980 como percentiles 5 y 95. Una propuesta inicial de rango plausible (0 a 35.000) no tiene respaldo en la consigna y dejaría fuera días con consumos entre 35.000 y 56.128 que quizá sean reales. El rango definitivo se fija en el análisis de atípicos de la Fase 1, con un criterio estadístico, y este registro se actualiza entonces.
+
+**Actualización del 02/11/2026:** el análisis de atípicos mostró que el problema no era el rango sino fallas del contador dentro del día. Se resolvió con el [ADR 0005](0005-dias-con-saltos-en-el-contador.md): no se usa ningún rango fijo, el corte de 100.000 se mantiene y se suman criterios por la evolución del contador. Las cifras de resultado de este registro (1.205 válidos, 7 inválidos) corresponden a la regla anterior.
