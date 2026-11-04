@@ -17,9 +17,11 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from auxiliar_functions import (  # noqa: E402
+    calcular_baselines,
     cierres_por_bloque,
     clasificar_fallas,
     construir_diario,
+    evaluar_baselines,
     medir_efecto_por_grupo,
     numerar_bloques,
     unir_versiones,
@@ -141,6 +143,34 @@ def test_construir_diario_invalida_el_salto_no_corregido_y_el_arranque_distinto_
     assert diario["tipo_falla"].tolist()[4] == "Sin falla grave"
     esperado = [np.nan, 280, np.nan, np.nan, np.nan]   # objetivo = consumo del día siguiente
     np.testing.assert_array_equal(diario["objetivo"].to_numpy(dtype=float), np.array(esperado, dtype=float))
+
+
+def diario_para_baselines():
+    """Siete días con uno inválido (el cuarto, consumo vacío). El objetivo es el consumo de la fila siguiente."""
+    consumo = [10, 20, 30, np.nan, 50, 60, 70]
+    return pd.DataFrame({"consumo_dia": consumo, "objetivo": pd.Series(consumo).shift(-1)})
+
+
+def test_calcular_baselines_no_predice_donde_no_hay_datos_y_no_imputa():
+    baselines = calcular_baselines(diario_para_baselines(), ventana=3, minimo_dias=2)
+
+    # Persistencia: el consumo de hoy, vacío si hoy es inválido.
+    np.testing.assert_array_equal(baselines["persistencia"].to_numpy(), [10, 20, 30, np.nan, 50, 60, 70])
+    # Media móvil de 3 filas con al menos 2 válidas: la primera fila tiene un solo dato y queda vacía;
+    # el día inválido no entra en el promedio pero no impide predecir.
+    np.testing.assert_allclose(baselines["media_movil"].to_numpy(), [np.nan, 15, 20, 25, 40, 55, 60])
+
+
+def test_evaluar_baselines_usa_las_mismas_filas_para_los_dos():
+    resumen, evaluadas = evaluar_baselines(diario_para_baselines(), ventana=3, minimo_dias=2)
+
+    # Entran las filas 1, 4 y 5. Las otras no: la 0 no tiene media móvil, la 2 y la 6 no tienen
+    # objetivo (su mañana es inválido o no existe) y la 3 es un día inválido (sin persistencia).
+    assert evaluadas.index.tolist() == [1, 4, 5]
+    assert resumen["Filas evaluadas"].tolist() == [3, 3]
+    # Persistencia: |30-20|, |60-50|, |70-60| = 10 en los tres. Media móvil: |30-15|, |60-40|, |70-55| = 15, 20, 15.
+    assert resumen["MAE (kW)"].iloc[0] == pytest.approx(10)
+    assert resumen["MAE (kW)"].iloc[1] == pytest.approx(50 / 3)
 
 
 def test_medir_efecto_por_grupo_cuando_el_grupo_explica_casi_todo():

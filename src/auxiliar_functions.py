@@ -39,6 +39,11 @@ UMBRAL_LECTURA_INICIAL = 100
 # acá: la lectura errónea se corrigió sola antes de las 23:59 y el cierre es confiable.
 FALLAS_INVALIDANTES = ("Salto no corregido", "Reinicio tardío")
 
+# Baseline de media móvil (consigna: últimos 7 días). Los días inválidos no entran en el promedio,
+# pero se exigen al menos 4 días válidos en la ventana para no predecir con muy poca información.
+VENTANA_MEDIA_MOVIL = 7
+MINIMO_DIAS_MEDIA_MOVIL = 4
+
 COLUMNA_CONSUMO = "Frio (Kw)"
 
 # Estilo común a todas las tablas: al pasar la tabla a HTML (mostrar_lado_a_lado) se
@@ -345,3 +350,53 @@ def medir_efecto_por_grupo(tabla, columna_grupo, columna_valor, orden=None):
         "p-valor de la prueba de Kruskal-Wallis": p_valor,
     }})
     return resumen, medidas
+
+
+# ---------------------------------------------------------------------------
+# Baselines
+# ---------------------------------------------------------------------------
+
+def calcular_baselines(diario, ventana=VENTANA_MEDIA_MOVIL, minimo_dias=MINIMO_DIAS_MEDIA_MOVIL):
+    """Predicción de los dos baselines para el consumo del día siguiente, una por fila de `diario`.
+
+    La fila de hoy predice el consumo de mañana, que es su `objetivo`:
+    - `persistencia`: el consumo de hoy (`consumo_dia`).
+    - `media_movil`: el promedio del consumo de los últimos `ventana` días, hoy incluido. Los
+      días inválidos (consumo vacío) no entran en el promedio, pero hacen falta al menos
+      `minimo_dias` días válidos en la ventana.
+
+    La ventana se cuenta en filas y no en fechas del calendario (ADR 0002). Donde no se puede
+    predecir queda vacío: no se imputa (ADR 0004).
+    """
+    consumo = diario["consumo_dia"]
+    return pd.DataFrame({
+        "persistencia": consumo,
+        "media_movil": consumo.rolling(ventana, min_periods=minimo_dias).mean(),
+    })
+
+
+def evaluar_baselines(diario, ventana=VENTANA_MEDIA_MOVIL, minimo_dias=MINIMO_DIAS_MEDIA_MOVIL):
+    """MAE (error absoluto medio) de cada baseline, calculado sobre exactamente las mismas filas.
+
+    Se evalúan solo las filas que tienen objetivo (hay un "mañana" válido con qué comparar) y
+    las dos predicciones, para que los baselines se comparen entre sí sobre los mismos días.
+    Las demás filas no se evalúan ni se completan.
+
+    Devuelve (resumen, evaluadas). `resumen` tiene una fila por baseline con su MAE y la cantidad
+    de filas evaluadas. `evaluadas` es la tabla de esas filas con el objetivo, las predicciones y
+    el error absoluto de cada una.
+    """
+    baselines = calcular_baselines(diario, ventana, minimo_dias)
+    tabla = baselines.assign(objetivo=diario["objetivo"])
+    evaluadas = tabla.loc[tabla.notna().all(axis=1)].copy()
+    for nombre in ("persistencia", "media_movil"):
+        evaluadas[f"error_{nombre}"] = (evaluadas["objetivo"] - evaluadas[nombre]).abs()
+
+    resumen = pd.DataFrame({
+        "MAE (kW)": {
+            "Consumo de hoy": evaluadas["error_persistencia"].mean(),
+            f"Media móvil de {ventana} días": evaluadas["error_media_movil"].mean(),
+        },
+        "Filas evaluadas": len(evaluadas),
+    })
+    return resumen, evaluadas
