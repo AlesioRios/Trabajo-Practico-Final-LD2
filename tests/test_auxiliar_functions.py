@@ -319,3 +319,18 @@ def test_convertir_textos_a_numero_limpia_la_columna_y_respeta_las_etiquetas():
     assert pd.isna(limpia["medida"].iloc[2])        # el espacio quedó como faltante
     assert limpia["etiqueta"].tolist() == ["a", "b", "c"]
     assert limpia["DIA"].equals(tabla["DIA"])       # fecha y hora no se tocan
+
+def test_cierres_de_otras_hojas_prefija_convierte_textos_y_vacia_si_no_cierra_a_tiempo():
+    def hoja(consumos):                # dos días: el primero cierra 23:59, el segundo 23:00
+        return pd.DataFrame({"DIA": pd.to_datetime(["2022-01-01"] * 2 + ["2022-01-02"] * 2),
+                             "HORA": ["00:00:00", "23:59:00", "00:00:00", "23:00:00"],
+                             "Id": [1, 2, 3, 4], "Consumo": consumos})
+
+    resultado = cierres_de_otras_hojas({"Consolidado EE": hoja([0, 9, 0, 9]),
+                                        "Hoja A": hoja([0, 100, 0, 200]),
+                                        "Hoja B": hoja([0, "1.016,5", 0, 60])})
+
+    assert list(resultado.columns) == ["Hoja A | Consumo", "Hoja B | Consumo"]   # sin el objetivo ni Id
+    assert resultado.loc[0, "Hoja A | Consumo"] == 100
+    assert resultado.loc[0, "Hoja B | Consumo"] == 1016.5       # el texto se convirtió
+    assert resultado.loc[1].isna().all()                        # el día que cierra 23:00 queda vacío

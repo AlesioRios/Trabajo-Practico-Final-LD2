@@ -68,6 +68,8 @@ ESTILOS_TABLA_SIMPLE = ESTILOS_TABLA + [
 UMBRAL_CASI_CONSTANTE = 95      # % de días con el mismo valor a partir del cual una columna se considera casi constante
 UMBRAL_MUCHOS_FALTANTES = 40    # % de días sin dato a partir del cual la columna no se puede imputar (menos de 60 % completo)
 
+MINUTO_DE_CIERRE = 23 * 60 + 59     # 23:59 expresado en minutos desde la medianoche (ignora segundos)
+
 
 # ---------------------------------------------------------------------------
 # Presentación de tablas
@@ -567,3 +569,30 @@ def convertir_textos_a_numero(tabla, columnas_a_excluir=("DIA", "HORA")):
         if convertida.notna().sum() >= 0.9 * con_contenido:
             limpia[columna] = convertida
     return limpia
+
+
+def cierres_de_otras_hojas(hojas, hoja_objetivo="Consolidado EE"):
+    """La lectura de cierre de cada día de todas las hojas menos la del objetivo, pegadas por bloque.
+
+    `hojas` es un diccionario {nombre de la hoja: tabla} de un mismo Excel. Devuelve una fila por
+    día (bloque, en el orden del archivo) y una columna por cada columna de cada hoja, con el
+    nombre "Hoja | Columna". Aplica el ADR 0006: textos convertidos a número, `Id` fuera, y
+    si una hoja no cierra a las 23:59 o después ese día queda vacío (no se imputa).
+    """
+    cierres_por_hoja = []
+    for nombre, tabla in hojas.items():
+        if nombre == hoja_objetivo:                       # el objetivo se trata aparte
+            continue
+        tabla = tabla.dropna(subset=["DIA", "HORA"]).reset_index(drop=True)
+        bloques = numerar_bloques_por_caida(tabla)        # a qué día pertenece cada fila
+        cierres = convertir_textos_a_numero(tabla).groupby(bloques).tail(1)   # última lectura del día
+        # Hora y minuto del cierre; sirve "23:59:00" y "1900-01-01 23:59:00"
+        hora = cierres["HORA"].astype(str).str.extract(r"(\d{1,2}):(\d{2})(?::\d{2})?$").astype(float)
+        cierra_a_tiempo = (hora[0] * 60 + hora[1]) >= MINUTO_DE_CIERRE
+        valores = cierres.drop(columns=["DIA", "HORA"])
+        valores = valores.loc[:, [c for c in valores.columns if str(c).strip() != "Id"]]   # Id no es medición
+        valores = valores.where(cierra_a_tiempo, axis=0)  # si no cerró a tiempo, toda la fila queda vacía
+        valores.index = range(len(valores))               # el número de bloque es la clave de unión
+        valores.columns = [f"{nombre} | {str(c).strip()}" for c in valores.columns]
+        cierres_por_hoja.append(valores)
+    return pd.concat(cierres_por_hoja, axis=1)
