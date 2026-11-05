@@ -16,16 +16,25 @@ import pytest
 # Los scripts del TP importan como `from auxiliar_functions import ...`, igual acá.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from auxiliar_functions import (  # noqa: E402
+from auxiliar_functions import (
     calcular_baselines,
+    cierres_de_hoja,
     cierres_por_bloque,
     clasificar_fallas,
     construir_diario,
+    convertir_texto_a_numero,
+    convertir_textos_a_numero,
     evaluar_baselines,
+    fecha_de_cada_bloque,
+    medir_alineacion,
     medir_efecto_por_grupo,
     numerar_bloques,
+    numerar_bloques_por_caida,
+    perfilar_columnas,
+    resumir_perfil,
     unir_versiones,
 )
+
 
 HORAS = ["00:00:00", "12:00:00", "23:00:00", "23:59:00"]
 
@@ -209,3 +218,104 @@ def test_medir_efecto_por_grupo_ignora_los_valores_vacios():
     resumen, _ = medir_efecto_por_grupo(tabla, "dia", "consumo")
 
     assert resumen["Días"].to_dict() == {"Lunes": 2, "Martes": 2}   # el vacío no cuenta
+
+def test_medir_alineacion():
+    horas = ["00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00"]
+    referencia = pd.DataFrame({"DIA": pd.Timestamp("2021-01-01"), "HORA": horas})
+    sin_la_tercera = referencia.drop(index=2)
+
+    igual = medir_alineacion(referencia, referencia)
+    desfasada = medir_alineacion(sin_la_tercera, referencia)
+
+    assert igual["% que coincide"] == 100 and igual["Primera fila distinta"] is None
+    # Faltando la fila 2, las filas 2 y 3 de la hoja miran a la hora siguiente y no coinciden.
+    assert desfasada["Filas que coinciden"] == 2
+    assert desfasada["Primera fila distinta"] == 2
+    assert desfasada["% que coincide"] == pytest.approx(40)
+
+def test_numerar_bloques_por_caida_ignora_un_tipeo_y_detecta_el_cambio_de_dia():
+    # El 23:00 está mal escrito (iba 11:00): la hora baja 11 horas, no es un día nuevo.
+    tabla = pd.DataFrame({"HORA": ["10:00:00", "23:00:00", "12:00:00", "23:59:00", "00:00:00", "01:00:00"]})
+    assert numerar_bloques_por_caida(tabla).tolist() == [0, 0, 0, 0, 1, 1]
+
+
+def test_numerar_bloques_por_caida_acepta_la_hora_escrita_como_fecha_y_hora():
+    tabla = pd.DataFrame({"HORA": ["23:00:00", "23:59:00", "1900-01-01 00:00:00", "1900-01-01 01:00:00"]})
+    assert numerar_bloques_por_caida(tabla).tolist() == [0, 0, 1, 1]
+
+
+def test_numerar_bloques_por_caida_cuenta_un_hueco_de_12_horas_como_cambio_de_dia():
+    # Faltan las lecturas entre las 23:00 y las 11:00 del día siguiente: la hora cae 12.
+    tabla = pd.DataFrame({"HORA": ["22:00:00", "23:00:00", "11:00:00", "12:00:00"]})
+    assert numerar_bloques_por_caida(tabla).tolist() == [0, 0, 1, 1]
+
+def test_fecha_de_cada_bloque_ignora_una_fila_con_la_fecha_mal_puesta():
+    # La lectura de las 23:59 del primer día quedó rotulada con la fecha del día siguiente.
+    tabla = pd.DataFrame({
+        "DIA": pd.to_datetime(["2021-01-01", "2021-01-01", "2021-01-02", "2021-01-02", "2021-01-02"]),
+        "HORA": ["00:00:00", "12:00:00", "23:59:00", "00:00:00", "12:00:00"],
+    })
+    fechas = fecha_de_cada_bloque(tabla)
+    assert fechas.tolist() == [pd.Timestamp("2021-01-01"), pd.Timestamp("2021-01-02")]
+
+def test_perfilar_columnas_mide_la_variabilidad_relativa_al_nivel():
+    cierres = pd.DataFrame({
+        "chica": [0.010, 0.020, 0.015, 0.017, 0.018],      # varianza minúscula, pero grande respecto de su nivel
+        "grande": [10000, 10040, 10080, 10020, 10060],     # desvío mayor, pero casi nada respecto de su nivel
+        "ceros": [0, 0, 0, 0, 0],
+    })
+    perfil = perfilar_columnas(cierres).set_index("Columna")
+
+    # chica varía ~24 % de su nivel y grande ~0,3 %: la "chica" es la más variable en términos relativos
+    assert perfil.loc["chica", "Coef. de variación"] > 50 * perfil.loc["grande", "Coef. de variación"]
+    assert pd.isna(perfil.loc["ceros", "Coef. de variación"])   # con nivel 0 no se puede dividir
+
+def test_cierres_de_hoja_toma_la_ultima_lectura_de_cada_dia():
+    tabla = pd.DataFrame({
+        "DIA": pd.to_datetime(["2021-01-01"] * 3 + ["2021-01-02"] * 2),
+        "HORA": ["00:00:00", "12:00:00", "23:59:00", "00:00:00", "12:00:00"],
+        "x": [0, 5, 9, 0, 4],
+    })
+    assert cierres_de_hoja(tabla)["x"].tolist() == [9, 4]   # el cierre de cada día
+
+
+def test_perfilar_columnas_detecta_texto_faltantes_y_columnas_constantes():
+    cierres = pd.DataFrame({
+        "constante": [5, 5, 5, 5],
+        "con_texto": [1, 2, "error", 4],
+        "con_faltantes": [1, None, None, 4],
+    })
+    perfil = perfilar_columnas(cierres).set_index("Columna")
+
+    assert perfil.loc["constante", "% del valor más repetido"] == 100
+    assert perfil.loc["con_texto", "Celdas con texto"] == 1
+    assert perfil.loc["con_texto", "% faltante"] == pytest.approx(25)       # el texto cuenta como sin dato
+    assert perfil.loc["con_faltantes", "% faltante"] == pytest.approx(50)
+
+    resumen = resumir_perfil(perfil.reset_index())
+    assert resumen["Casi constantes"] == 1 and resumen["Con muchos faltantes"] == 1 and resumen["Con texto"] == 1
+
+
+def test_convertir_texto_a_numero():
+    assert convertir_texto_a_numero("25,9") == 25.9            # coma decimal
+    assert convertir_texto_a_numero("1.016.475") == 1016.475   # dos puntos: el último es decimal
+    assert convertir_texto_a_numero("1.234,5") == 1234.5       # miles con punto y decimal con coma
+    assert convertir_texto_a_numero(42) == 42                  # un número no se toca
+    assert convertir_texto_a_numero(" ") is None               # espacio -> faltante
+    assert convertir_texto_a_numero("") is None                # vacío -> faltante
+    assert convertir_texto_a_numero("#N/A") is None            # marca de error -> faltante
+
+
+def test_convertir_textos_a_numero_limpia_la_columna_y_respeta_las_etiquetas():
+    tabla = pd.DataFrame({
+        "DIA": pd.to_datetime(["2021-01-01"] * 3),
+        "HORA": ["00:00:00", "12:00:00", "23:59:00"],
+        "medida": [1, "2,5", " "],                  # un número, un texto con coma y un espacio
+        "etiqueta": ["a", "b", "c"],                # columna de etiquetas: no se toca
+    })
+    limpia = convertir_textos_a_numero(tabla)
+
+    assert limpia["medida"].iloc[1] == 2.5
+    assert pd.isna(limpia["medida"].iloc[2])        # el espacio quedó como faltante
+    assert limpia["etiqueta"].tolist() == ["a", "b", "c"]
+    assert limpia["DIA"].equals(tabla["DIA"])       # fecha y hora no se tocan

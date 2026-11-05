@@ -65,6 +65,9 @@ ESTILOS_TABLA_SIMPLE = ESTILOS_TABLA + [
     {'selector': 'td', 'props': [('color', f'{COLOR_TEXTO} !important'), ('background-color', '#ffffff !important')]},
 ]
 
+UMBRAL_CASI_CONSTANTE = 95      # % de días con el mismo valor a partir del cual una columna se considera casi constante
+UMBRAL_MUCHOS_FALTANTES = 40    # % de días sin dato a partir del cual la columna no se puede imputar (menos de 60 % completo)
+
 
 # ---------------------------------------------------------------------------
 # Presentación de tablas
@@ -400,3 +403,167 @@ def evaluar_baselines(diario, ventana=VENTANA_MEDIA_MOVIL, minimo_dias=MINIMO_DI
         "Filas evaluadas": len(evaluadas),
     })
     return resumen, evaluadas
+
+
+def _claves_dia_hora(tabla):
+    """Las columnas DIA y HORA de una hoja, sin las filas vacías del final y con HORA como texto."""
+    claves = tabla.loc[tabla["DIA"].notna() & tabla["HORA"].notna(), ["DIA", "HORA"]].reset_index(drop=True)
+    claves["HORA"] = claves["HORA"].astype(str)
+    return claves
+
+
+def medir_alineacion(hoja, referencia):
+    """Compara fila por fila la fecha y la hora de una hoja con las de una hoja de referencia.
+
+    Sirve para saber si dos hojas del mismo Excel se pueden pegar por posición. Una fila
+    "coincide" si, en el mismo número de fila, las dos hojas tienen la misma DIA y la misma HORA.
+    Si a una hoja le falta una fila, todas las siguientes quedan corridas y dejan de coincidir.
+
+    Devuelve un diccionario con las filas de cada hoja, cuántas coinciden, el porcentaje sobre la
+    referencia y el número de la primera fila que no coincide (None si coinciden todas).
+    """
+    claves_hoja = _claves_dia_hora(hoja)
+    claves_ref = _claves_dia_hora(referencia)
+    comunes = min(len(claves_hoja), len(claves_ref))
+    coincide = (claves_hoja.iloc[:comunes] == claves_ref.iloc[:comunes]).all(axis=1)
+
+    if not coincide.all():
+        primera_distinta = int((~coincide).idxmax())
+    elif len(claves_hoja) != len(claves_ref):
+        primera_distinta = comunes          # coinciden hasta donde llega la más corta
+    else:
+        primera_distinta = None
+
+    return {
+        "Filas de la hoja": len(claves_hoja),
+        "Filas de la referencia": len(claves_ref),
+        "Filas que coinciden": int(coincide.sum()),
+        "% que coincide": 100 * coincide.sum() / len(claves_ref),
+        "Primera fila distinta": primera_distinta,
+    }
+
+def contexto_desfase(hojas, referencia, fila, ancho=2):
+    """Muestra la fecha y hora de las filas que rodean a `fila`, con una columna por hoja.
+
+    `hojas` es un diccionario {nombre de la hoja: tabla}; `referencia` es la hoja del objetivo.
+    Así se ve si las hojas que fallan en la misma fila fallan de la misma manera.
+    """
+    claves_ref = _claves_dia_hora(referencia)
+    claves = {nombre: _claves_dia_hora(tabla) for nombre, tabla in hojas.items()}
+    posiciones = range(max(fila - ancho, 0), fila + ancho + 1)   # `ancho` filas antes y después
+
+    def texto(tabla_claves, i):
+        if i >= len(tabla_claves):            # una hoja puede terminar antes que la otra
+            return "—"
+        return f"{tabla_claves.loc[i, 'DIA']:%d/%m/%y} {tabla_claves.loc[i, 'HORA']}"
+
+    columnas = {"Fila": list(posiciones),
+                "Consolidado EE": [texto(claves_ref, i) for i in posiciones]}
+    for nombre, tabla_claves in claves.items():   # una columna más por cada hoja del grupo
+        columnas[nombre] = [texto(tabla_claves, i) for i in posiciones]
+    return pd.DataFrame(columnas)
+
+def numerar_bloques_por_caida(tabla, caida_minima_horas=12):
+    """Número de bloque diario de cada fila, para hojas con horas mal escritas.
+
+    Es una variante de `numerar_bloques`: un bloque nuevo empieza cuando la hora cae
+    `caida_minima_horas` o más respecto de la fila anterior. Un cierre (23:59) seguido de
+    00:00 cae casi 24 horas; un tipeo (por ejemplo 23:00 en lugar de 11:00) cae menos.
+    Acepta la hora como texto ("23:59:00") o como fecha y hora ("1900-01-01 00:00:00").
+    Supone que la tabla conserva el orden del archivo y no tiene filas vacías.
+    """
+    # Saco horas y minutos del final del texto; así sirve el formato "1900-01-01 00:00:00" también
+    partes = tabla["HORA"].astype(str).str.extract(r"(\d{1,2}):(\d{2})(?::\d{2})?$").astype(float)
+    hora = partes[0] + partes[1] / 60             # la hora como número: 23:30 -> 23.5
+    cae = (hora.shift() - hora) >= caida_minima_horas   # cuánto bajó respecto de la fila anterior
+    return cae.cumsum()                           # cada caída grande suma un bloque
+
+
+def fecha_de_cada_bloque(tabla):
+    """La fecha de cada bloque diario de una hoja, en el orden de los bloques.
+
+    Usa `numerar_bloques_por_caida` y, dentro de cada bloque, la fecha que más se repite, así una
+    fila con la fecha mal puesta (como la lectura de las 23:59 con el día siguiente) no cambia el resultado.
+    Supone una tabla sin filas vacías y con DIA como fecha.
+    """
+    bloques = numerar_bloques_por_caida(tabla)    # a qué bloque pertenece cada fila
+    # mode() devuelve la fecha más frecuente del grupo; iloc[0] toma la primera si hay empate
+    return tabla.groupby(bloques)["DIA"].agg(lambda fechas: fechas.mode().iloc[0])
+
+def cierres_de_hoja(tabla):
+    """La última lectura de cada día (bloque) de una hoja, sin las columnas de fecha y hora.
+
+    Para un totalizador que se reinicia a medianoche, esa lectura es el consumo del día.
+    """
+    tabla = tabla.dropna(subset=["DIA", "HORA"]).reset_index(drop=True)   # fuera las filas vacías del final
+    bloques = numerar_bloques_por_caida(tabla)                             # a qué día pertenece cada fila
+    # tail(1) deja la última fila de cada bloque; la fecha y la hora ya no hacen falta
+    return tabla.groupby(bloques).tail(1).drop(columns=["DIA", "HORA"])
+
+
+def perfilar_columnas(cierres):
+    """Una fila por columna: faltantes, texto, valor más repetido y variabilidad relativa a su nivel."""
+    perfil = []
+    for columna in cierres.columns:
+        valores = pd.to_numeric(cierres[columna], errors="coerce")          # lo que no es número queda vacío
+        con_texto = int((cierres[columna].notna() & valores.isna()).sum())   # había algo, pero no era un número
+        media, mediana = valores.mean(), valores.median()
+        rango_central = valores.quantile(0.75) - valores.quantile(0.25)      # distancia entre los percentiles 25 y 75
+        perfil.append({
+            "Columna": str(columna).strip(),
+            "% faltante": 100 * valores.isna().mean(),                       # el texto cuenta como sin dato
+            "Celdas con texto": con_texto,
+            "% del valor más repetido": (100 * valores.value_counts(normalize=True).iloc[0]
+                                         if valores.notna().any() else None),     # columna vacía: no aplica
+            # Desvío dividido por el nivel: no tiene unidades, así se compara entre columnas (si el nivel es 0, no aplica)
+            "Coef. de variación": valores.std() / abs(media) if media != 0 else None,
+            # Lo mismo con medidas robustas a picos: rango central dividido por la mediana
+            "Dispersión robusta": rango_central / abs(mediana) if mediana != 0 else None,
+        })
+    return pd.DataFrame(perfil)
+
+
+
+def resumir_perfil(perfil):
+    """Cuenta, para una hoja, cuántas columnas son casi constantes, tienen muchos faltantes o tienen texto."""
+    return pd.Series({
+        "Columnas": len(perfil),
+        "Casi constantes": int((perfil["% del valor más repetido"] >= UMBRAL_CASI_CONSTANTE).sum()),
+        "Con muchos faltantes": int((perfil["% faltante"] > UMBRAL_MUCHOS_FALTANTES).sum()),
+        "Con texto": int((perfil["Celdas con texto"] > 0).sum()),
+    })
+
+
+def convertir_texto_a_numero(valor):
+    """Convierte una celda a número; devuelve None si es vacía o no se puede interpretar."""
+    if isinstance(valor, (int, float)):            # ya es número (o NaN): se deja como está
+        return valor
+    texto = str(valor).strip()                     # se sacan espacios de los bordes
+    if texto == "":                                # vacío o solo espacios -> faltante
+        return None
+    if "," in texto:                               # '1.234,5': puntos de miles, coma decimal
+        texto = texto.replace(".", "").replace(",", ".")
+    elif texto.count(".") >= 2:                    # '1.016.475': el último punto es el decimal
+        entero, _, decimales = texto.rpartition(".")
+        texto = entero.replace(".", "") + "." + decimales
+    try:
+        return float(texto)
+    except ValueError:                             # '#N/A' y similares -> faltante
+        return None
+
+def convertir_textos_a_numero(tabla, columnas_a_excluir=("DIA", "HORA")):
+    """Devuelve una copia de la tabla con las columnas de texto numérico convertidas a número.
+
+    Una columna que sea en realidad de etiquetas (casi nada se puede leer como número) se deja igual.
+    """
+    limpia = tabla.copy()                                    # no se modifica la tabla original
+    for columna in limpia.columns:
+        if columna in columnas_a_excluir or limpia[columna].dtype != object:
+            continue                                         # solo columnas con texto mezclado
+        convertida = pd.to_numeric(limpia[columna].map(convertir_texto_a_numero))
+        # Celdas con contenido real: las vacías y las de solo espacios no cuentan
+        con_contenido = limpia[columna].map(lambda v: pd.notna(v) and str(v).strip() != "").sum()
+        # Si casi todo lo que tenía contenido se pudo leer como número, la columna era numérica
+        if convertida.notna().sum() >= 0.9 * con_contenido:
+            limpia[columna] = convertida
+    return limpia
