@@ -19,6 +19,10 @@ import numpy as np
 from scipy.stats import kruskal
 from scipy.cluster.hierarchy import leaves_list, linkage
 from scipy.spatial.distance import squareform
+import hashlib
+import json
+from pathlib import Path
+
 
 
 SEMILLA = 42
@@ -687,3 +691,50 @@ def elegir_columnas_distintas(ranking, matriz, cantidad=5, umbral=0.98):
         if len(elegidas) == cantidad:
             break
     return elegidas
+
+
+def huella(ruta, algoritmo="sha256", bloque=1 << 20):
+    """Resumen hexadecimal de un archivo, leyéndolo de a bloques (por defecto 1 MiB).
+
+    Es la función de la cátedra (Unidad 5, capítulo 10). Leer por bloques evita cargar el
+    archivo entero en memoria. Si el archivo cambia aunque sea en un byte, el resumen cambia.
+    """
+    resumen = hashlib.new(algoritmo)
+    with open(ruta, "rb") as archivo:                            # "rb": leer bytes, sin interpretar el texto
+        for trozo in iter(lambda: archivo.read(bloque), b""):    # hasta que no quede nada por leer
+            resumen.update(trozo)
+    return resumen.hexdigest()
+
+
+def guardar_huellas(archivos, destino, base):
+    """Calcula la huella de cada archivo y la guarda en un JSON {ruta relativa a `base`: huella}.
+
+    Si `destino` ya existe, conserva las huellas que tenía (así la Fase 2 puede sumar la del
+    dataset final sin borrar las de los Excel). Escribe siempre con saltos de línea "\\n" para
+    que el JSON sea idéntico en Windows y Linux. Devuelve el diccionario completo.
+    """
+    huellas = {Path(a).relative_to(base).as_posix(): huella(a) for a in archivos}
+    destino = Path(destino)
+    guardadas = json.loads(destino.read_text(encoding="utf-8")) if destino.exists() else {}
+    guardadas.update(huellas)                                    # las nuevas pisan a las viejas del mismo archivo
+    with open(destino, "w", encoding="utf-8", newline="\n") as salida:
+        json.dump(guardadas, salida, indent=2, sort_keys=True, ensure_ascii=False)
+        salida.write("\n")
+    return guardadas
+
+
+def verificar_huellas(ruta_json, carpeta):
+    """Compara las huellas guardadas con las de los archivos que hay hoy en `carpeta`.
+
+    Devuelve {archivo: "coincide" | "distinto" | "falta"}. Si algún valor no es "coincide",
+    los resultados no son comparables con los del equipo.
+    """
+    esperadas = json.loads(Path(ruta_json).read_text(encoding="utf-8"))
+    estado = {}
+    for nombre, esperada in esperadas.items():
+        archivo = Path(carpeta) / nombre
+        if not archivo.exists():
+            estado[nombre] = "falta"
+        else:
+            estado[nombre] = "coincide" if huella(archivo) == esperada else "distinto"
+    return estado

@@ -39,6 +39,9 @@ from auxiliar_functions import (
     etiqueta_corta,
     ordenar_por_similitud,
     elegir_columnas_distintas,
+    guardar_huellas,
+    huella,
+    verificar_huellas,
 )
 
 
@@ -395,3 +398,28 @@ def test_elegir_columnas_distintas_salta_las_copias_de_una_ya_elegida():
 
     assert elegir_columnas_distintas(["a", "b", "c"], matriz, cantidad=2, umbral=0.98) == ["a", "c"]
     assert elegir_columnas_distintas(["a", "b", "c"], matriz, cantidad=3, umbral=0.98) == ["a", "c"]   # no hay tres distintas
+
+def test_huella_da_el_sha256_conocido_y_no_depende_del_tamaño_del_bloque(tmp_path):
+    archivo = tmp_path / "a.txt"
+    archivo.write_bytes(b"abc")
+
+    assert huella(archivo) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"   # SHA-256 de "abc"
+    assert huella(archivo, bloque=1) == huella(archivo)         # leído de a 1 byte da lo mismo
+
+
+def test_guardar_y_verificar_huellas_detecta_archivos_cambiados_y_faltantes(tmp_path):
+    (tmp_path / "carpeta").mkdir()
+    cambiado, borrado = tmp_path / "a.txt", tmp_path / "carpeta" / "b.txt"
+    cambiado.write_bytes(b"abc")
+    borrado.write_bytes(b"xyz")
+    destino = tmp_path / "checksums.json"
+
+    guardar_huellas([cambiado, borrado], destino, base=tmp_path)
+    assert verificar_huellas(destino, tmp_path) == {"a.txt": "coincide", "carpeta/b.txt": "coincide"}
+
+    cambiado.write_bytes(b"abd")                                # un byte distinto
+    borrado.unlink()
+    assert verificar_huellas(destino, tmp_path) == {"a.txt": "distinto", "carpeta/b.txt": "falta"}
+
+    guardar_huellas([cambiado], destino, base=tmp_path)         # volver a guardar conserva las huellas que no se tocan
+    assert set(verificar_huellas(destino, tmp_path)) == {"a.txt", "carpeta/b.txt"}
