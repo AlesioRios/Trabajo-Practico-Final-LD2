@@ -34,6 +34,10 @@ from auxiliar_functions import (
     resumir_perfil,
     unir_versiones,
     marcar_columnas_descartables,
+    correlaciones_con_objetivo,
+    parejas muy correlacionadas,
+    etiqueta_corta,
+    ordenar_por_similitud,
 )
 
 
@@ -344,3 +348,42 @@ def test_marcar_columnas_descartables_aplica_los_dos_umbrales():
     assert marcado["Se conserva"].tolist() == [True, False, False, False]
     assert marcado["Muchos faltantes"].tolist() == [False, True, False, True]
     assert marcado["Casi constante"].tolist() == [False, False, True, True]
+
+def test_correlaciones_con_objetivo_spearman_ignora_valores_extremos_y_ordena():
+    tabla = pd.DataFrame({"objetivo": [1, 2, 3, 4, 5],
+                          "sube_con_extremo": [1, 2, 3, 4, 100],    # siempre sube, pero con un valor enorme
+                          "baja": [5, 4, 3, 2, 1],
+                          "sin_relacion": [3, 1, 5, 2, 4]})
+    resultado = correlaciones_con_objetivo(tabla, ["sube_con_extremo", "baja", "sin_relacion"])
+
+    assert resultado.loc["sube_con_extremo", "Spearman"] == 1       # el orden es perfecto
+    assert resultado.loc["sube_con_extremo", "Pearson"] < 0.9       # el valor extremo lo distorsiona
+    assert resultado.loc["baja", "Spearman"] == -1
+    assert resultado.index[-1] == "sin_relacion"                    # la menos correlacionada queda última
+
+def test_parejas_muy_correlacionadas_no_repite_parejas_y_respeta_el_umbral():
+    tabla = pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [2, 4, 6, 8, 10],     # b sube igual que a
+                          "c": [5, 3, 4, 1, 2], "d": [3, 1, 5, 2, 4]})     # c y d no se parecen a nadie
+    parejas = parejas_muy_correlacionadas(tabla, ["a", "b", "c", "d"], umbral=0.9)
+
+    assert len(parejas) == 1                                    # solo la pareja a-b
+    assert (parejas.loc[0, "Columna A"], parejas.loc[0, "Columna B"]) == ("a", "b")
+    assert parejas.loc[0, "Spearman"] == 1
+    assert abs(parejas.loc[0, "Pearson"] - 1) < 1e-9             # a y b también son una recta perfecta
+
+
+def test_ordenar_por_similitud_junta_las_columnas_parecidas():
+    matriz = pd.DataFrame([[1.0, 0.1, 0.9], [0.1, 1.0, 0.2], [0.9, 0.2, 1.0]],
+                          index=["a", "b", "c"], columns=["a", "b", "c"])
+    ordenada = ordenar_por_similitud(matriz)
+
+    posicion = {nombre: i for i, nombre in enumerate(ordenada.index)}
+    assert abs(posicion["a"] - posicion["c"]) == 1               # a y c (0,9) quedan una al lado de la otra
+    assert ordenada.loc["a", "c"] == 0.9                         # los valores no cambian, solo el orden
+
+
+def test_etiqueta_corta_abrevia_la_hoja_y_nombra_ee_a_las_que_no_tienen():
+    assert etiqueta_corta("Consolidado Agua | Agua Cocina (Hl)") == "C. Agua: Agua Cocina (Hl)"
+    assert etiqueta_corta("Totalizadores Energia | KW Trafo 8") == "T. Energia: KW Trafo 8"
+    assert etiqueta_corta("Frio (Kw)") == "EE: Frio (Kw)"
+

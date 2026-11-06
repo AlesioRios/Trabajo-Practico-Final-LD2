@@ -15,7 +15,11 @@ el Excel oculto de la cátedra tiene que procesarse igual que el de entrenamient
 """
 
 import pandas as pd
+import numpy as np
 from scipy.stats import kruskal
+from scipy.cluster.hierarchy import leaves_list, linkage
+from scipy.spatial.distance import squareform
+
 
 SEMILLA = 42
 
@@ -610,3 +614,60 @@ def marcar_columnas_descartables(perfil):
     marcado["Casi constante"] = marcado["% del valor más repetido"].fillna(100) >= UMBRAL_CASI_CONSTANTE
     marcado["Se conserva"] = ~marcado["Muchos faltantes"] & ~marcado["Casi constante"]
     return marcado
+
+def correlaciones_con_objetivo(tabla, columnas, columna_objetivo="objetivo"):
+    """Correlación de cada columna con el objetivo, con Spearman y con Pearson.
+
+    Spearman usa el orden de los valores, así que casi no lo afectan los valores extremos;
+    Pearson mide cuánto se parece la relación a una recta y sí lo afectan. Devuelve una fila
+    por columna, ordenada de mayor a menor Spearman en valor absoluto.
+    """
+    numeros = tabla[columnas].apply(pd.to_numeric, errors="coerce")   # cualquier texto queda vacío
+    resultado = pd.DataFrame({
+        "Spearman": numeros.corrwith(tabla[columna_objetivo], method="spearman"),
+        "Pearson": numeros.corrwith(tabla[columna_objetivo], method="pearson"),
+    })
+    resultado["Spearman absoluto"] = resultado["Spearman"].abs()      # para ordenar sin importar el signo
+    return resultado.sort_values("Spearman absoluto", ascending=False)
+
+def parejas_muy_correlacionadas(tabla, columnas, umbral=0.9):
+    """Parejas de columnas cuya correlación de Spearman, en valor absoluto, llega a `umbral`.
+
+    Cada pareja aparece una sola vez (no se repite como A-B y B-A ni se compara una columna
+    consigo misma). Las parejas que no se pueden calcular (columnas sin días en común) se omiten.
+    Devuelve `Columna A`, `Columna B`, `Spearman` y `Pearson` (para contrastar), de mayor a menor Spearman.
+    """
+    numeros = tabla[columnas].apply(pd.to_numeric, errors="coerce")   # cualquier texto queda vacío
+    spearman = numeros.corr(method="spearman")
+    pearson = numeros.corr(method="pearson")
+    # Me quedo con el triángulo de arriba de la diagonal: ahí está cada pareja una sola vez
+    solo_arriba = spearman.where(np.triu(np.ones(spearman.shape, dtype=bool), k=1))
+    parejas = (solo_arriba.stack().dropna()                      # una fila por pareja calculable
+               .rename_axis(["Columna A", "Columna B"]).rename("Spearman").reset_index())
+    parejas = parejas[parejas["Spearman"].abs() >= umbral].copy()
+    # Para cada pareja que quedó, busco su Pearson en la otra matriz
+    parejas["Pearson"] = [pearson.loc[a, b] for a, b in zip(parejas["Columna A"], parejas["Columna B"])]
+    return parejas.reindex(parejas["Spearman"].abs().sort_values(ascending=False).index).reset_index(drop=True)
+
+
+def ordenar_por_similitud(matriz):
+    """Reordena una matriz de correlación para que las columnas parecidas queden juntas.
+
+    Agrupa las columnas por jerarquía usando como distancia 1 menos el valor absoluto de la
+    correlación (dos columnas muy correlacionadas, con signo positivo o negativo, quedan cerca).
+    Una correlación que no se pudo calcular se trata como 0. Devuelve la misma matriz, con filas
+    y columnas en el nuevo orden.
+    """
+    distancia = 1 - matriz.abs().fillna(0).to_numpy()          # 0 = idénticas, 1 = sin relación
+    distancia = (distancia + distancia.T) / 2                  # simétrica, por si hay diferencias mínimas
+    np.fill_diagonal(distancia, 0)                             # una columna está a distancia 0 de sí misma
+    orden = leaves_list(linkage(squareform(distancia, checks=False), method="average", optimal_ordering=True))
+    return matriz.iloc[orden, orden]
+
+
+def etiqueta_corta(columna):
+    """Nombre corto de una columna para ejes de gráficos: 'Hoja abreviada: columna' (EE si no tiene hoja)."""
+    hoja, _, base = str(columna).rpartition(" | ")
+    hoja = hoja.replace("Consolidado ", "C. ").replace("Totalizadores ", "T. ")
+    return f"{hoja or 'EE'}: {base}"[:34]
+
