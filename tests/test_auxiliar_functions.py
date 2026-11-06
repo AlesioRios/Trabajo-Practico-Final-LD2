@@ -440,3 +440,17 @@ def test_correlaciones_sin_estacionalidad_quita_el_efecto_de_la_epoca_del_ano():
 
     assert abs(resultado["solo_estacion"]) < 0.2     # sin la estación no queda nada
     assert resultado["con_informacion"] > 0.9
+
+
+def test_convertir_textos_a_numero_convierte_tambien_las_columnas_que_son_todo_texto():
+    # Con pandas 3 una columna cuyas celdas son todas texto tiene dtype `str` y no `object`;
+    # una columna mixta (números y texto) sigue siendo `object`. Las dos tienen que convertirse.
+    tabla = pd.DataFrame({"DIA": pd.date_range("2022-01-01", periods=3), "HORA": ["a", "b", "c"],
+                          "solo_texto": ["1,5", "2,5", "1.016,5"], "mezcla": [1.5, "2,5", 3.5],
+                          "etiquetas": ["alto", "bajo", "medio"]})
+
+    limpia = convertir_textos_a_numero(tabla)
+
+    assert limpia["solo_texto"].tolist() == [1.5, 2.5, 1016.5]
+    assert limpia["mezcla"].tolist() == [1.5, 2.5, 3.5]
+    assert limpia["etiquetas"].tolist() == ["alto", "bajo", "medio"]    # lo que no es número queda como estaba

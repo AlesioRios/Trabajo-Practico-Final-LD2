@@ -568,8 +568,8 @@ def convertir_textos_a_numero(tabla, columnas_a_excluir=("DIA", "HORA")):
     """
     limpia = tabla.copy()                                    # no se modifica la tabla original
     for columna in limpia.columns:
-        if columna in columnas_a_excluir or limpia[columna].dtype != object:
-            continue                                         # solo columnas con texto mezclado
+        if columna in columnas_a_excluir or pd.api.types.is_numeric_dtype(limpia[columna]):
+            continue        # solo las que no son numéricas: texto mezclado con números (object) o texto puro (str en pandas 3)
         convertida = pd.to_numeric(limpia[columna].map(convertir_texto_a_numero))
         # Celdas con contenido real: las vacías y las de solo espacios no cuentan
         con_contenido = limpia[columna].map(lambda v: pd.notna(v) and str(v).strip() != "").sum()
