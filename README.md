@@ -141,7 +141,7 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 ## Estado por fase
 
 - [x] Fase 0 - Entorno, control de versiones y trazabilidad
-- [ ] Fase 1 - Análisis exploratorio de datos (EDA)
+- [x] Fase 1 - Análisis exploratorio de datos (EDA)
 - [ ] Fase 2 - Preprocesamiento y selección de variables
 - [ ] Fase 3 - Entrenamiento y versionado de modelos
 - [ ] Fase 4 - Pipeline de predicción
