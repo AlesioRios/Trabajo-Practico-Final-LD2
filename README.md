@@ -14,7 +14,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 | Nombre | Usuario de GitHub |
 |---|---|
 | Alesio Ríos | AlesioRios |
-| Juan Cruz Brown | juancruzbrown910-cpu |
+| Juan Cruz Brown | jcbrown910 |
 | Milagros González | miligonzalzz |
 
 ## Estructura del proyecto
@@ -23,8 +23,9 @@ La consigna completa está en [`consigna.md`](consigna.md).
 .
 ├── data/
 │   ├── Totalizadores Planta de Cerveza*.xlsx   (NO versionados, ver "Datos")
-│   ├── checksums.json                          (huellas SHA-256 de los Excel)
+│   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
+│       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
 │       ├── dataset_final.csv
 │       └── data_lineage.json
 ├── models/
@@ -42,6 +43,9 @@ La consigna completa está en [`consigna.md`](consigna.md).
 ├── results/
 │   ├── predicciones.csv
 │   └── experiment_logs.csv
+├── tests/                                      (pruebas con datos sintéticos)
+├── docs/
+│   └── decisions/                              (decisiones de diseño, una por archivo)
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
@@ -92,7 +96,7 @@ Para comprobar que se tienen exactamente los mismos archivos que el equipo, el r
 versiona `data/checksums.json`, con el hash SHA-256 de cada archivo. Si alguna huella no
 coincide, el archivo es distinto y los resultados no serán comparables.
 
-> `data/checksums.json` y la función que lo verifica se generan en la Fase 1.
+> `data/checksums.json` ya se generó en la Fase 1 (sección 26 de `notebooks/eda.ipynb`): guarda las huellas de los tres Excel y de `data/processed/dataset_unificado_inicial.csv`, que contiene solo la hoja Consolidado EE (los tres archivos unidos, una fila por día); las demás hojas se unen en la Fase 2. Se verifica con `verificar_huellas` de `src/auxiliar_functions.py`.
 
 ## Cómo ejecutar el proyecto
 
@@ -141,3 +145,8 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [ ] Fase 2 - Preprocesamiento y selección de variables
 - [ ] Fase 3 - Entrenamiento y versionado de modelos
 - [ ] Fase 4 - Pipeline de predicción
+
+## Decisiones y acuerdos
+
+- [`docs/acuerdos-de-datos.md`](docs/acuerdos-de-datos.md): formato de los datos, funciones compartidas y reglas de trabajo del equipo.
+- [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
