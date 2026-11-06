@@ -596,3 +596,17 @@ def cierres_de_otras_hojas(hojas, hoja_objetivo="Consolidado EE"):
         valores.columns = [f"{nombre} | {str(c).strip()}" for c in valores.columns]
         cierres_por_hoja.append(valores)
     return pd.concat(cierres_por_hoja, axis=1)
+
+def marcar_columnas_descartables(perfil):
+    """Agrega al perfil de columnas las marcas del ADR 0006 y si la columna se conserva.
+
+    `perfil` es el resultado de `perfilar_columnas` calculado solo sobre los datos de
+    entrenamiento. Una columna se descarta si tiene más de UMBRAL_MUCHOS_FALTANTES % de
+    faltantes o si repite un mismo valor en UMBRAL_CASI_CONSTANTE % o más de los días.
+    """
+    marcado = perfil.copy()
+    marcado["Muchos faltantes"] = marcado["% faltante"] > UMBRAL_MUCHOS_FALTANTES
+    # Una columna totalmente vacía no tiene valor más repetido: se cuenta como casi constante
+    marcado["Casi constante"] = marcado["% del valor más repetido"].fillna(100) >= UMBRAL_CASI_CONSTANTE
+    marcado["Se conserva"] = ~marcado["Muchos faltantes"] & ~marcado["Casi constante"]
+    return marcado

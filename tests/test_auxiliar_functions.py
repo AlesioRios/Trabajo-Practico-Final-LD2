@@ -33,6 +33,7 @@ from auxiliar_functions import (
     perfilar_columnas,
     resumir_perfil,
     unir_versiones,
+    marcar_columnas_descartables,
 )
 
 
@@ -334,3 +335,12 @@ def test_cierres_de_otras_hojas_prefija_convierte_textos_y_vacia_si_no_cierra_a_
     assert resultado.loc[0, "Hoja A | Consumo"] == 100
     assert resultado.loc[0, "Hoja B | Consumo"] == 1016.5       # el texto se convirtió
     assert resultado.loc[1].isna().all()                        # el día que cierra 23:00 queda vacío
+
+def test_marcar_columnas_descartables_aplica_los_dos_umbrales():
+    perfil = pd.DataFrame({"Columna": ["buena", "con_faltantes", "constante", "vacia"],
+                           "% faltante": [0, 50, 0, 100],
+                           "% del valor más repetido": [60, 60, 97, None]})
+    marcado = marcar_columnas_descartables(perfil)
+    assert marcado["Se conserva"].tolist() == [True, False, False, False]
+    assert marcado["Muchos faltantes"].tolist() == [False, True, False, True]
+    assert marcado["Casi constante"].tolist() == [False, False, True, True]
