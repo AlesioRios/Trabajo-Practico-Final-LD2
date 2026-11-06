@@ -40,4 +40,5 @@ Hechos medidos sobre los cierres diarios de las doce hojas perfiladas:
 - Un texto con un solo punto y sin coma (`'1.234'`) se leería como decimal; no aparece en los datos.
 - No se perfilaron KPI, Consolidado Producción, Auxiliar ni Seguimiento Dia.
 - Las columnas casi constantes de marcas de Producción (`HL Mosto <marca>`) podrían tener relación con el objetivo; se decide después de las correlaciones.
+- Los valores absurdos de las columnas distintas de `Frio` no están tratados. En días válidos de `Frio` hay columnas con valores de millones frente a medianas de decenas de miles (`Sala Maq (Kw)`: 4.208.132 el 24/12/2021 contra mediana 29.184; `KW Gral Planta`: 2.413.859 el 29/12/2021 contra 72.452). Un solo valor así baja el coeficiente de Pearson de 0,78 a 0,05 (Spearman no lo nota). La regla para estos valores se define en la Fase 2.
 - El tramo interpolado de `KW Trafo 8` (05/02/2022, 00:00 a 10:00) está confirmado en esa columna; falta buscarlo en `Frio`.
