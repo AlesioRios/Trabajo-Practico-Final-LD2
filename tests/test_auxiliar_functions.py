@@ -38,6 +38,7 @@ from auxiliar_functions import (
     parejas muy correlacionadas,
     etiqueta_corta,
     ordenar_por_similitud,
+    elegir_columnas_distintas,
 )
 
 
@@ -387,3 +388,10 @@ def test_etiqueta_corta_abrevia_la_hoja_y_nombra_ee_a_las_que_no_tienen():
     assert etiqueta_corta("Totalizadores Energia | KW Trafo 8") == "T. Energia: KW Trafo 8"
     assert etiqueta_corta("Frio (Kw)") == "EE: Frio (Kw)"
 
+
+def test_elegir_columnas_distintas_salta_las_copias_de_una_ya_elegida():
+    matriz = pd.DataFrame([[1.0, 0.99, 0.3], [0.99, 1.0, 0.4], [0.3, 0.4, 1.0]],
+                          index=["a", "b", "c"], columns=["a", "b", "c"])    # b es casi copia de a
+
+    assert elegir_columnas_distintas(["a", "b", "c"], matriz, cantidad=2, umbral=0.98) == ["a", "c"]
+    assert elegir_columnas_distintas(["a", "b", "c"], matriz, cantidad=3, umbral=0.98) == ["a", "c"]   # no hay tres distintas

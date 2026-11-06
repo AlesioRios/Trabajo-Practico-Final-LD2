@@ -671,3 +671,19 @@ def etiqueta_corta(columna):
     hoja = hoja.replace("Consolidado ", "C. ").replace("Totalizadores ", "T. ")
     return f"{hoja or 'EE'}: {base}"[:34]
 
+def elegir_columnas_distintas(ranking, matriz, cantidad=5, umbral=0.98):
+    """Las primeras `cantidad` columnas del ranking, saltando las que son copia de una ya elegida.
+
+    `ranking` es la lista de columnas de mejor a peor; `matriz` es la matriz de correlación entre
+    columnas (con las mismas columnas como filas y columnas). Una columna se descarta si su
+    correlación, en valor absoluto, con alguna ya elegida llega a `umbral`. Si una pareja no se
+    pudo calcular (falta de días en común) no se considera copia.
+    """
+    elegidas = []
+    for columna in ranking:
+        # `not abs(x) >= umbral` en lugar de `abs(x) < umbral`: si x no se pudo calcular (vacío), cuenta como distinta
+        if all(not abs(matriz.loc[columna, elegida]) >= umbral for elegida in elegidas):
+            elegidas.append(columna)
+        if len(elegidas) == cantidad:
+            break
+    return elegidas
