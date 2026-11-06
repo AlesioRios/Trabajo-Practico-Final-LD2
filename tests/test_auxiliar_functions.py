@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from auxiliar_functions import (
     calcular_baselines,
     cierres_de_hoja,
+    cierres_de_otras_hojas,
     cierres_por_bloque,
     clasificar_fallas,
     construir_diario,
@@ -35,13 +36,14 @@ from auxiliar_functions import (
     unir_versiones,
     marcar_columnas_descartables,
     correlaciones_con_objetivo,
-    parejas muy correlacionadas,
+    parejas_muy_correlacionadas,
     etiqueta_corta,
     ordenar_por_similitud,
     elegir_columnas_distintas,
     guardar_huellas,
     huella,
     verificar_huellas,
+    correlaciones_sin_estacionalidad,
 )
 
 
@@ -360,9 +362,9 @@ def test_correlaciones_con_objetivo_spearman_ignora_valores_extremos_y_ordena():
                           "sin_relacion": [3, 1, 5, 2, 4]})
     resultado = correlaciones_con_objetivo(tabla, ["sube_con_extremo", "baja", "sin_relacion"])
 
-    assert resultado.loc["sube_con_extremo", "Spearman"] == 1       # el orden es perfecto
+    assert abs(resultado.loc["sube_con_extremo", "Spearman"] - 1) < 1e-9       # el orden es perfecto
     assert resultado.loc["sube_con_extremo", "Pearson"] < 0.9       # el valor extremo lo distorsiona
-    assert resultado.loc["baja", "Spearman"] == -1
+    assert abs(resultado.loc["baja", "Spearman"] + 1) < 1e-9
     assert resultado.index[-1] == "sin_relacion"                    # la menos correlacionada queda última
 
 def test_parejas_muy_correlacionadas_no_repite_parejas_y_respeta_el_umbral():
@@ -423,3 +425,18 @@ def test_guardar_y_verificar_huellas_detecta_archivos_cambiados_y_faltantes(tmp_
 
     guardar_huellas([cambiado], destino, base=tmp_path)         # volver a guardar conserva las huellas que no se tocan
     assert set(verificar_huellas(destino, tmp_path)) == {"a.txt", "carpeta/b.txt"}
+
+def test_correlaciones_sin_estacionalidad_quita_el_efecto_de_la_epoca_del_ano():
+    import numpy as np
+    rng = np.random.default_rng(42)
+    tabla = pd.DataFrame({"DIA": pd.date_range("2021-01-01", periods=730)})
+    estacion = np.sin(2 * np.pi * tabla["DIA"].dt.dayofyear / 365.25)
+    ruido = rng.normal(size=730)
+    tabla["objetivo"] = estacion + ruido                                   # el objetivo es estación más algo propio
+    tabla["solo_estacion"] = estacion + 0.05 * rng.normal(size=730)        # copia la estación y nada más
+    tabla["con_informacion"] = ruido + 0.05 * rng.normal(size=730)         # copia lo propio del objetivo
+
+    resultado = correlaciones_sin_estacionalidad(tabla, ["solo_estacion", "con_informacion"])
+
+    assert abs(resultado["solo_estacion"]) < 0.2     # sin la estación no queda nada
+    assert resultado["con_informacion"] > 0.9

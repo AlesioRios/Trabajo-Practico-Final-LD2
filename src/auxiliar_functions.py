@@ -738,3 +738,26 @@ def verificar_huellas(ruta_json, carpeta):
         else:
             estado[nombre] = "coincide" if huella(archivo) == esperada else "distinto"
     return estado
+
+def correlaciones_sin_estacionalidad(tabla, columnas, columna_objetivo="objetivo", columna_fecha="DIA"):
+    """Correlación de Spearman de cada columna con el objetivo, después de quitarle a ambos el efecto de la época del año.
+
+    El efecto estacional se ajusta con el seno y el coseno de la posición del día en el año (una curva
+    que sube y baja una vez por año). Se trabaja con los rangos de los valores (eso es Spearman) y se
+    usan solo las filas donde la columna y el objetivo tienen dato. Devuelve una serie con una
+    correlación por columna: cuánto se parecen lo que sobra de la columna y lo que sobra del objetivo
+    una vez descontada la estación.
+    """
+    angulo = 2 * np.pi * pd.to_datetime(tabla[columna_fecha]).dt.dayofyear.to_numpy() / 365.25   # de 0 a 2π en el año
+    estacion = np.column_stack([np.ones(len(tabla)), np.sin(angulo), np.cos(angulo)])
+    resultado = {}
+    for columna in columnas:
+        valores = np.column_stack([pd.to_numeric(tabla[columna], errors="coerce").to_numpy(),
+                                   tabla[columna_objetivo].to_numpy()])
+        completas = ~np.isnan(valores).any(axis=1)               # filas donde hay dato en las dos
+        base = estacion[completas]
+        rangos = pd.DataFrame(valores[completas]).rank().to_numpy()
+        # Lo que sobra de cada uno una vez ajustada la curva estacional
+        residuos = rangos - base @ np.linalg.lstsq(base, rangos, rcond=None)[0]
+        resultado[columna] = np.corrcoef(residuos[:, 0], residuos[:, 1])[0, 1]
+    return pd.Series(resultado, name="Spearman sin estacionalidad")
