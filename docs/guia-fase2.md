@@ -12,9 +12,9 @@ La Fase 1 (EDA) está en `main`. La Fase 2 se trabaja en la rama `feature/prepro
 | 1. Tabla completa (46 hojas unidas, un día por fila) | Hecha | `construir_tabla_completa`, `cargar_tabla_completa` en `src/preprocessing_pipeline.py` |
 | 2. División temporal 70 / 15 / 15 | Hecha | `dividir_por_fecha` en `src/preprocessing_pipeline.py` |
 | 3. Limpieza | Hecha | `aprender_reglas_de_limpieza`, `limpiar` en `src/limpieza.py`; decisiones en el ADR 0008 |
-| 4. Variables nuevas (consigna 2.2) | **Por hacer** | `src/variables_temporales.py` y `src/variables_planta.py` (ver sección 4) |
-| 5. Selección de variables (2.3) | **Por hacer** | `src/seleccion_de_variables.py` (ver sección 4) |
-| 6. Guardado y cierre (2.4) | **Por hacer** | `data/processed/`, `data_lineage.json` (ver sección 4) |
+| 4. Variables nuevas (consigna 2.2) | **Por hacer** | `src/variables_temporales.py` y `src/variables_planta.py` (ver secciones 4 y 5) |
+| 5. Selección de variables (2.3) | **Por hacer** | `src/seleccion_de_variables.py` (ver secciones 4 y 5) |
+| 6. Guardado y cierre (2.4) | **Por hacer** | `data/processed/`, `data_lineage.json` (ver secciones 4 y 5) |
 
 ## 2. Cómo arrancar
 1. `git pull` y `git switch feature/preprocessing`.
@@ -48,34 +48,51 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
 8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 42.
-9. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
+9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
+10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
-## 4. Lo que falta, por tarea
+## 4. Las 9 tareas que faltan: qué se puede hacer en paralelo y qué no
+Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde ya. La tarea 3 necesita las dos. De la selección y el cierre se puede **preparar el código en paralelo**, pero el resultado definitivo necesita que antes estén todas las variables creadas.
+
+| # | Tarea | Consigna | ¿Paralela? | Necesita |
+|---|---|---|---|---|
+| 1 | Variables temporales | 2.2 | **Paralela** con la 2 | La tabla limpia (ya está) |
+| 2 | Variables de planta (razones, interacciones) | 2.2 | **Paralela** con la 1 | La tabla limpia (ya está) |
+| 3 | Integrar 1 y 2 en `construir_variables(tabla)` | 2.2 | **Secuencial** | Tareas 1 y 2 terminadas |
+| 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | Código **preparable en paralelo** (con las 10 variables provisionales de la sección 30 del EDA); resultado definitivo **secuencial** | Tarea 3 |
+| 5 | `Pipeline` de imputación, transformación y escalado, ajustado solo con entrenamiento | 2.4 | Código **preparable en paralelo**; se ajusta con el conjunto final | Tarea 4 |
+| 6 | Quitar las filas que no sirven para entrenar, una sola vez y con la misma regla para todos los modelos | 2.4 | **Secuencial** | Tareas 4 y 5 |
+| 7 | Guardar `dataset_final.csv` sin escalar, su checksum en `data/checksums.json`, `data_lineage.json` y el tamaño de `X_train`, `X_val`, `X_test` | 2.4 | **Secuencial** | Tarea 6 |
+| 8 | Que `python src/preprocessing_pipeline.py` corra todo de punta a punta (el README lo promete; hoy el archivo solo arma la tabla y la divide) | Entregable | Esqueleto en **paralelo**; se completa al final | Tareas 3 y 7 |
+| 9 | Cierre: notebook ejecutado de cero, pruebas, README, `estado.md` y Pull Request a `main` | Entregable | **Secuencial**, al final | Todas |
+
+Decisiones ya tomadas que afectan a las tareas: los valores faltantes **no** se rellenan en la limpieza (ADR 0008); la eficiencia contra la meta **no** se calcula (ADR 0009); la transformación por asimetría y el escalado van **después** de crear las variables, en el `Pipeline` (ADR 0010).
+
 Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de nuevo a esa rama con Pull Request (merge commit). **No** se hace Pull Request a `main` hasta el cierre. Quién hace cada una se acuerda dentro del equipo.
 
-### Tarea 1: variables temporales (2.2, primera parte)
+## 5. Detalle de cada tarea
+
+### Tarea 1: variables temporales
 - Rama `feature/preprocessing-temporales`, módulo `src/variables_temporales.py`, notebook `notebooks/variables_temporales.ipynb`.
 - Función a entregar: `crear_variables_temporales(tabla)`.
 - Qué: rezagos del consumo (ayer, hace 7 días), promedios móviles, mes, día de la semana, fin de semana, estacionalidad (seno y coseno del día del año).
 - Cuidados: comprobar que los días estén en orden y sin saltos antes de calcular rezagos. Las fechas pueden estar corridas (ADR 0002), así que el día de la semana debe tomarse con cautela; la estacionalidad con seno y coseno es la opción más segura. `calcular_baselines` en `src/auxiliar_functions.py` muestra cómo pedir un mínimo de días en un promedio móvil.
 - Prueba: el rezago de 1 día de la fila *t* debe valer lo que tenía la fila *t-1*.
 
-### Tarea 2: variables de planta (2.2, segunda parte)
+### Tarea 2: variables de planta
 - Rama `feature/preprocessing-planta`, módulo `src/variables_planta.py`, notebook `notebooks/variables_planta.ipynb`.
 - Función a entregar: `crear_variables_de_planta(tabla)`.
-- Qué: razones entre áreas (por ejemplo, frío sobre servicios), eficiencia energética (consumo contra meta) e interacciones entre las variables principales.
-- **Decisión abierta:** las metas están en las columnas `Meta` de Consolidado KPI, pero el filtro de calidad (ADR 0006) las descartó a todas (43 % de vacíos en entrenamiento). Hay que decidir cómo obtener esa eficiencia (por ejemplo, volver a leerlas de los Excel) antes de empezar, y documentarlo en un ADR.
-- Cuidados: una razón con denominador cero produce valores enormes; decidir y justificar cómo se trata.
+- Qué: razones entre áreas (por ejemplo, frío sobre servicios) e interacciones entre las variables principales. **No** incluye la eficiencia contra la meta: las columnas `Meta` no se usan (ADR 0009: existen solo desde julio de 2021 y valen lo mismo todo el mes).
+- Cuidados: una razón con denominador cero o muy chico produce valores enormes; decidir y justificar cómo se trata. Usar los valores reales (kW, Hl), sin transformar (ADR 0010).
 - Prueba: una razón 10/2 da 5, y otra con denominador cero.
 
-### Tarea 3: selección y cierre (2.3 y 2.4)
-- Rama `feature/preprocessing-seleccion`, módulo `src/seleccion_de_variables.py`, notebook `notebooks/seleccion_de_variables.ipynb`.
-- Función a entregar: `seleccionar_variables(X_train, y_train)`.
-- Se puede preparar mientras se hacen las tareas 1 y 2: el código de **al menos 2 métodos de selección** (por ejemplo, importancia de Random Forest y LASSO o RFE), evaluados con `TimeSeriesSplit` sobre `X_train` (nunca `KFold`: respeta el orden del tiempo), probado con las 10 variables provisionales de la sección 30 del EDA. También `data_lineage.json`, el `Pipeline` de imputación y escalado (ajustado **solo con entrenamiento**) y la separación en `X_*` e `y_*`.
-- Después de integrar las tareas 1 y 2: correr la selección definitiva y justificar el conjunto final. Quitar las filas que no sirven para entrenar (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige) **una sola vez y con la misma regla para todos los modelos**. Guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
-- Decisiones que quedaron para esta tarea: cómo imputar los vacíos (ver ADR 0008, punto 4), si conviene transformar columnas muy asimétricas para Ridge y Lasso, y qué hacer con las columnas que dejan de medirse en validación y prueba (por ejemplo, las razones de la Línea 5 del KPI).
+### Tareas 4 a 8: selección, `Pipeline` y guardado
+- Rama `feature/preprocessing-seleccion`, módulo `src/seleccion_de_variables.py`, notebook `notebooks/seleccion_de_variables.ipynb`. Función a entregar: `seleccionar_variables(X_train, y_train)`.
+- Para preparar en paralelo mientras se hacen las tareas 1 y 2: el código de **al menos 2 métodos de selección** (por ejemplo, importancia de Random Forest y LASSO o RFE), evaluados con `TimeSeriesSplit` sobre `X_train` (nunca `KFold`: respeta el orden del tiempo); el `Pipeline` de imputación, transformación (Yeo-Johnson) y escalado; la separación en `X_*` e `y_*`; `data_lineage.json`; y el esqueleto del punto de entrada de `src/preprocessing_pipeline.py`.
+- Después de integrar las tareas 1 y 2: correr la selección definitiva y justificar el conjunto final. Quitar las filas que no sirven para entrenar (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige). Guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
+- Decisiones que quedan para esta tarea: cómo imputar los vacíos (ADR 0008, punto 4), qué hacer con las columnas que dejan de medirse en validación y prueba (por ejemplo, las razones de la Línea 5 del KPI) y si conviene transformar cada modelo (ADR 0010).
 
-## 5. Integración y cierre (en orden)
+## 6. Integración y cierre (en orden)
 1. **Integrar las tareas 1 y 2:** merge de las dos ramas en `feature/preprocessing`. En `src/preprocessing_pipeline.py` queda `construir_variables(tabla)`, que llama a las dos funciones. Verificar mismas filas que la tabla limpia y sin columnas repetidas.
 2. **Selección definitiva** y revisión del conjunto elegido entre todos.
 3. **Cierre:** ejecutar `notebooks/preprocesamiento.ipynb` de cero (reiniciar kernel y correr todo), `python -m pytest tests -q`, y abrir el Pull Request de `feature/preprocessing` a `main` con "Create a merge commit". Antes del merge, otra persona lo revisa.
