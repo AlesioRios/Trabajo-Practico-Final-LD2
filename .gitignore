@@ -30,3 +30,6 @@ estado.md
 Thumbs.db
 .idea/
 .vscode/
+
+# Copia de trabajo de la tabla completa (se regenera sola; ver cargar_tabla_completa)
+data/interim/

@@ -40,6 +40,27 @@ def construir_tabla_completa(carpeta_datos):
     return construir_diario(unir_versiones(pd.concat(cierres, ignore_index=True)))
 
 
+def cargar_tabla_completa(carpeta_datos, usar_cache=True):
+    """Devuelve la tabla completa; la guarda en data/interim/ para no reconstruirla (~6 min) cada vez.
+
+    El archivo guardado se descarta solo si algún Excel o el código que arma la tabla
+    (este archivo y auxiliar_functions.py) es más nuevo que él.
+    """
+    carpeta_datos = Path(carpeta_datos)
+    archivo_cache = carpeta_datos / "interim" / "tabla_completa.pkl"
+    fuentes = list(carpeta_datos.glob("Totalizadores Planta *.xlsx")) + [Path(__file__), Path(__file__).with_name("auxiliar_functions.py")]
+
+    if usar_cache and archivo_cache.exists():
+        ultima_modificacion = max(f.stat().st_mtime for f in fuentes)
+        if archivo_cache.stat().st_mtime > ultima_modificacion:           # nada cambió desde que se guardó
+            return pd.read_pickle(archivo_cache)
+
+    tabla = construir_tabla_completa(carpeta_datos)                       # camino lento
+    archivo_cache.parent.mkdir(exist_ok=True)
+    tabla.to_pickle(archivo_cache)
+    return tabla
+
+
 def dividir_por_fecha(tabla):
     """Divide la tabla del día, sin mezclarla, en entrenamiento (70 %), validación (15 %) y prueba (15 %)."""
     assert tabla["DIA"].is_monotonic_increasing, "La tabla tiene que estar en orden cronológico."
