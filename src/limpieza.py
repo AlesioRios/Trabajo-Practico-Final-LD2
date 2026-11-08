@@ -23,6 +23,16 @@ FACTOR_SOBRE_P99 = 5
 
 #----------------------------------------------------------------------------------------------------
 
+def _exigir_columnas(tabla, columnas, que_es):
+    """Si a la tabla le falta alguna de las columnas pedidas, falla diciendo cuáles (nunca con un KeyError sin explicación)."""
+    faltan = [c for c in columnas if c not in tabla.columns]
+    if faltan:
+        ejemplos = ", ".join(f"«{c}»" for c in faltan[:10])
+        resto = f" (y {len(faltan) - 10} más)" if len(faltan) > 10 else ""
+        raise ValueError(f"A la tabla le faltan {len(faltan)} columnas {que_es}: {ejemplos}{resto}. "
+                         "Se buscan por nombre; revisar que el archivo tenga las hojas y columnas esperadas.")
+
+
 def _es_columna_de_energia(columna):
     """Consolidado EE (sin ' | ' en el nombre) y las razones 'EE ... / Hl' del KPI, derivadas de esos kW."""
     return " | " not in columna or columna.startswith("Consolidado KPI | EE")
@@ -52,6 +62,7 @@ def aprender_reglas_de_limpieza(entrenamiento):
       - columnas_de_temperatura: las que pueden ser negativas (paso 3);
       - limite_superior: FACTOR_SOBRE_P99 veces el percentil 99 de cada columna (paso 3).
     """
+    _exigir_columnas(entrenamiento, ["valido"], "de control que la limpieza necesita")
     candidatas = [c for c in entrenamiento.columns if c not in COLUMNAS_DE_CONTROL]
     perfil = marcar_columnas_descartables(perfilar_columnas(entrenamiento[candidatas]))
     conservadas = [c for c, se_conserva in zip(candidatas, perfil["Se conserva"]) if se_conserva]
@@ -72,9 +83,12 @@ def aprender_reglas_de_limpieza(entrenamiento):
 def limpiar(tabla, reglas):
     """Aplica las reglas de limpieza: descarta columnas, anula días inválidos y valores absurdos.
 
-    No borra filas ni imputa nada. No modifica la tabla recibida.
+    No borra filas ni imputa nada. No modifica la tabla recibida. Las columnas de más se ignoran;
+    si falta alguna columna necesaria levanta un ValueError que dice cuáles faltan.
     """
     conservadas = reglas["columnas_conservadas"]
+    _exigir_columnas(tabla, ["valido"], "de control que la limpieza necesita")
+    _exigir_columnas(tabla, conservadas, "de medición que el modelo necesita")
     mantener = [c for c in tabla.columns if c in COLUMNAS_DE_CONTROL or c in set(conservadas)]
     limpia = anular_dias_invalidos(tabla[mantener], reglas["columnas_de_energia"])
     negativas, muy_altas = marcar_valores_absurdos(limpia, conservadas, reglas["limite_superior"],

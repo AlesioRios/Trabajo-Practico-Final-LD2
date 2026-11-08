@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -114,3 +115,27 @@ def test_no_modifica_la_tabla_recibida():
     copia = tabla.copy()
     limpiar(tabla, reglas)
     pdt.assert_frame_equal(tabla, copia)
+
+
+def test_si_falta_una_columna_necesaria_avisa_cual_falta():
+    tabla = tabla_de_entrenamiento()
+    reglas = aprender_reglas_de_limpieza(tabla)
+    sin_caudal = tabla.drop(columns=["Agua | Caudal"])
+    with pytest.raises(ValueError, match="Caudal"):            # el mensaje nombra la columna que falta
+        limpiar(sin_caudal, reglas)
+
+
+def test_si_falta_la_marca_de_dia_valido_avisa():
+    tabla = tabla_de_entrenamiento()
+    reglas = aprender_reglas_de_limpieza(tabla)
+    with pytest.raises(ValueError, match="valido"):
+        limpiar(tabla.drop(columns=["valido"]), reglas)
+
+
+def test_ignora_las_columnas_de_mas():
+    tabla = tabla_de_entrenamiento()
+    reglas = aprender_reglas_de_limpieza(tabla)
+    con_extra = tabla.assign(**{"Hoja nueva | Columna rara": 1.0})
+    limpia = limpiar(con_extra, reglas)
+    assert "Hoja nueva | Columna rara" not in limpia.columns
+    pdt.assert_frame_equal(limpia, limpiar(tabla, reglas))
