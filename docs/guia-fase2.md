@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 42.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 57.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
@@ -56,7 +56,7 @@ Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde y
 
 | # | Tarea | Consigna | ¿Paralela? | Necesita |
 |---|---|---|---|---|
-| 1 | Variables temporales | 2.2 | **Paralela** con la 2 | La tabla limpia (ya está) |
+| 1 | Variables temporales | 2.2 | **Hecha** (ADR 0012) | La tabla limpia (ya está) |
 | 2 | Variables de planta (razones, interacciones) | 2.2 | **Paralela** con la 1 | La tabla limpia (ya está) |
 | 3 | Integrar 1 y 2 en `construir_variables(tabla)` | 2.2 | **Secuencial** | Tareas 1 y 2 terminadas |
 | 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | Código **preparable en paralelo** (con las 10 variables provisionales de la sección 30 del EDA); resultado definitivo **secuencial** | Tarea 3 |
@@ -66,18 +66,17 @@ Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde y
 | 8 | Que `python src/preprocessing_pipeline.py` corra todo de punta a punta (el README lo promete; hoy el archivo solo arma la tabla y la divide) | Entregable | Esqueleto en **paralelo**; se completa al final | Tareas 3 y 7 |
 | 9 | Cierre: notebook ejecutado de cero, pruebas, README, `estado.md` y Pull Request a `main` | Entregable | **Secuencial**, al final | Todas |
 
-Decisiones ya tomadas que afectan a las tareas: los valores faltantes **no** se rellenan en la limpieza (ADR 0008); la eficiencia contra la meta **no** se calcula (ADR 0009); la transformación por asimetría y el escalado van **después** de crear las variables, en el `Pipeline` (ADR 0010).
+Decisiones ya tomadas que afectan a las tareas: los valores faltantes **no** se rellenan en la limpieza (ADR 0008); la eficiencia contra la meta **no** se calcula (ADR 0009); la transformación por asimetría y el escalado van **después** de crear las variables, en el `Pipeline` (ADR 0010); las variables temporales son diez y se descartan los rezagos de 7, 30 y 365 días y la variable de año (ADR 0012).
 
 Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de nuevo a esa rama con Pull Request (merge commit). **No** se hace Pull Request a `main` hasta el cierre. Quién hace cada una se acuerda dentro del equipo.
 
 ## 5. Detalle de cada tarea
 
-### Tarea 1: variables temporales
-- Rama `feature/preprocessing-temporales`, módulo `src/variables_temporales.py`, notebook `notebooks/variables_temporales.ipynb`.
-- Función a entregar: `crear_variables_temporales(tabla)`.
-- Qué: rezagos del consumo (ayer, hace 7 días), promedios móviles, mes, día de la semana, fin de semana, estacionalidad (seno y coseno del día del año).
-- Cuidados: comprobar que los días estén en orden y sin saltos antes de calcular rezagos. Las fechas pueden estar corridas (ADR 0002), así que el día de la semana debe tomarse con cautela; la estacionalidad con seno y coseno es la opción más segura. `calcular_baselines` en `src/auxiliar_functions.py` muestra cómo pedir un mínimo de días en un promedio móvil.
-- Prueba: el rezago de 1 día de la fila *t* debe valer lo que tenía la fila *t-1*.
+### Tarea 1: variables temporales (hecha)
+- Rama `feature/preprocessing-temporales`, módulo `src/variables_temporales.py`, notebook `notebooks/variables_temporales.ipynb`, decisión en el ADR 0012.
+- Función entregada: `crear_variables_temporales(tabla)`. Agrega 10 columnas: frío de ayer, de hace 2 y de hace 3 días; promedio y desvío de los últimos 7 días (mínimo 3 con dato); diferencia entre hoy y ayer; seno y coseno del día del año del día que se predice; indicadores de fin de año (24/12 al 6/01) y de fin de semana.
+- Cuidados que sirven de modelo para las demás tareas: los rezagos van **por fila** y no por fecha (la columna `DIA` tiene fechas repetidas y faltantes, ADR 0002); el calendario es el del día que se predice (la fecha de hoy más un día); toda cifra citada en un ADR sale de una celda del notebook.
+- Pruebas: `tests/test_variables_temporales.py`, incluida una que verifica que cambiar el futuro no altera las variables de las filas anteriores.
 
 ### Tarea 2: variables de planta
 - Rama `feature/preprocessing-planta`, módulo `src/variables_planta.py`, notebook `notebooks/variables_planta.ipynb`.
