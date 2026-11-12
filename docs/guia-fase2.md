@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 57.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 66.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
@@ -57,7 +57,7 @@ Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde y
 | # | Tarea | Consigna | ¿Paralela? | Necesita |
 |---|---|---|---|---|
 | 1 | Variables temporales | 2.2 | **Hecha** (ADR 0012) | La tabla limpia (ya está) |
-| 2 | Variables de planta (razones, interacciones) | 2.2 | **Paralela** con la 1 | La tabla limpia (ya está) |
+| 2 | Variables de planta (razones, interacciones) | 2.2 | Razones **hechas** (ADR 0013); faltan las interacciones | La tabla limpia (ya está) |
 | 3 | Integrar 1 y 2 en `construir_variables(tabla)` | 2.2 | **Secuencial** | Tareas 1 y 2 terminadas |
 | 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | Código **preparable en paralelo** (con las 10 variables provisionales de la sección 30 del EDA); resultado definitivo **secuencial** | Tarea 3 |
 | 5 | `Pipeline` de imputación, transformación y escalado, ajustado solo con entrenamiento | 2.4 | Código **preparable en paralelo**; se ajusta con el conjunto final | Tarea 4 |
@@ -66,7 +66,7 @@ Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde y
 | 8 | Que `python src/preprocessing_pipeline.py` corra todo de punta a punta (el README lo promete; hoy el archivo solo arma la tabla y la divide) | Entregable | Esqueleto en **paralelo**; se completa al final | Tareas 3 y 7 |
 | 9 | Cierre: notebook ejecutado de cero, pruebas, README, `estado.md` y Pull Request a `main` | Entregable | **Secuencial**, al final | Todas |
 
-Decisiones ya tomadas que afectan a las tareas: los valores faltantes **no** se rellenan en la limpieza (ADR 0008); la eficiencia contra la meta **no** se calcula (ADR 0009); la transformación por asimetría y el escalado van **después** de crear las variables, en el `Pipeline` (ADR 0010); las variables temporales son diez y se descartan los rezagos de 7, 30 y 365 días y la variable de año (ADR 0012).
+Decisiones ya tomadas que afectan a las tareas: los valores faltantes **no** se rellenan en la limpieza (ADR 0008); la eficiencia contra la meta **no** se calcula (ADR 0009); la transformación por asimetría y el escalado van **después** de crear las variables, en el `Pipeline` (ADR 0010); las variables temporales son diez y se descartan los rezagos de 7, 30 y 365 días y la variable de año (ADR 0012); las razones de planta son seis, con una regla única para los denominadores chicos (ADR 0013).
 
 Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de nuevo a esa rama con Pull Request (merge commit). **No** se hace Pull Request a `main` hasta el cierre. Quién hace cada una se acuerda dentro del equipo.
 
@@ -78,12 +78,13 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Cuidados que sirven de modelo para las demás tareas: los rezagos van **por fila** y no por fecha (la columna `DIA` tiene fechas repetidas y faltantes, ADR 0002); el calendario es el del día que se predice (la fecha de hoy más un día); toda cifra citada en un ADR sale de una celda del notebook.
 - Pruebas: `tests/test_variables_temporales.py`, incluida una que verifica que cambiar el futuro no altera las variables de las filas anteriores.
 
-### Tarea 2: variables de planta
-- Rama `feature/preprocessing-planta`, módulo `src/variables_planta.py`, notebook `notebooks/variables_planta.ipynb`.
-- Función a entregar: `crear_variables_de_planta(tabla)`.
-- Qué: razones entre áreas (por ejemplo, frío sobre servicios) e interacciones entre las variables principales. **No** incluye la eficiencia contra la meta: las columnas `Meta` no se usan (ADR 0009: existen solo desde julio de 2021 y valen lo mismo todo el mes).
-- Cuidados: una razón con denominador cero o muy chico produce valores enormes; decidir y justificar cómo se trata. Usar los valores reales (kW, Hl), sin transformar (ADR 0010).
-- Prueba: una razón 10/2 da 5, y otra con denominador cero.
+### Tarea 2: variables de planta (razones hechas; faltan las interacciones)
+- Rama `feature/preprocessing-planta`, módulo `src/variables_planta.py`, notebook `notebooks/variables_planta.ipynb`, decisión en el ADR 0013.
+- Funciones entregadas: `aprender_reglas_de_planta(entrenamiento_limpio)`, que mide el umbral de cada denominador solo con entrenamiento, y `crear_variables_planta(tabla, reglas)`. Agregan 6 razones: frío sobre planta, frío / Hl envasados, planta / Hl envasados, aire / Hl envasados, gas / Hl envasados y servicios sobre planta.
+- Regla de los denominadores: vacío, cero o menor al 10 % de la mediana de entrenamiento da razón vacía (nunca cero ni infinito). **No** se calcula la eficiencia contra la meta (ADR 0009). Se usan los valores reales (kW, Hl), sin transformar (ADR 0010).
+- Cuidado a tener en cuenta: los días de producción casi nula son mucho más frecuentes en validación y prueba (alrededor del 20 %) que en entrenamiento (5 %), así que las razones por hectolitro tienen más vacíos ahí; la imputación se decide en el `Pipeline`.
+- Pruebas: `tests/test_variables_planta.py` (razones calculadas a mano, denominadores en cero, vacíos y chicos, reglas solo de entrenamiento).
+- Falta: interacciones con `PolynomialFeatures` (grado 2, `interaction_only=True`) sobre unas diez variables, seguido de la selección.
 
 ### Tareas 4 a 8: selección, `Pipeline` y guardado
 - Rama `feature/preprocessing-seleccion`, módulo `src/seleccion_de_variables.py`, notebook `notebooks/seleccion_de_variables.ipynb`. Función a entregar: `seleccionar_variables(X_train, y_train)`.
