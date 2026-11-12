@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 66.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 81.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
@@ -84,7 +84,7 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Regla de los denominadores: vacío, cero o menor al 10 % de la mediana de entrenamiento da razón vacía (nunca cero ni infinito). **No** se calcula la eficiencia contra la meta (ADR 0009). Se usan los valores reales (kW, Hl), sin transformar (ADR 0010).
 - Cuidado a tener en cuenta: los días de producción casi nula son mucho más frecuentes en validación y prueba (alrededor del 20 %) que en entrenamiento (5 %), así que las razones por hectolitro tienen más vacíos ahí; la imputación se decide en el `Pipeline`.
 - Pruebas: `tests/test_variables_planta.py` (razones calculadas a mano, denominadores en cero, vacíos y chicos, reglas solo de entrenamiento).
-- Falta: interacciones con `PolynomialFeatures` (grado 2, `interaction_only=True`) sobre unas diez variables, seguido de la selección.
+- Interacciones hechas (ADR 0014): `aprender_reglas_de_interacciones` y `crear_interacciones` en `src/variables_interacciones.py` (10 variables base, 45 productos, notebook `notebooks/variables_interacciones.ipynb`). Falta integrar todo en `construir_variables`, seguido de la selección.
 
 ### Tareas 4 a 8: selección, `Pipeline` y guardado
 - Rama `feature/preprocessing-seleccion`, módulo `src/seleccion_de_variables.py`, notebook `notebooks/seleccion_de_variables.ipynb`. Función a entregar: `seleccionar_variables(X_train, y_train)`.
