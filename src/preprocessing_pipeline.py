@@ -12,6 +12,9 @@ from auxiliar_functions import (
     leer_consolidado_ee,
     unir_versiones,
 )
+from variables_interacciones import aprender_reglas_de_interacciones, crear_interacciones
+from variables_planta import aprender_reglas_de_planta, crear_variables_planta
+from variables_temporales import crear_variables_temporales
 
 # Cortes de la división temporal (consigna 2.4): 70 % entrenamiento, 15 % validación, 15 % prueba
 FRACCION_FIN_ENTRENAMIENTO = 0.70
@@ -70,3 +73,34 @@ def dividir_por_fecha(tabla):
     return (tabla.iloc[:fin_entrenamiento].copy(),                 # el tramo más antiguo
             tabla.iloc[fin_entrenamiento:fin_validacion].copy(),
             tabla.iloc[fin_validacion:].copy())                    # el más reciente: se toca una sola vez, al final
+
+
+#----------------------------------------------------------------------------------------------------
+# Variables nuevas (consigna 2.2): se aprenden reglas con entrenamiento y se aplican a cualquier tabla.
+
+def fitear_reglas_de_variables(entrenamiento_limpio):
+    """Aprende, solo con el tramo de entrenamiento ya limpio, todo lo que hace falta para crear las variables.
+
+    Devuelve un diccionario con dos reglas, que `transform_variables` recibe tal cual:
+      - `planta`: umbral de cada denominador de las razones (ADR 0013).
+      - `interacciones`: las 10 variables base elegidas y el umbral de correlación (ADR 0014).
+    Las variables temporales no necesitan reglas: solo miran hoy y los días anteriores.
+    """
+    reglas_planta = aprender_reglas_de_planta(entrenamiento_limpio)
+    # Las variables base se eligen con temporales y razones ya creadas, así que se crean primero en entrenamiento.
+    # Mirar solo hacia atrás da el mismo valor en el entrenamiento solo que en la tabla completa.
+    con_variables = crear_variables_planta(crear_variables_temporales(entrenamiento_limpio), reglas_planta)
+    return {"planta": reglas_planta, "interacciones": aprender_reglas_de_interacciones(con_variables)}
+
+
+def transform_variables(tabla_limpia, reglas):
+    """Agrega a la tabla limpia las variables temporales, las razones de planta y las interacciones, en ese orden.
+
+    Recibe la tabla limpia completa y en orden cronológico (los rezagos de validación necesitan los últimos
+    días de entrenamiento), y las `reglas` que devolvió `fitear_reglas_de_variables`. No aprende nada:
+    no mira el contenido de la tabla para decidir umbrales ni variables. Misma cantidad de filas y mismo
+    índice; las columnas originales no cambian y las nuevas se agregan al final.
+    """
+    con_temporales = crear_variables_temporales(tabla_limpia)
+    con_planta = crear_variables_planta(con_temporales, reglas["planta"])
+    return crear_interacciones(con_planta, reglas["interacciones"])
