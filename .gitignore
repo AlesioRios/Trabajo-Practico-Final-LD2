@@ -25,6 +25,10 @@ env/
 # Notas locales de trabajo (no se comparten)
 estado.md
 
+# Instrucciones y guías locales para la IA y el equipo (no se comparten)
+AGENTS.md
+prompt-equipo-fase2-continuacion.md
+
 # Sistema operativo / editores
 .DS_Store
 Thumbs.db
