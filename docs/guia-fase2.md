@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 81.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 87.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
@@ -58,7 +58,7 @@ Las tareas 1 y 2 son independientes entre sí y se pueden hacer a la vez desde y
 |---|---|---|---|---|
 | 1 | Variables temporales | 2.2 | **Hecha** (ADR 0012) | La tabla limpia (ya está) |
 | 2 | Variables de planta (razones, interacciones) | 2.2 | Razones **hechas** (ADR 0013); faltan las interacciones | La tabla limpia (ya está) |
-| 3 | Integrar 1 y 2 en `construir_variables(tabla)` | 2.2 | **Secuencial** | Tareas 1 y 2 terminadas |
+| 3 | Integrar las variables nuevas: `fitear_reglas_de_variables` y `transform_variables` | 2.2 | **Hecha** | Tareas 1 y 2 (hechas) |
 | 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | Código **preparable en paralelo** (con las 10 variables provisionales de la sección 30 del EDA); resultado definitivo **secuencial** | Tarea 3 |
 | 5 | `Pipeline` de imputación, transformación y escalado, ajustado solo con entrenamiento | 2.4 | Código **preparable en paralelo**; se ajusta con el conjunto final | Tarea 4 |
 | 6 | Quitar las filas que no sirven para entrenar, una sola vez y con la misma regla para todos los modelos | 2.4 | **Secuencial** | Tareas 4 y 5 |
@@ -84,7 +84,7 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Regla de los denominadores: vacío, cero o menor al 10 % de la mediana de entrenamiento da razón vacía (nunca cero ni infinito). **No** se calcula la eficiencia contra la meta (ADR 0009). Se usan los valores reales (kW, Hl), sin transformar (ADR 0010).
 - Cuidado a tener en cuenta: los días de producción casi nula son mucho más frecuentes en validación y prueba (alrededor del 20 %) que en entrenamiento (5 %), así que las razones por hectolitro tienen más vacíos ahí; la imputación se decide en el `Pipeline`.
 - Pruebas: `tests/test_variables_planta.py` (razones calculadas a mano, denominadores en cero, vacíos y chicos, reglas solo de entrenamiento).
-- Interacciones hechas (ADR 0014): `aprender_reglas_de_interacciones` y `crear_interacciones` en `src/variables_interacciones.py` (10 variables base, 45 productos, notebook `notebooks/variables_interacciones.ipynb`). Falta integrar todo en `construir_variables`, seguido de la selección.
+- Interacciones hechas (ADR 0014): `aprender_reglas_de_interacciones` y `crear_interacciones` en `src/variables_interacciones.py` (10 variables base, 45 productos, notebook `notebooks/variables_interacciones.ipynb`). La integración quedó en `fitear_reglas_de_variables` y `transform_variables`; sigue la selección.
 
 ### Tareas 4 a 8: selección, `Pipeline` y guardado
 - Rama `feature/preprocessing-seleccion`, módulo `src/seleccion_de_variables.py`, notebook `notebooks/seleccion_de_variables.ipynb`. Función a entregar: `seleccionar_variables(X_train, y_train)`.
@@ -93,7 +93,7 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Decisiones que quedan para esta tarea: cómo imputar los vacíos (ADR 0008, punto 4), qué hacer con las columnas que dejan de medirse en validación y prueba (por ejemplo, las razones de la Línea 5 del KPI) y si conviene transformar cada modelo (ADR 0010).
 
 ## 6. Integración y cierre (en orden)
-1. **Integrar las tareas 1 y 2:** merge de las dos ramas en `feature/preprocessing`. En `src/preprocessing_pipeline.py` queda `construir_variables(tabla)`, que llama a las dos funciones. Verificar mismas filas que la tabla limpia y sin columnas repetidas.
+1. **Integrar las tareas 1 y 2:** merge de las dos ramas en `feature/preprocessing`. En `src/preprocessing_pipeline.py` quedan `fitear_reglas_de_variables(entrenamiento_limpio)` (aprende solo con entrenamiento y devuelve un diccionario de reglas) y `transform_variables(tabla_limpia, reglas)` (agrega temporales, razones e interacciones a la tabla limpia completa y en orden); el notebook es `notebooks/construir_variables.ipynb`. Verificar mismas filas que la tabla limpia y sin columnas repetidas.
 2. **Selección definitiva** y revisión del conjunto elegido entre todos.
 3. **Cierre:** ejecutar `notebooks/preprocesamiento.ipynb` de cero (reiniciar kernel y correr todo), `python -m pytest tests -q`, y abrir el Pull Request de `feature/preprocessing` a `main` con "Create a merge commit". Antes del merge, otra persona lo revisa.
 
