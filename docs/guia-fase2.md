@@ -14,7 +14,7 @@ La Fase 1 (EDA) está en `main`. La Fase 2 se trabaja en la rama `feature/prepro
 | 3. Limpieza | Hecha | `aprender_reglas_de_limpieza`, `limpiar` en `src/limpieza.py`; decisiones en el ADR 0008 |
 | 4. Variables nuevas (consigna 2.2) | **Por hacer** | `src/variables_temporales.py` y `src/variables_planta.py` (ver secciones 4 y 5) |
 | 5. Selección de variables (2.3) | **Por hacer** | `src/seleccion_de_variables.py` (ver secciones 4 y 5) |
-| 6. Guardado y cierre (2.4) | **Por hacer** | `data/processed/`, `data_lineage.json` (ver secciones 4 y 5) |
+| 6. Pipeline y guardado (2.4) | Comparación y funciones probadas. Generación final pendiente de selección. | `src/pipeline_sklearn.py`, `notebooks/pipeline_y_guardado.ipynb`, ADR 0016 |
 
 ## 2. Cómo arrancar
 1. `git pull` y `git switch feature/preprocessing`.
@@ -92,8 +92,8 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Se decide además, con número: si algún compresor Mycom individual aporta (ADR 0013) y si el indicador de fin de semana aporta (ADR 0012).
 
 ### Tareas 5 a 7: `Pipeline` y guardado
-- Rama `feature/preprocessing-pipeline`, módulo `src/pipeline_sklearn.py`, notebook `notebooks/pipeline_y_guardado.ipynb`, decisión en el ADR 0016.
-- El `Pipeline` de imputación, transformación (Yeo-Johnson) y escalado, ajustado solo con `X_train` (ADR 0010). Quitar las filas que no sirven para entrenar, una sola vez (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige). Separar `X_*` e `y_*`, guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json`, escribir `data/processed/data_lineage.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
+- La comparación temporal y el guardado están implementados en `src/pipeline_sklearn.py` y documentados en `notebooks/pipeline_y_guardado.ipynb` y el ADR 0016. Falta generar los archivos finales con la selección definitiva.
+- La variante provisional usa mediana y escalado estándar, ajustados solo con `X_train` (ADR 0016). Quitar las filas que no sirven para entrenar, una sola vez (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige). Separar `X_*` e `y_*`, guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json`, escribir `data/processed/data_lineage.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
 - Decisiones que quedan para esta tarea: cómo imputar los vacíos (ADR 0008, punto 4), en particular las razones por hectolitro, con muchos más vacíos en validación y prueba (ADR 0013); qué hacer con las columnas que dejan de medirse en validación y prueba (por ejemplo, las razones de la Línea 5 del KPI) y si conviene transformar cada modelo (ADR 0010).
 
 ### Tarea 8: punto de entrada
