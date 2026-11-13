@@ -1,0 +1,14 @@
+{
+  "archivos_intactos_desde_inicio": {
+    "src/preprocessing_pipeline.py": true,
+    "tests/test_preprocessing_pipeline.py": true,
+    "src/auxiliar_functions.py": true,
+    "src/limpieza.py": true,
+    "src/variables_interacciones.py": true,
+    "data/processed/dataset_unificado_inicial.csv": true
+  },
+  "indice_git_intacto": true,
+  "commit_realizado": false,
+  "push_realizado": false,
+  "staging_realizado": false
+}

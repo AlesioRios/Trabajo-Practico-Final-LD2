@@ -9,6 +9,8 @@ Las decisiones y sus justificaciones están en el notebook preprocesamiento.ipyn
 y en docs/decisions/0008-politica-de-limpieza.md.
 """
 
+from math import isfinite
+
 import pandas as pd
 
 from auxiliar_functions import marcar_columnas_descartables, perfilar_columnas
@@ -49,6 +51,7 @@ def marcar_valores_absurdos(tabla, columnas, limite_superior, columnas_de_temper
     """Devuelve dos tablas de verdadero/falso: celdas negativas (salvo temperaturas) y celdas sobre el límite."""
     valores = tabla[columnas].apply(pd.to_numeric, errors="coerce")
     negativas = (valores < 0) & ~valores.columns.isin(columnas_de_temperatura)
+    limite_superior = pd.Series(limite_superior, dtype=float).reindex(columnas)
     muy_altas = valores > limite_superior            # comparar con NaN da falso: no se marca
     return negativas, muy_altas
 
@@ -56,7 +59,7 @@ def marcar_valores_absurdos(tabla, columnas, limite_superior, columnas_de_temper
 def aprender_reglas_de_limpieza(entrenamiento):
     """Mide, solo con el tramo de entrenamiento, todo lo que necesita `limpiar`.
 
-    Devuelve un diccionario con:
+    Devuelve un diccionario serializable a JSON estándar (None indica ausencia de límite), con:
       - columnas_conservadas: las que pasan los criterios del ADR 0006 (paso 1);
       - columnas_de_energia: las que se anulan en los días inválidos (paso 2);
       - columnas_de_temperatura: las que pueden ser negativas (paso 3);
@@ -76,7 +79,8 @@ def aprender_reglas_de_limpieza(entrenamiento):
         "columnas_conservadas": conservadas,
         "columnas_de_energia": de_energia,
         "columnas_de_temperatura": [c for c in conservadas if "Temp" in c],
-        "limite_superior": limite.where(limite > 0),     # percentil 99 igual a 0: sin límite
+        "limite_superior": {c: float(v) if pd.notna(v) and isfinite(v) and v > 0 else None
+                            for c, v in limite.items()},     # None: sin límite; JSON estándar
     }
 
 
@@ -85,6 +89,7 @@ def limpiar(tabla, reglas):
 
     No borra filas ni imputa nada. No modifica la tabla recibida. Las columnas de más se ignoran;
     si falta alguna columna necesaria levanta un ValueError que dice cuáles faltan.
+    Admite límites JSON (dict con None) y los límites históricos representados como Series.
     """
     conservadas = reglas["columnas_conservadas"]
     _exigir_columnas(tabla, ["valido"], "de control que la limpieza necesita")

@@ -1,0 +1,42 @@
+{
+  "pruebas": {
+    "comando": "python -m pytest tests -q",
+    "aprobadas": 126,
+    "fallidas": 0,
+    "duracion_segundos": 18.46
+  },
+  "notebook": {
+    "celdas_codigo": 5,
+    "ejecutadas_de_cero": true,
+    "sin_errores": true,
+    "nbformat_valido": true,
+    "kernel": "cervecera_env"
+  },
+  "enlaces_comprobados": 40,
+  "enlaces_rotos": [],
+  "pruebas_afectadas_tras_ultima_mejora": {
+    "comando": "python -m pytest tests/test_seleccion_definitiva.py tests/test_seleccion_de_variables.py tests/test_reproducibilidad_seleccion.py -q",
+    "aprobadas": 28,
+    "fallidas": 0,
+    "duracion_segundos": 8.67
+  },
+  "pip_check": "No broken requirements found.",
+  "archivos_manifiesto_existentes_y_no_ignorados": 58,
+  "paquetes_compactos_sha256_y_zip_validos": 4,
+  "revision_pr_notebook": {
+    "kernel": "cervecera_env",
+    "celdas_ejecutadas": 9,
+    "segundos": 8.86386839998886,
+    "errores": 0,
+    "busquedas_ejecutadas": false,
+    "datos_reales_leidos": false
+  },
+  "revision_pr_suite": {
+    "comando": "python -m pytest tests -q",
+    "aprobadas": 131,
+    "fallidas": 0,
+    "omitidas": 1,
+    "segundos": 17.49,
+    "motivo_omision": "Prueba compartida que procesa Train/Validation/Test reales; se mantiene la reserva de Test."
+  }
+}

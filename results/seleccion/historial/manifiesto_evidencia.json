@@ -1,0 +1,22 @@
+{
+  "ejecucion-20261113T184058Z-969d4545-evidencia.zip": {
+    "archivos": 90,
+    "bytes": 3271569,
+    "sha256": "f6bd493d59715c62ea5d4b58d488f72a32ca58dbac15306709106b3014b0eaaf"
+  },
+  "ejecucion-20261113T194441Z-union-a9b63e4f-evidencia.zip": {
+    "archivos": 160,
+    "bytes": 2998241,
+    "sha256": "c658f9be67721d0ad06d77eb981e94d557c0f13bf088a5d4ab77ec3a551216b6"
+  },
+  "ejecucion-forward30-20261113-01-evidencia.zip": {
+    "archivos": 232,
+    "bytes": 4662639,
+    "sha256": "6d275598795a0c7cf3bb8eb1b58b6eb0f87e67148890bb0b14cb5a24c515a569"
+  },
+  "auditoria-y-diagnosticos-evidencia.zip": {
+    "archivos": 49,
+    "bytes": 163158,
+    "sha256": "b4921a6772028f8b01b032077be171b418b5c6b35bbee3a863107b8e0482db4f"
+  }
+}

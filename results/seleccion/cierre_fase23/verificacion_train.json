@@ -1,0 +1,37 @@
+{
+  "entorno": "3.12.14 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:37:13) [MSC v.1942 64 bit (AMD64)]",
+  "fuentes": {
+    "Totalizadores Planta 2020-2022.xlsx": "coincide",
+    "Totalizadores Planta 2021-2023.xlsx": "coincide",
+    "Totalizadores Planta 2022-2023.xlsx": "coincide",
+    "processed/dataset_unificado_inicial.csv": "coincide"
+  },
+  "huellas": {
+    "comparacion_validation_congelada/resultados.json": true,
+    "comparacion_validation_congelada/resumen.csv": true,
+    "comparacion_validation_congelada/seleccion_definitiva.json": true,
+    "forward_max60_artefactos/checkpoint_ronda_30.json": true,
+    "forward_max60_artefactos/checkpoint_ronda_31.json": true,
+    "forward_max60_artefactos/codigo_ejecutado.py": true,
+    "forward_max60_artefactos/configuracion.json": true,
+    "forward_max60_artefactos/entorno_verificacion.json": true,
+    "forward_max60_artefactos/preparacion_pliegue_1.json": true,
+    "forward_max60_artefactos/preparacion_pliegue_2.json": true,
+    "forward_max60_artefactos/preparacion_pliegue_3.json": true,
+    "forward_max60_artefactos/progreso.json": true,
+    "forward_max60_artefactos/resultado.json": true
+  },
+  "train_bloques": 848,
+  "train_utilizables": 829,
+  "matriz": [
+    829,
+    27
+  ],
+  "nombres_y_orden": true,
+  "preparacion_reproducida_solo_train": true,
+  "causalidad_prefijo_real": true,
+  "test_evaluado": false,
+  "validation_reevaluada": false,
+  "modelos_entrenados": false,
+  "disponibilidad_fisica_certificada": false
+}

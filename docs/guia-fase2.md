@@ -13,7 +13,7 @@ La Fase 1 (EDA) está en `main`. La Fase 2 se trabaja en la rama `feature/prepro
 | 2. División temporal 70 / 15 / 15 | Hecha | `dividir_por_fecha` en `src/preprocessing_pipeline.py` |
 | 3. Limpieza | Hecha | `aprender_reglas_de_limpieza`, `limpiar` en `src/limpieza.py`; decisiones en el ADR 0008 |
 | 4. Variables nuevas (consigna 2.2) | **Por hacer** | `src/variables_temporales.py` y `src/variables_planta.py` (ver secciones 4 y 5) |
-| 5. Selección de variables (2.3) | **Por hacer** | `src/seleccion_de_variables.py` (ver secciones 4 y 5) |
+| 5. Selección de variables (2.3) | Definitiva: Spearman, 14 variables; 27 columnas efectivas. Pearson tiene el menor MAE absoluto; se elige Spearman por parsimonia en el margen del 1 %. | `src/seleccion_definitiva.py`, `notebooks/seleccion_de_variables.ipynb`, ADR 0015 y [contrato](informes/seleccion_fase23_estado_actual.md) |
 | 6. Pipeline y guardado (2.4) | Comparación y funciones probadas. Generación final pendiente de selección. | `src/pipeline_sklearn.py`, `notebooks/pipeline_y_guardado.ipynb`, ADR 0016 |
 
 ## 2. Cómo arrancar

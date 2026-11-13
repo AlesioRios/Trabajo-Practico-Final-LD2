@@ -1,6 +1,7 @@
-"""Selección configurable y evaluación temporal; no define un ganador."""
+"""Selección experimental explícita y consumo predeterminado del conjunto oficial."""
 import copy
 import time
+import warnings
 from itertools import combinations
 import numpy as np
 import pandas as pd
@@ -12,10 +13,24 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from variables_interacciones import columnas_candidatas
+from variables_interacciones import columnas_candidatas, construir_mapa_interacciones
 from auxiliar_functions import SEMILLA
-from limpieza import aprender_reglas_de_limpieza, limpiar, COLUMNAS_DE_CONTROL
-from preprocessing_pipeline import fitear_reglas_de_variables, transform_variables
+from limpieza import aprender_reglas_de_limpieza, limpiar, COLUMNAS_DE_CONTROL, _exigir_columnas
+
+# Política de compatibilidad provisional; no representa un resultado experimental.
+CONFIGURACION_PROVISIONAL = {"metodo": "spearman", "k": 1, "provisional": True}
+
+
+def fitear_reglas_de_variables(entrenamiento_limpio):
+    """Delega al pipeline al llamar, conservando el nombre público sin un ciclo al importar."""
+    from preprocessing_pipeline import fitear_reglas_de_variables as aprender
+    return aprender(entrenamiento_limpio)
+
+
+def transform_variables(tabla_limpia, reglas):
+    """Delega la transformación al pipeline mediante una importación local."""
+    from preprocessing_pipeline import transform_variables as transformar
+    return transformar(tabla_limpia, reglas)
 
 
 def cerrar_jerarquia(elegidas, componentes, disponibles):
@@ -40,15 +55,21 @@ def aprender_seleccion(X, y, configuracion, componentes=None, *,
     Los selectores que requieren datos completos usan mediana; Lasso estandariza.
     No modifica entradas ni ajusta hiperparámetros. Los tiempos son informativos.
     """
+    componentes = componentes or {}
+    if any(c in COLUMNAS_DE_CONTROL for nombre, padres in componentes.items()
+           for c in [nombre, *padres]):
+        raise ValueError("El mapa de componentes contiene objetivo o columnas de control.")
     if configuracion["metodo"] in ("forward", "backward"):
         return _buscar_secuencial(tabla_bruta, configuracion, componentes or {},
                                   estimador, particion_interna)
     inicio = time.perf_counter()
     cfg = copy.deepcopy(configuracion)
-    componentes = componentes or {}
-    sin_mapa = [c for c in X.columns if " x " in c and c not in componentes]
+    bases = {p for padres in componentes.values() for p in padres}
+    sin_mapa = [c for c in X.columns if " x " in c and c not in componentes and c not in bases]
     if sin_mapa:
-        raise ValueError(f"Falta mapa de componentes: {sin_mapa}")
+        raise ValueError(f"Falta mapa de componentes: {sin_mapa}. "
+                         "Proporcionar componentes=construir_mapa_interacciones(reglas_variables) "
+                         "o usar seleccionar_variables con las reglas o attrs de ingeniería.")
     if not X.index.equals(y.index) or not X.index.is_unique:
         raise ValueError("X e y deben tener el mismo índice único.")
     if not X.columns.is_unique:
@@ -102,11 +123,76 @@ def aprender_seleccion(X, y, configuracion, componentes=None, *,
             "semilla": SEMILLA}
 
 
-def seleccionar_variables(X_train, y_train, configuracion=None, componentes=None, **contexto):
-    """Devuelve nombres; sin configuración aprobada falla explícitamente."""
+def preparar_datos_seleccion(tabla_train, reglas_variables):
+    """Prepara X, y y mapa explícito desde entrenamiento ya ingenierizado, sin aprender.
+
+    Exige DIA creciente, índice y columnas únicos y las reglas originales de ingeniería.
+    Conserva constantes que puedan ser padres. Quita controles de X y filas sin objetivo
+    solo después de crear rezagos; no imputa ni escala. Rechaza objetivos infinitos,
+    componentes ausentes o interacciones incompatibles con las reglas, sin usar attrs.
+    """
+    _exigir_columnas(tabla_train, ["DIA", "objetivo"], "para preparar la selección")
+    if not tabla_train.index.is_unique or not tabla_train.columns.is_unique:
+        raise ValueError("La preparación de selección requiere índice y columnas únicos.")
+    if not tabla_train["DIA"].is_monotonic_increasing:
+        raise ValueError("El entrenamiento debe conservar el orden cronológico de DIA.")
+    componentes = construir_mapa_interacciones(reglas_variables)
+    necesarias = list(dict.fromkeys([*componentes, *(p for padres in componentes.values() for p in padres)]))
+    _exigir_columnas(tabla_train, necesarias, "de ingeniería descritas por las reglas de interacciones")
+    utilizables = tabla_train.loc[tabla_train["objetivo"].notna()]
+    y = utilizables["objetivo"].copy()
+    if y.empty or not np.isfinite(y.to_numpy(dtype=float)).all():
+        raise ValueError("Se requiere al menos un objetivo utilizable y todos deben ser finitos; no se imputan.")
+    X = utilizables.drop(columns=COLUMNAS_DE_CONTROL, errors="ignore").copy()
+    return X, y, componentes
+
+
+def seleccionar_variables(X_train, y_train, configuracion=None, componentes=None, *,
+                          reglas_variables=None, **contexto):
+    """Carga nombres oficiales por defecto; configuración explícita permite experimentar.
+
+    Las reglas explícitas son la fuente principal del mapa. Si también se da un mapa,
+    ambos deben coincidir. Sin reglas admite el mapa explícito y, como complemento,
+    attrs["componentes_interacciones"]. Nunca deduce componentes separando nombres.
+    La preparación recomendada es preparar_datos_seleccion(tabla_train, reglas_variables).
+    Sin configuración carga la lista oficial sin usar y_train ni recalcular selección.
+    Las configuraciones explícitas conservan la interfaz experimental histórica.
+    """
     if configuracion is None:
-        raise ValueError("Falta aprobar la configuración de selección.")
-    return aprender_seleccion(X_train, y_train, configuracion, componentes, **contexto)["seleccionadas"]
+        from seleccion_definitiva import cargar_seleccion_definitiva, aplicar_conjunto_definitivo
+        oficiales = cargar_seleccion_definitiva()
+        if reglas_variables is not None and reglas_variables != oficiales["ingenieria"]:
+            raise ValueError("Las reglas de ingeniería no coinciden con el conjunto definitivo")
+        if componentes is not None:
+            mapa = construir_mapa_interacciones(oficiales["ingenieria"])
+            if componentes != mapa:
+                raise ValueError("El mapa no coincide con la ingeniería definitiva")
+        return aplicar_conjunto_definitivo(X_train, oficiales).columns.tolist()
+    cfg = copy.deepcopy(configuracion)
+    if not isinstance(cfg, dict) or "metodo" not in cfg:
+        raise ValueError("La configuración de selección debe ser un diccionario con metodo.")
+    if cfg.get("provisional", False):
+        warnings.warn(
+            "La configuración provisional no es definitiva ni representa un método ganador. "
+            "k=1 no está respaldado por una comparación experimental. Debe sustituirse por "
+            "la configuración elegida después de comparar métodos.", UserWarning, stacklevel=2)
+    if reglas_variables is not None:
+        mapa_reglas = construir_mapa_interacciones(reglas_variables)
+        if componentes is not None and componentes != mapa_reglas:
+            raise ValueError("El mapa explícito no coincide con las reglas de ingeniería proporcionadas.")
+        componentes = mapa_reglas
+    elif componentes is None:
+        componentes = getattr(X_train, "attrs", {}).get("componentes_interacciones", {})
+    if not isinstance(componentes, dict):
+        raise ValueError("El mapa de componentes debe ser un diccionario de listas de dos nombres.")
+    for nombre, padres in componentes.items():
+        if (not isinstance(nombre, str) or not isinstance(padres, list) or len(padres) != 2
+                or any(not isinstance(p, str) or not p for p in padres)
+                or len(set(padres)) != 2 or nombre in padres):
+            raise ValueError(f"Componentes inválidos para la interacción {nombre!r}: se requieren dos padres distintos.")
+        if X_train is not None and nombre in X_train.columns:
+            cerrar_jerarquia([nombre], componentes, X_train.columns)
+    return aprender_seleccion(X_train, y_train, cfg, componentes, **contexto)["seleccionadas"]
 
 
 def aplicar_seleccion(X, reglas):
@@ -153,8 +239,7 @@ def evaluar_temporal(tabla_train, particion, estimador, configuracion=None, *,
         # Los padres constantes pueden ser necesarios para respetar jerarquía.
         X = entrenamiento.drop(columns=COLUMNAS_DE_CONTROL, errors="ignore")
         y = entrenamiento["objetivo"]
-        base = reglas_variables["interacciones"]["variables_base"]
-        componentes = {f"{a} x {b}": [a, b] for a, b in combinations(base, 2)}
+        componentes = construir_mapa_interacciones(reglas_variables)
         if columnas_fijas is not None:
             if configuracion is not None:
                 raise ValueError("No combinar selección y columnas fijas.")
@@ -229,8 +314,9 @@ def _buscar_secuencial(tabla, cfg, componentes, estimador, particion):
         raise ValueError("Candidatas vacías o repetidas.")
     if any(c in COLUMNAS_DE_CONTROL for c in candidatas):
         raise ValueError("Una candidata es objetivo o control.")
+    bases = {p for padres in componentes.values() for p in padres}
     for c in candidatas:
-        if " x " in c and c not in componentes:
+        if " x " in c and c not in componentes and c not in bases:
             raise ValueError(f"Falta mapa de componentes: {c}")
     objetivo = cfg["cantidad_objetivo"]
     if not isinstance(objetivo, int) or not 1 <= objetivo <= len(candidatas):

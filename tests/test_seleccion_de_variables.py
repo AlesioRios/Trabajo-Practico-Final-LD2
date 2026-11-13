@@ -30,8 +30,8 @@ def test_spearman_json_y_configuracion():
     assert reglas["seleccionadas"] == ["a"]
     assert reglas["puntajes"]["a"] == pytest.approx(1)
     json.dumps(reglas, allow_nan=False)
-    with pytest.raises(ValueError, match="aprobar"):
-        s.seleccionar_variables(X, y)
+    assert s.seleccionar_variables(X, y, {"metodo": "spearman", "k": 1}) == ["a"]
+    assert s.seleccionar_variables(X, y, {"metodo": "spearman", "k": 1}) == ["a"]
     with pytest.raises(ValueError, match="mapa"):
         s.aprender_seleccion(X.rename(columns={"a": "a x b"}), y, {"metodo": "spearman", "k": 1})
     with pytest.raises(ValueError, match="finito"):
@@ -237,3 +237,45 @@ def test_wrapper_busca_solo_dentro_de_entrenamiento_externo(monkeypatch):
     s.evaluar_temporal(t,TimeSeriesSplit(2),DummyRegressor(),{"metodo":"forward"},
         particion_interna=TimeSeriesSplit(2),estimador_selector=DummyRegressor())
     assert recibidos == [list(range(4)),list(range(8))]
+
+
+def test_contrato_dos_argumentos_con_metadatos_y_padre_constante():
+    from variables_interacciones import crear_interacciones
+    X = crear_interacciones(pd.DataFrame({"a": [1., 2., 3., 4.], "b": [2.]*4}),
+                            {"variables_base": ["a", "b"]})
+    y = pd.Series([2., 4., 6., 8.])
+    cfg = {"metodo": "spearman", "k": 2}
+    assert s.seleccionar_variables(X, y, cfg) == ["a", "a x b", "b"]
+    assert s.seleccionar_variables(X, y, {"metodo": "spearman", "k": 1}) == ["a"]
+    sin_attrs = X.copy()
+    sin_attrs.attrs = {}
+    with pytest.raises(ValueError, match="mapa"):
+        s.seleccionar_variables(sin_attrs, y, {"metodo": "spearman", "k": 1})
+    reglas = {"interacciones": {"variables_base": ["a", "b"]}}
+    assert s.seleccionar_variables(sin_attrs, y, cfg, reglas_variables=reglas) == ["a", "a x b", "b"]
+    with pytest.raises(ValueError, match="Falta componente: b"):
+        s.seleccionar_variables(X.drop(columns="b"), y, cfg)
+
+
+def test_mapa_desde_reglas_sin_interpretar_nombres_y_json():
+    reglas = {"interacciones": {"variables_base": ["a x auxiliar", "b", "c"]}}
+    mapa = s.construir_mapa_interacciones(reglas)
+    assert mapa == {"a x auxiliar x b": ["a x auxiliar", "b"],
+                    "a x auxiliar x c": ["a x auxiliar", "c"], "b x c": ["b", "c"]}
+    assert json.loads(json.dumps(mapa, allow_nan=False)) == mapa
+    assert s.construir_mapa_interacciones({"variables_base": []}) == {}
+    with pytest.raises(ValueError, match="variables_base"):
+        s.construir_mapa_interacciones({})
+    with pytest.raises(ValueError, match="repetidos"):
+        s.construir_mapa_interacciones({"variables_base": ["a", "a"]})
+    for control in ["objetivo", "consumo_dia", "valido", "DIA"]:
+        with pytest.raises(ValueError, match="objetivo o control"):
+            s.construir_mapa_interacciones({"variables_base": ["a", control]})
+
+
+def test_jerarquia_no_agrega_controles_desde_mapa_explicito():
+    X = pd.DataFrame({"a": [1., 2., 3.], "a x objetivo": [2., 4., 6.]})
+    with pytest.raises(ValueError, match="control"):
+        s.aprender_seleccion(X, pd.Series([2., 4., 6.]),
+                            {"metodo": "spearman", "k": 1},
+                            {"a x objetivo": ["a", "objetivo"]})

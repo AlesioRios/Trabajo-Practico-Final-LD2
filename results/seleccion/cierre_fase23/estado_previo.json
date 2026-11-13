@@ -1,0 +1,13 @@
+{
+  "status": " M README.md\n M data/processed/dataset_unificado_inicial.csv\n M docs/decisions/0015-seleccion-de-variables.md\nMM docs/guia-fase2.md\n M notebooks/seleccion_de_variables.ipynb\n M src/auxiliar_functions.py\n M src/limpieza.py\nMM src/preprocessing_pipeline.py\n M src/seleccion_de_variables.py\n M src/variables_interacciones.py\nM  tests/test_preprocessing_pipeline.py\n M tests/test_seleccion_de_variables.py\n",
+  "index": "M\tdocs/guia-fase2.md\nM\tsrc/preprocessing_pipeline.py\nM\ttests/test_preprocessing_pipeline.py\n",
+  "index_sha256": "eb2a69087ea0fbb722935f11fb9c9df19dca980a8c09c0725b743203c2e4547d",
+  "archivos": {
+    "src/preprocessing_pipeline.py": "06cde441f7e1aa3c1e12ea56d109851f2baf67bb28970987f3b6a850a0195929",
+    "tests/test_preprocessing_pipeline.py": "fdd9326352c2230493b96411b46fa55ea3070abd982a54db142ddc6125b4d0f9",
+    "src/auxiliar_functions.py": "62ced64ddafaff573a8993b06dc456e3c8ec166aeda9db28cd0a4d351ec77c6f",
+    "src/limpieza.py": "287ce057dd5d7d7d9f0aa8abafc9800ce3cadeda64b8de745ac1234362b4a2d8",
+    "src/variables_interacciones.py": "1b0165f793ac857564dcc9df3ef1038fb0630754b26999fddb3fb2683134ece7",
+    "data/processed/dataset_unificado_inicial.csv": "859f1aa24c749f5df681394938bd1d5b7614e1fbf71906b581d8e4d6f67950e5"
+  }
+}
