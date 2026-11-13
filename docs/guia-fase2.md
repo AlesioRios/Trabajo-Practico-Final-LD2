@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 87.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 88.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 

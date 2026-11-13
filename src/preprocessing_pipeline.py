@@ -1,6 +1,7 @@
 #Pipeline de preprocesamiento reproducible (Fase 2).
 #Debe reutilizarse tal cual desde predict.py, sin reimplementarlo.
 
+import argparse
 from pathlib import Path
 
 import pandas as pd
@@ -12,6 +13,7 @@ from auxiliar_functions import (
     leer_consolidado_ee,
     unir_versiones,
 )
+from limpieza import aprender_reglas_de_limpieza, limpiar
 from variables_interacciones import aprender_reglas_de_interacciones, crear_interacciones
 from variables_planta import aprender_reglas_de_planta, crear_variables_planta
 from variables_temporales import crear_variables_temporales
@@ -104,3 +106,58 @@ def transform_variables(tabla_limpia, reglas):
     con_temporales = crear_variables_temporales(tabla_limpia)
     con_planta = crear_variables_planta(con_temporales, reglas["planta"])
     return crear_interacciones(con_planta, reglas["interacciones"])
+
+
+#----------------------------------------------------------------------------------------------------
+# Punto de entrada: python src/preprocessing_pipeline.py
+
+CARPETA_DATOS_POR_DEFECTO = Path(__file__).resolve().parents[1] / "data"      # la carpeta data/ del repositorio
+
+
+def ejecutar_preprocesamiento(carpeta_datos=CARPETA_DATOS_POR_DEFECTO, usar_cache=True):
+    """Corre, en orden, todo lo que ya existe: de los Excel a la tabla con todas las variables.
+
+    Pasos: tabla completa, división temporal, limpieza (reglas aprendidas solo con entrenamiento) y variables
+    nuevas (reglas aprendidas solo con entrenamiento). Devuelve un diccionario con la tabla final, sus tres
+    tramos y las reglas aprendidas, que es lo que usarán los pasos siguientes (selección, `Pipeline`, guardado).
+    """
+    tabla_completa = cargar_tabla_completa(carpeta_datos, usar_cache)
+    X_train, _, _ = dividir_por_fecha(tabla_completa)
+    reglas_limpieza = aprender_reglas_de_limpieza(X_train)                       # solo con entrenamiento
+    tabla_limpia = limpiar(tabla_completa, reglas_limpieza)
+    train_limpio, _, _ = dividir_por_fecha(tabla_limpia)
+    reglas_variables = fitear_reglas_de_variables(train_limpio)                  # solo con entrenamiento
+    tabla_con_variables = transform_variables(tabla_limpia, reglas_variables)
+    entrenamiento, validacion, prueba = dividir_por_fecha(tabla_con_variables)
+    return {"tabla_completa": tabla_completa, "tabla_limpia": tabla_limpia,
+            "tabla_con_variables": tabla_con_variables,
+            "entrenamiento": entrenamiento, "validacion": validacion, "prueba": prueba,
+            "reglas": {"limpieza": reglas_limpieza, "variables": reglas_variables}}
+
+
+def main(argumentos=None):
+    """Punto de entrada por línea de comandos: ejecuta el preprocesamiento e imprime un resumen de cada paso."""
+    analizador = argparse.ArgumentParser(description="Preprocesamiento de la Fase 2: de los Excel a la tabla con todas las variables.")
+    analizador.add_argument("--carpeta-datos", default=str(CARPETA_DATOS_POR_DEFECTO),
+                            help="carpeta con los Excel (por defecto, data/ del repositorio)")
+    analizador.add_argument("--sin-cache", action="store_true",
+                            help="reconstruir la tabla completa desde los Excel (tarda unos 6 minutos)")
+    opciones = analizador.parse_args(argumentos)
+
+    resultado = ejecutar_preprocesamiento(opciones.carpeta_datos, usar_cache=not opciones.sin_cache)
+    print(f"1. Tabla completa: {len(resultado['tabla_completa'])} días x {resultado['tabla_completa'].shape[1]} columnas")
+    print(f"2. Limpieza aplicada con reglas de entrenamiento: {resultado['tabla_limpia'].shape[1]} columnas")
+    print(f"3. Variables nuevas: {len(resultado['tabla_con_variables'])} días x {resultado['tabla_con_variables'].shape[1]} columnas")
+    print(f"   Entrenamiento {resultado['entrenamiento'].shape}, validación {resultado['validacion'].shape}, prueba {resultado['prueba'].shape}")
+
+    # PENDIENTE (a conectar cuando estén integradas las otras tareas de la Fase 2):
+    #   4. Selección de variables:   seleccionar_variables(X_train, y_train)      (src/seleccion_de_variables.py)
+    #   5. Pipeline de imputación, transformación y escalado, ajustado solo con entrenamiento   (src/pipeline_sklearn.py)
+    #   6. Quitar filas inutilizables y guardar data/processed/dataset_final.csv sin escalar, con su checksum en
+    #      data/checksums.json, data/processed/data_lineage.json y las shapes de X_train, X_val y X_test.
+    print("Pendiente de conectar: selección de variables, Pipeline y guardado (dataset_final.csv).")
+    return resultado
+
+
+if __name__ == "__main__":
+    main()
