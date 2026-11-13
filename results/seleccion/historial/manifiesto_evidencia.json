@@ -1,22 +1,38 @@
 {
   "ejecucion-20261113T184058Z-969d4545-evidencia.zip": {
-    "archivos": 90,
-    "bytes": 3271569,
-    "sha256": "f6bd493d59715c62ea5d4b58d488f72a32ca58dbac15306709106b3014b0eaaf"
+    "archivos": 85,
+    "bytes": 3055830,
+    "sha256": "ca1b93d828a584c8223e02c55f0a76b1b6352fde4ad1e9789b16a4fd692b6418",
+    "sha256_paquete_anterior": "f6bd493d59715c62ea5d4b58d488f72a32ca58dbac15306709106b3014b0eaaf",
+    "versionado": true,
+    "nota": "Se omitieron registros operativos e intentos fallidos con rutas locales; tablas, configuraciones y código experimental conservan sus bytes originales.",
+    "entradas_omitidas": [
+      "ejecucion-20261113T184058Z-969d4545/estado.json",
+      "ejecucion-20261113T184058Z-969d4545/eventos.jsonl",
+      "ejecucion-20261113T184058Z-969d4545/progreso.json",
+      "ejecucion-20261113T184058Z-969d4545/intentos_previos/004b67ffefd8ce89d124-e91554a7.json",
+      "ejecucion-20261113T184058Z-969d4545/intentos_previos/bbfd933502cf18be2be4-35e81c80.json"
+    ]
   },
   "ejecucion-20261113T194441Z-union-a9b63e4f-evidencia.zip": {
     "archivos": 160,
     "bytes": 2998241,
-    "sha256": "c658f9be67721d0ad06d77eb981e94d557c0f13bf088a5d4ab77ec3a551216b6"
+    "sha256": "c658f9be67721d0ad06d77eb981e94d557c0f13bf088a5d4ab77ec3a551216b6",
+    "versionado": false,
+    "nota": "Procedimiento descartado o diagnóstico local; se conserva descripción y huella, sin dependencia del notebook ni del conjunto oficial."
   },
   "ejecucion-forward30-20261113-01-evidencia.zip": {
     "archivos": 232,
     "bytes": 4662639,
-    "sha256": "6d275598795a0c7cf3bb8eb1b58b6eb0f87e67148890bb0b14cb5a24c515a569"
+    "sha256": "6d275598795a0c7cf3bb8eb1b58b6eb0f87e67148890bb0b14cb5a24c515a569",
+    "versionado": false,
+    "nota": "Procedimiento descartado o diagnóstico local; se conserva descripción y huella, sin dependencia del notebook ni del conjunto oficial."
   },
   "auditoria-y-diagnosticos-evidencia.zip": {
     "archivos": 49,
     "bytes": 163158,
-    "sha256": "b4921a6772028f8b01b032077be171b418b5c6b35bbee3a863107b8e0482db4f"
+    "sha256": "b4921a6772028f8b01b032077be171b418b5c6b35bbee3a863107b8e0482db4f",
+    "versionado": false,
+    "nota": "Procedimiento descartado o diagnóstico local; se conserva descripción y huella, sin dependencia del notebook ni del conjunto oficial."
   }
 }

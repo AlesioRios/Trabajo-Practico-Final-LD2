@@ -70,5 +70,20 @@
       "errores": 0
     },
     "respaldo": "Directorio hermano respaldo-pre-pr-20261113T232220Z, dos stashes conservados"
+  },
+  "segunda_revision": {
+    "README": "Versión de origin/feature/preprocessing más un enlace al ADR; sin otras modificaciones.",
+    "informes_vigentes": [
+      "docs/informes/integracion_pr_fase23.md"
+    ],
+    "archivos_manifiesto_vigente": 56,
+    "modulos_compartidos_sin_cambios_adicionales": [
+      "src/limpieza.py",
+      "src/variables_interacciones.py",
+      "src/preprocessing_pipeline.py",
+      "notebooks/preprocesamiento.ipynb"
+    ],
+    "artefactos_descartados": "Copias locales preservadas; descripción y huellas en manifiesto_evidencia.json.",
+    "indice_antes_de_revision_vacio": true
   }
 }

@@ -55,10 +55,13 @@ data/interim/
 
 # Paquetes íntegros locales: evidencia compacta versionable en *-evidencia.zip.
 /results/seleccion/historial/*.zip
-!/results/seleccion/historial/*-evidencia.zip
+!/results/seleccion/historial/ejecucion-20261113T184058Z-969d4545-evidencia.zip
 /results/seleccion/auditoria/
 /results/seleccion/baselines-20261113T194523Z/
 /results/seleccion/comparacion-ridge-20261113T193636Z-121dc7e7/
 
 # Copias íntegras locales previas a relativizar metadatos personales.
 /results/seleccion/**/*.original-local.json
+
+# Salidas locales de reproducción; el contrato oficial no se ignora.
+/results/seleccion/reproduccion-*/

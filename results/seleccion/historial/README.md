@@ -1,22 +1,11 @@
-# Evidencia histórica de Fase 2.3
+# Evidencia de selección
 
-Los cuatro paquetes *-evidencia.zip son los archivos destinados a Git. manifiesto_evidencia.json guarda huellas, cantidades y tamaños. Se verificó la integridad de los tres paquetes de ejecuciones; todos sus contenidos conservan los bytes originales.
+El único paquete necesario para el notebook es `ejecucion-20261113T184058Z-969d4545-evidencia.zip`. Contiene el resumen de etapas que lee el notebook y conserva las configuraciones, reglas por pliegue, perfiles, estabilidad, resúmenes de candidatos, código y registros de las configuraciones elegidas. No se cambiaron los bytes de esas entradas. Se retiraron del paquete logs operativos e intentos fallidos con rutas personales, que no son insumos de reproducción.
 
-El paquete de métodos individuales incluye código, configuraciones, datos de particiones, reglas por pliegue, perfiles, estabilidad, resúmenes CSV completos de la búsqueda, eventos y registros JSON de las configuraciones finales elegidas. Estos resúmenes conservan los resultados de los candidatos descartados. Los paquetes de unión y Forward 30/15 conservan código, preparaciones, manifiestos, eventos y checkpoints de procedimientos abandonados. auditoria-y-diagnosticos-evidencia.zip guarda logs, decisiones previas, incidencias y diagnósticos anteriores.
+`manifiesto_evidencia.json` registra tamaño, cantidad de entradas y SHA-256 del paquete publicado, junto con la huella anterior y las entradas omitidas. Antes de extraerlo, verificar su huella; usar un directorio vacío para no sobrescribir evidencia local. Las rutas internas comienzan por la carpeta de ejecución. Los originales de los datos se obtienen por el mecanismo del proyecto, no desde archivos privados de esta copia.
 
-Para inspeccionar sin ejecutar búsquedas, verificar SHA-256 contra manifiesto_evidencia.json y extraer el paquete elegido en una carpeta vacía. Los nombres internos comienzan por la carpeta de ejecución. Para reconstruir las rutas históricas de una copia nueva, extraer desde results/seleccion/. No sobrescribir evidencia local modificada; usar una carpeta aparte para comparar.
+Los paquetes de unión de selectores, Forward 30/15 y diagnósticos anteriores se retiraron del árbol versionado porque no intervienen en la selección vigente. Se conserva su descripción y SHA-256 en el manifiesto. No son dependencias operativas ni se prometen como parte de un clon nuevo. Sus copias locales permanecen ignoradas; la historia de Git conserva además las versiones publicadas anteriormente.
 
-```python
-from zipfile import ZipFile
-from pathlib import Path
-base = Path("results/seleccion")
-# nombre debe pertenecer a manifiesto_evidencia.json; verificar huella antes.
-# with ZipFile(base / "historial" / nombre) as archivo:
-#     archivo.extractall(base)
-```
+Los resultados y checkpoints del Forward tradicional definitivo permanecen en `../forward_max60_artefactos/`. El código exacto del comparador histórico se conserva en `codigo_comparador_validation_20261113.py`. Estos insumos son distintos de los procedimientos descartados. La explicación metodológica vigente está en el ADR de selección y en el notebook, sin duplicar aquí sus cifras.
 
-Se omiten de Git tablas_compartidas/ (cachés de matrices derivadas), bytecode, temporales y el detalle JSON repetitivo de configuraciones no elegidas. Las configuraciones y resúmenes completos, preparaciones y código permiten regenerar ese detalle con los motores archivados, exclusivamente con Train y los Excel del aula virtual validados con data/checksums.json. Puede ser costoso y no forma parte del consumo oficial. No ejecutar automáticamente ni usar Test.
-
-Además de los archivos originales que siguen intactos, esta copia local conserva tres ZIP íntegros de ejecuciones, con los mismos nombres de carpeta y extensión .zip, ignorados por Git. sha256.json registra sus huellas. Esos paquetes incluyen todo el detalle JSON, salvo tablas compartidas regenerables y bytecode. Ruta de recuperación local: results/seleccion/historial/<carpeta-de-ejecución>.zip. No se presupone que estén en un clon nuevo: para ese clon, los paquetes compactos versionados y el código/configuraciones archivados son la ruta reproducible de recuperación. No se borró evidencia local.
-
-Las rutas absolutas de los documentos históricos son procedencia. Resolver el sufijo desde la raíz del proyecto; el consumidor oficial no abre esos caminos. La única fuente operativa es comparacion_validation_congelada/seleccion_definitiva.json.
+Las tablas compartidas, matrices intermedias, bytecode, copias locales y detalles repetitivos de ajustes descartados no se versionan. Su ausencia no impide cargar el contrato oficial ni ejecutar el notebook. Los comandos explícitos de reproducción están en la [guía de conexión](../../../docs/informes/integracion_pr_fase23.md); no se ejecutan automáticamente.

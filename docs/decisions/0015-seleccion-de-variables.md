@@ -5,7 +5,7 @@
 
 ## Contexto
 
-Se necesita una entrada interpretable para predecir el frío del bloque diario siguiente usando solo información hasta el cierre del actual. Train contiene 848 bloques, Validation 182 y Test 182. Se eligieron cinco candidatos inicialmente solo con Train, con separación temporal y aprendizaje por prefijo. La comparación posterior utiliza las mismas 176 observaciones etiquetadas de Validation, preparación de Train y `Ridge(alpha=100.0, solver="svd")`, semilla 42. No se emplea Test para esta selección ni para las verificaciones de este PR.
+Se necesita una entrada interpretable para predecir el frío del bloque diario siguiente usando solo información hasta el cierre del actual. Train contiene 848 bloques, Validation 182 y Test 182. Se eligieron cinco candidatos inicialmente solo con Train, con separación temporal y aprendizaje por prefijo. La comparación posterior utiliza las mismas 176 observaciones etiquetadas de Validation, preparación de Train y `Ridge(alpha=100.0, solver="svd")`, semilla 42. No se emplea Test para seleccionar, ajustar ni evaluar. La comprobación estructural posterior del punto de entrada se limita a tamaño y nombres de columnas, con autorización explícita y sin inspeccionar valores de Test.
 
 ## Decisión
 

@@ -38,5 +38,40 @@
     "omitidas": 1,
     "segundos": 17.49,
     "motivo_omision": "Prueba compartida que procesa Train/Validation/Test reales; se mantiene la reserva de Test."
+  },
+  "segunda_revision": {
+    "suite": {
+      "comando": "python -m pytest tests -q",
+      "aprobadas": 131,
+      "fallidas": 0,
+      "omitidas": 1,
+      "segundos": 9.23
+    },
+    "notebook": {
+      "kernel": "cervecera_env",
+      "celdas": 9,
+      "errores": 0,
+      "segundos": 5.335788400028832,
+      "busquedas": false
+    },
+    "preprocesamiento_estructural_autorizado": {
+      "comando": "ejecutar_preprocesamiento()",
+      "shape": [
+        1212,
+        337
+      ],
+      "seleccion": 14,
+      "nombres_y_orden_oficiales": true,
+      "columnas_existentes": true,
+      "segundos": 281.1715877999668,
+      "solo_tamano_y_columnas": true,
+      "entrenamiento_modelos": false,
+      "evaluacion_test": false
+    },
+    "compatibilidad": "Prueba de límites JSON conserva soporte de dict/None y Series; mapa conserva nombres y valores de ingeniería; suite completa aprobada.",
+    "documentacion_vigente": "docs/informes/integracion_pr_fase23.md",
+    "paquetes_publicados": 1,
+    "bytes_paquetes_publicados": 3055830,
+    "ruta_absoluta_heredada_fuera_del_diff": "notebooks/preprocesamiento.ipynb (salida histórica de la rama compartida; no modificada)"
   }
 }
