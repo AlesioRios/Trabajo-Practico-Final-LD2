@@ -6,10 +6,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from preprocessing_pipeline import fitear_reglas_de_variables, transform_variables
+from preprocessing_pipeline import (CARPETA_DATOS_POR_DEFECTO, ejecutar_preprocesamiento, fitear_reglas_de_variables,
+                                    transform_variables)
 from variables_interacciones import nombres_de_interacciones
 from variables_planta import HL_ENVASADOS, NOMBRES_NUEVAS as NOMBRES_PLANTA, PLANTA_KW
 from variables_temporales import NOMBRES_NUEVAS as NOMBRES_TEMPORALES
@@ -84,3 +86,13 @@ def test_cambiar_validacion_y_prueba_no_cambia_las_reglas_ni_el_entrenamiento():
     antes = transform_variables(tabla, reglas).iloc[:FILAS_ENTRENAMIENTO - 1]
     despues = transform_variables(alterada, reglas).iloc[:FILAS_ENTRENAMIENTO - 1]
     pd.testing.assert_frame_equal(antes, despues)
+
+
+@pytest.mark.skipif(len(list(CARPETA_DATOS_POR_DEFECTO.glob("Totalizadores Planta *.xlsx"))) != 3,
+                    reason="Faltan los Excel en data/ (no se versionan; ver README, sección Datos)")
+def test_el_punto_de_entrada_da_la_tabla_con_todas_las_variables():
+    """Prueba de punta a punta con los datos reales (tarda ~30 s con la copia en data/interim/; ~10 min la primera vez)."""
+    resultado = ejecutar_preprocesamiento()
+    assert resultado["tabla_con_variables"].shape == (1212, 337)
+    assert [len(resultado[k]) for k in ("entrenamiento", "validacion", "prueba")] == [848, 182, 182]
+    assert set(resultado["reglas"]) == {"limpieza", "variables"}
