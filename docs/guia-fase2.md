@@ -14,7 +14,7 @@ La Fase 1 (EDA) está en `main`. La Fase 2 se trabaja en la rama `feature/prepro
 | 3. Limpieza | Hecha | `aprender_reglas_de_limpieza`, `limpiar` en `src/limpieza.py`; decisiones en el ADR 0008 |
 | 4. Variables nuevas (consigna 2.2) | **Por hacer** | `src/variables_temporales.py` y `src/variables_planta.py` (ver secciones 4 y 5) |
 | 5. Selección de variables (2.3) | **Por hacer** | `src/seleccion_de_variables.py` (ver secciones 4 y 5) |
-| 6. Guardado y cierre (2.4) | **Por hacer** | `data/processed/`, `data_lineage.json` (ver secciones 4 y 5) |
+| 6. Pipeline y guardado (2.4) | Comparación y funciones probadas. Generación final pendiente de selección. | `src/pipeline_sklearn.py`, `notebooks/pipeline_y_guardado.ipynb`, ADR 0016 |
 
 ## 2. Cómo arrancar
 1. `git pull` y `git switch feature/preprocessing`.
@@ -47,7 +47,7 @@ Resultado: tres tablas de 276 columnas (262 mediciones y 14 de control: `DIA`, `
 5. **No tocar `objetivo`** ni las columnas de control.
 6. **Una notebook, un módulo de `src/` y una rama por tarea.** Los `.ipynb` en conflicto casi no se resuelven. Solo se integran en `src/preprocessing_pipeline.py` al final.
 7. **Cada decisión se justifica en la notebook** y, si afecta a los demás, en un ADR nuevo (`docs/decisions/0000-plantilla.md`).
-8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 87.
+8. **Pruebas:** cada función lleva pruebas en `tests/` con tablas chicas calculables a mano. Correr `python -m pytest tests -q`; hoy pasan 88.
 9. **No transformar ni escalar** dentro de las funciones de variables: se trabaja con los valores reales (kW, Hl); la transformación y el escalado van después, en el `Pipeline` (ADR 0010).
 10. **Commits** con prefijo (`feat:`, `fix:`, `docs:`, `chore:`), sin líneas de coautoría, y a la rama propia.
 
@@ -60,7 +60,7 @@ Las tareas 1, 2 y 3 están hechas: la tabla con todas las variables (1.212 días
 | 2 | Variables de planta (razones, interacciones) | 2.2 | Razones **hechas** (ADR 0013); faltan las interacciones | La tabla limpia (ya está) |
 | 3 | Integrar las variables nuevas: `fitear_reglas_de_variables` y `transform_variables` | 2.2 | **Hecha** | Tareas 1 y 2 (hechas) |
 | 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | **Se puede hacer ya**, en paralelo con la 5 | La tabla con todas las variables (tarea 3, hecha) |
-| 5 | `Pipeline` de imputación, transformación y escalado, ajustado solo con entrenamiento | 2.4 | **Se puede hacer ya**, en paralelo con la 4; se ajusta con el conjunto final de la tarea 4 | La tabla con todas las variables (tarea 3, hecha) |
+
 | 6 | Quitar las filas que no sirven para entrenar, una sola vez y con la misma regla para todos los modelos | 2.4 | **Secuencial** | Tareas 4 y 5 |
 | 7 | Guardar `dataset_final.csv` sin escalar, su checksum en `data/checksums.json`, `data_lineage.json` y el tamaño de `X_train`, `X_val`, `X_test` | 2.4 | **Secuencial** | Tarea 6 |
 | 8 | Que `python src/preprocessing_pipeline.py` corra todo de punta a punta (el README lo promete; hoy el archivo solo arma la tabla y la divide) | Entregable | Esqueleto **ya**, en su propia rama; se conecta con las tareas 4 a 7 al final | Tareas 3 y 7 |
@@ -92,8 +92,8 @@ Cada tarea va en su rama, que sale de `feature/preprocessing`, y se integra de n
 - Se decide además, con número: si algún compresor Mycom individual aporta (ADR 0013) y si el indicador de fin de semana aporta (ADR 0012).
 
 ### Tareas 5 a 7: `Pipeline` y guardado
-- Rama `feature/preprocessing-pipeline`, módulo `src/pipeline_sklearn.py`, notebook `notebooks/pipeline_y_guardado.ipynb`, decisión en el ADR 0016.
-- El `Pipeline` de imputación, transformación (Yeo-Johnson) y escalado, ajustado solo con `X_train` (ADR 0010). Quitar las filas que no sirven para entrenar, una sola vez (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige). Separar `X_*` e `y_*`, guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json`, escribir `data/processed/data_lineage.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
+- La comparación temporal y el guardado están implementados en `src/pipeline_sklearn.py` y documentados en `notebooks/pipeline_y_guardado.ipynb` y el ADR 0016. Falta generar los archivos finales con la selección definitiva.
+- La variante provisional usa mediana y escalado estándar, ajustados solo con `X_train` (ADR 0016). Quitar las filas que no sirven para entrenar, una sola vez (sin objetivo, o con vacíos en las variables elegidas si el modelo lo exige). Separar `X_*` e `y_*`, guardar `data/processed/dataset_final.csv` **sin escalar**, agregar su checksum a `data/checksums.json`, escribir `data/processed/data_lineage.json` y documentar el tamaño final de `X_train`, `X_val` y `X_test`.
 - Decisiones que quedan para esta tarea: cómo imputar los vacíos (ADR 0008, punto 4), en particular las razones por hectolitro, con muchos más vacíos en validación y prueba (ADR 0013); qué hacer con las columnas que dejan de medirse en validación y prueba (por ejemplo, las razones de la Línea 5 del KPI) y si conviene transformar cada modelo (ADR 0010).
 
 ### Tarea 8: punto de entrada
