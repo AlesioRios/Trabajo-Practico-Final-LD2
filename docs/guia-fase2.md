@@ -60,7 +60,7 @@ Las tareas 1, 2 y 3 están hechas: la tabla con todas las variables (1.212 días
 | 2 | Variables de planta (razones, interacciones) | 2.2 | Razones **hechas** (ADR 0013); faltan las interacciones | La tabla limpia (ya está) |
 | 3 | Integrar las variables nuevas: `fitear_reglas_de_variables` y `transform_variables` | 2.2 | **Hecha** | Tareas 1 y 2 (hechas) |
 | 4 | Selección con al menos 2 métodos y `TimeSeriesSplit` | 2.3 | **Se puede hacer ya**, en paralelo con la 5 | La tabla con todas las variables (tarea 3, hecha) |
-| 5 | `Pipeline` de imputación, transformación y escalado, ajustado solo con entrenamiento | 2.4 | **Se puede hacer ya**, en paralelo con la 4; se ajusta con el conjunto final de la tarea 4 | La tabla con todas las variables (tarea 3, hecha) |
+
 | 6 | Quitar las filas que no sirven para entrenar, una sola vez y con la misma regla para todos los modelos | 2.4 | **Secuencial** | Tareas 4 y 5 |
 | 7 | Guardar `dataset_final.csv` sin escalar, su checksum en `data/checksums.json`, `data_lineage.json` y el tamaño de `X_train`, `X_val`, `X_test` | 2.4 | **Secuencial** | Tarea 6 |
 | 8 | Que `python src/preprocessing_pipeline.py` corra todo de punta a punta (el README lo promete; hoy el archivo solo arma la tabla y la divide) | Entregable | Esqueleto **ya**, en su propia rama; se conecta con las tareas 4 a 7 al final | Tareas 3 y 7 |
