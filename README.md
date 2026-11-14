@@ -26,21 +26,25 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
-│       ├── dataset_final.csv
-│       └── data_lineage.json
+│       ├── dataset_final.csv               (Fase 2: 14 variables sin escalar, objetivo y tramo)
+│       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
 │   ├── modelo_v1.0.0.pkl
 │   └── model_registry.json
 ├── notebooks/
 │   ├── eda.ipynb
-│   ├── preprocesamiento.ipynb
+│   ├── preprocesamiento.ipynb              (Fase 2: de los Excel al dataset final; sección 7 = cierre)
+│   ├── (un notebook por tarea de la Fase 2: variables, selección y Pipeline)
 │   └── modelado.ipynb
 ├── src/
-│   ├── preprocessing_pipeline.py
+│   ├── preprocessing_pipeline.py           (punto de entrada de la Fase 2)
+│   ├── limpieza.py, variables_*.py         (limpieza y variables nuevas)
+│   ├── seleccion_*.py, pipeline_sklearn.py (selección de variables y Pipeline)
 │   ├── train_model.py
 │   ├── predict.py
 │   └── auxiliar_functions.py
 ├── results/
+│   ├── seleccion/                          (Fase 2: resultados congelados de la selección)
 │   ├── predicciones.csv
 │   └── experiment_logs.csv
 ├── tests/                                      (pruebas con datos sintéticos)
@@ -110,6 +114,12 @@ repositorio.
 | Modelado y entrenamiento | `jupyter lab notebooks/modelado.ipynb` y `python src/train_model.py` | Fase 3 |
 | Predicción sobre un Excel nuevo | `python src/predict.py "<ruta al archivo .xlsx>"` | Fase 4 |
 
+`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, elige las 14
+variables, ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
+su huella en `data/checksums.json` y `data/processed/data_lineage.json`. Con `--sin-guardar` hace las mismas
+comprobaciones sin escribir archivos. La primera vez reconstruye la tabla desde los Excel (unos 6 minutos) y
+después reutiliza la copia de trabajo de `data/interim/`.
+
 `predict.py` carga el modelo desde `models/model_registry.json` y escribe las
 predicciones diarias (una fila por día, correspondientes al consumo del día D+1) en
 `results/predicciones.csv`.
@@ -142,7 +152,7 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 
 - [x] Fase 0 - Entorno, control de versiones y trazabilidad
 - [x] Fase 1 - Análisis exploratorio de datos (EDA)
-- [ ] Fase 2 - Preprocesamiento y selección de variables
+- [x] Fase 2 - Preprocesamiento y selección de variables
 - [ ] Fase 3 - Entrenamiento y versionado de modelos
 - [ ] Fase 4 - Pipeline de predicción
 
