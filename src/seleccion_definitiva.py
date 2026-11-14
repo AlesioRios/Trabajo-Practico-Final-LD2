@@ -1,4 +1,4 @@
-"""Contrato oficial de Fase 2.3: cargar y aplicar Spearman sin selección ni ajuste."""
+"""Contrato oficial de Fase 2.3: cargar y aplicar Spearman sin selecciÃ³n ni ajuste."""
 from pathlib import Path
 import hashlib
 import json
@@ -24,14 +24,21 @@ def cargar_seleccion_definitiva(ruta=ARTEFACTO):
             or not set(prep["indicadores"]).issubset(columnas)
             or reglas["test_utilizado"]):
         raise ValueError("Contrato Spearman inconsistente")
+    # ExtensiÃ³n manual posterior: conservar intacta la evidencia automÃ¡tica de 14 variables.
+    reglas["variables"] = [*columnas, "es_fin_de_anio"]
+    reglas["cantidad_variables"] = 15
+    reglas["columnas_efectivas"] += 1
+    reglas["incorporacion_manual"] = {"variable": "es_fin_de_anio", "adr": "0015",
+                                    "evaluada": False}
+    reglas["mae_validation_original_14"] = reglas.pop("mae_validation")
     return reglas
 
 
 def aplicar_conjunto_definitivo(X, reglas=None):
-    """Extrae nombres y orden oficiales de una tabla con ingeniería reconstruida."""
+    """Extrae nombres y orden oficiales de una tabla con ingenierÃ­a reconstruida."""
     reglas = cargar_seleccion_definitiva() if reglas is None else reglas
     if not X.columns.is_unique:
-        raise ValueError("Las columnas de entrada deben ser únicas")
+        raise ValueError("Las columnas de entrada deben ser Ãºnicas")
     faltan = set(reglas["variables"]) - set(X.columns)
     if faltan:
         raise ValueError(f"Faltan variables definitivas: {sorted(faltan)}")
@@ -39,10 +46,10 @@ def aplicar_conjunto_definitivo(X, reglas=None):
 
 
 def reconstruir_conjunto_definitivo(historia, reglas=None):
-    """Reutiliza limpieza e ingeniería congeladas sin aprender ni construir etiquetas.
+    """Reutiliza limpieza e ingenierÃ­a congeladas sin aprender ni construir etiquetas.
 
-    Recibe bloques crudos ordenados hasta la emisión, con sus controles. Conservar
-    historia antes de quitar filas. Aplica la política estricta de lecturas mínimas.
+    Recibe bloques crudos ordenados hasta la emisiÃ³n, con sus controles. Conservar
+    historia antes de quitar filas. Aplica la polÃ­tica estricta de lecturas mÃ­nimas.
     """
     from limpieza import limpiar
     from preprocessing_pipeline import transform_variables
@@ -58,8 +65,11 @@ def reconstruir_conjunto_definitivo(historia, reglas=None):
 def preprocesar_conjunto_definitivo(X, reglas=None):
     """Aplica medianas, escala e indicadores guardados de Train, sin fit.
 
-    Reproduce las 27 columnas del comparador; no entrena un modelo definitivo.
+    Conserva las 27 columnas originales y agrega el indicador binario (28); no entrena un modelo definitivo.
     """
     from experimentos_seleccion import aplicar_preparacion
     reglas = cargar_seleccion_definitiva() if reglas is None else reglas
-    return aplicar_preparacion(aplicar_conjunto_definitivo(X, reglas), reglas["preprocesamiento"])
+    seleccion = aplicar_conjunto_definitivo(X, reglas)
+    preparada = aplicar_preparacion(seleccion, reglas["preprocesamiento"])
+    # El indicador binario no necesita aprender mediana ni escala.
+    return np.column_stack([preparada, seleccion["es_fin_de_anio"].to_numpy(dtype=float)])

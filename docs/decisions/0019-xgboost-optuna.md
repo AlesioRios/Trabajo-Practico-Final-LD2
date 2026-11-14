@@ -105,3 +105,11 @@ Ver README para instalación en entorno limpio, ejecución y reanudación.
 Referencias: [TPE](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.TPESampler.html),
 [MedianPruner](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.pruners.MedianPruner.html),
 [XGBRegressor](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBRegressor).
+
+
+## Vigencia tras la ampliación manual
+
+Este ADR y todos sus resultados corresponden a las 14 variables originales. La selección vigente
+tiene 15 por la incorporación manual de es_fin_de_anio (ADR 0015). El estudio se conserva sin cambios
+y deberá revisarse mediante un estudio nuevo con identidad y almacenamiento distintos cuando se autorice.
+No se ejecutaron nuevos trials ni entrenamientos en esta actualización.

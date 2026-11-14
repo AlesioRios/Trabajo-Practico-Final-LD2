@@ -16,7 +16,7 @@ from modelado_comun import calcular_metricas, filas_comunes, validacion_cruzada_
 @pytest.fixture
 def entrenamiento():
     indices = pd.RangeIndex(100, 136)
-    X = pd.DataFrame({f"x{i}": np.arange(36, dtype=float) for i in range(14)}, index=indices)
+    X = pd.DataFrame({f"x{i}": np.arange(36, dtype=float) for i in range(15)}, index=indices)
     X.iloc[::4, 0] = np.nan
     parte = {"X": X, "y": pd.Series(np.arange(1., 37.), index=indices),
              "fechas": pd.Series(pd.date_range("2026-01-01", periods=18).repeat(2), index=indices),

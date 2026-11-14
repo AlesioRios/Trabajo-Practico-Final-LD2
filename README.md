@@ -26,7 +26,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
-│       ├── dataset_final.csv               (Fase 2: 14 variables sin escalar, objetivo y tramo)
+│       ├── dataset_final.csv               (Fase 2: 15 variables sin escalar, objetivo y tramo)
 │       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
 │   ├── modelo_v1.0.0.pkl
@@ -214,3 +214,10 @@ SQLite, detalle JSON por trial, tabla CSV y resumen. Los completos también qued
 Para restaurar desde un clon, abrir `notebooks/modelado_xgboost.ipynb`: si falta la base local, la notebook
 restaura la copia versionada sin sobrescribir bases existentes. Consultarla nunca inicia trials adicionales.
 La búsqueda todavía no realiza el análisis exhaustivo ni el entrenamiento definitivo.
+
+
+La selección vigente incluye 15 predictoras: las 14 originales más `es_fin_de_anio`, incorporada
+manualmente por posible información estacional (ADR 0015). Los resultados de selección y de Optuna
+existentes corresponden a las 14 originales y requieren revisión; no se han reentrenado modelos.
+El estudio anterior permanece intacto: el comando de búsqueda documentado es histórico y no debe
+utilizarse para continuar ese estudio con las 15 variables. Una futura búsqueda requiere identidad nueva.

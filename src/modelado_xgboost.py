@@ -54,8 +54,8 @@ def crear_objective(entrenamiento, fabrica_modelo=None):
     """Cierra sobre entrenamiento Ãºnicamente; permite modelos pequeÃ±os de prueba."""
     X, y = entrenamiento["X"], entrenamiento["y"]
     prohibidas = {"objetivo", "consumo_dia", "baseline_media_movil", "tramo", "DIA"}
-    if X.shape[1] != 14 or prohibidas.intersection(X.columns):
-        raise ValueError("Se requieren las 14 variables seleccionadas sin columnas auxiliares.")
+    if X.shape[1] != 15 or prohibidas.intersection(X.columns):
+        raise ValueError("Se requieren las 15 variables seleccionadas sin columnas auxiliares.")
     if not X.index.is_unique or not X.index.is_monotonic_increasing:
         raise ValueError("Se requieren los Ã­ndices Ãºnicos y ordenados del CSV.")
     if not entrenamiento["fechas"].is_monotonic_increasing or y.isna().any():
