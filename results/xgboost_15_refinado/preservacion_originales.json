@@ -1,0 +1,22 @@
+{
+  "results\\xgboost\\detalle.json": "625a1f0db0bdd79715c49aafab9f38af3379e7b0fb6d5e5d08432ef649b16dff",
+  "results\\xgboost\\estudio.sqlite3.zip": "f022f1c00326e350450820c9472b7af50301fea5fa19756161786d3fa1620a3c",
+  "results\\xgboost\\resumen.json": "94b72b166f5a511909ed16c7ce99f8706e24f31f2e8d1ed4fae45ae3110b090a",
+  "results\\xgboost\\trials.csv": "8e604f036d81fc37828337fcb0e779420eb116a434f45754ea81036a9bd8318c",
+  "results\\xgboost\\verificacion_dependencias.json": "a0f065389c4ee4a5e1d63ca0f1328615ee4fe03c6cb99e380d2be6cedb491020",
+  "results\\xgboost_15\\comparacion_14_vs_15.json": "fb8e902210a1125756f35eb78ac2e35bd8cc06491f3ac05efe1d909430951006",
+  "results\\xgboost_15\\detalle.json": "5985af87f311cd4dc4405be3030cb7619d497ff5773fb02cab8a2f724871a063",
+  "results\\xgboost_15\\estudio.sqlite3.zip": "d14a33b1acfc880965ebea82f92554e722007d962c8a7d70845349fa46f96866",
+  "results\\xgboost_15\\preservacion_originales.json": "bc0ab357318cd00fdb33f2c011e816cd061f9bfd1dbb66a960343e3ff4ca2372",
+  "results\\xgboost_15\\resumen.json": "8472b80b5bf68a32b446c24ad5df6f3eecc91b4871597c4e4133920c59f2173b",
+  "results\\xgboost_15\\trials.csv": "d634114693687644f0325b618031a35999d036a6c708d43b85fa93a8091963a8",
+  "results\\xgboost_15\\graficos\\coordenadas_paralelas.png": "d4a59c0647bdf6e26bec800703b4dbab488661b21668f53c21c73898aedd1276",
+  "results\\xgboost_15\\graficos\\historial_optimizacion.png": "cc033230089e740b24bd72971a3ddd847b98e8011c57f7bd2bfeed4b8884f8e1",
+  "results\\xgboost_15\\graficos\\importancia_hiperparametros_fanova.png": "347ffd7afb0ae5143086971fb229890786dee553c68ac61363989dfbe6c34715",
+  "results\\xgboost_15_validacion\\comparacion.csv": "8a353d6b7bf875108c7c5168217ab538f3342b9f10a82c9f2ea87d9b27b13282",
+  "results\\xgboost_15_validacion\\evaluacion.json": "1d9fdc87cc69b4999ece1d2b30b49133388b9d4bb3753d23f25ca00470e1590b",
+  "results\\xgboost_15_validacion\\predicciones.csv": "5e1d986ecbe21cae5ab7373c8dc2139f45fbf3c2db296403797c7800be3558d5",
+  "results\\xgboost_15_validacion\\referencias_companera.csv": "a953cc239d5d52945518a63dcfc6011012d6d2688b5cf18588d72b3eea665438",
+  "results\\optuna\\xgboost\\estudio.sqlite3": "d9cbfd1057ca728111929d7bbd8244c6fe54b03056a491d1700789a05a746405",
+  "results\\optuna\\xgboost_15\\estudio_15.sqlite3": "454175e113c369a43b5c266168571103daf71e1b7e0b789e9b37e61f09d8de4e"
+}
