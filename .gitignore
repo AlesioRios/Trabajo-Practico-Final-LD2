@@ -68,3 +68,6 @@ data/interim/
 
 # Estado mutable de la búsqueda; la evidencia terminada se versiona aparte.
 /results/optuna/xgboost/
+
+# Estudio independiente de 15 predictoras; evidencia final en results/xgboost_15/.
+/results/optuna/xgboost_15/
