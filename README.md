@@ -170,14 +170,23 @@ Trabajar en `feature/modeling-xgboost`. Esta etapa usa solo entrenamiento: no en
 un modelo definitivo y no evalúa validación independiente ni prueba. Metodología en el
 [ADR 0019](docs/decisions/0019-xgboost-optuna.md).
 
-La instalación conserva conda + uv y las versiones exactas existentes:
+Para restaurar exactamente las huellas del estudio publicado, esta ejecución usó Windows y checkout
+con `core.autocrlf=true`; los datos conservan sus bytes por `.gitattributes`. Desde otra carpeta:
 
 ```bash
-conda create -n cervecera_env python=3.12
+git -c core.autocrlf=true clone --branch feature/modeling-xgboost https://github.com/AlesioRios/Trabajo-Practico-Final-LD2.git
+cd Trabajo-Practico-Final-LD2
+```
+
+La instalación conserva conda + uv y las versiones exactas existentes (la corrida usó Python 3.12.14):
+
+```bash
+conda create -n cervecera_env python=3.12.14
 conda activate cervecera_env
 python -m pip install uv==0.13.1
 uv pip install -r requirements.txt
 uv pip check
+python -m ipykernel install --user --name cervecera_env --display-name "Python (cervecera_env)"
 python -m pytest tests -q
 ```
 

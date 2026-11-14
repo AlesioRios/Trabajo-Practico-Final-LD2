@@ -1,7 +1,7 @@
 # ADR 0019: búsqueda temporal de hiperparámetros de XGBoost con Optuna
 
 - **Fecha:** 14/11/2026
-- **Estado:** propuesta
+- **Estado:** aceptada
 - **Autor:** Juan Cruz Brown
 
 ## Contexto
@@ -54,8 +54,22 @@ MedianPruner evita terminar siempre los cinco ajustes de configuraciones poco pr
 Los cinco pliegues respetan el orden cronológico y hacen comparables los modelos (tabla 2 del notebook).
 El MAE acumulado pondera observaciones, evitando que un pliegue con menos filas comunes pese lo mismo que otro mayor.
 No usar early stopping garantiza que n_estimators represente la cantidad de árboles realmente entrenada.
-Las tablas 6 a 9 y results/xgboost/resumen.json contendrán los resultados de la ejecución, sin presentar la mejor
-configuración como definitiva. Esta propuesta se cerrará con las cifras efectivamente obtenidas.
+Las tablas 6 a 9 y results/xgboost/resumen.json contienen los resultados ejecutados: 100 trials,
+45 completos, 55 podados y 0 fallidos. La mejor configuración provisional es el trial 88,
+con MAE 3.986,65 kW, RMSE 5.198,78 kW y R² 0,6009 sobre 677 filas comunes reunidas de los cinco pliegues.
+Sus parámetros son n_estimators=1258, learning_rate=0.0042724261637713265, max_depth=4,
+min_child_weight=4.491708962592647, subsample=0.9670402445597764 y colsample_bytree=0.9650101376104412.
+En esas mismas filas, la persistencia tiene MAE 3.247,71 kW y la media móvil 3.377,77 kW.
+Esta búsqueda no mejoró esos baselines; identificar el mínimo de Optuna no demuestra que el modelo agregue valor.
+La configuración sigue siendo provisional y el análisis exhaustivo queda para la siguiente etapa.
+
+El código se ejecutó desde b964060a9b253939d1c4d4be5e0e9678f6ee3f18, con árbol limpio en los 45 registros.
+La corrida se dividió en una tanda de 10 y su reanudación hasta 100 totales. La copia SQLite comprimida
+se restauró y verificó por SHA-256: reanudar al límite no agregó trials ni duplicó filas del log.
+La notebook se ejecutó desde cero con cervecera_env y todos sus controles pasaron.
+La suite final tiene 166 pruebas aprobadas y una omitida por ausencia de los Excel privados en esta copia separada.
+El entorno limpio se instaló con uv --link-mode=copy por la restricción de vínculos de OneDrive;
+uv pip check pasó en ambos entornos y dos pruebas funcionales pasaron en el entorno limpio.
 
 ## Alternativas descartadas
 
@@ -82,6 +96,10 @@ alembic==1.20.1 y sqlalchemy==2.1.8 para SQLite, mako==1.4.3 para las migracione
 colorlog==6.12.0 para mensajes y tqdm==4.70.1 para progreso. XGBoost permanece en 3.4.1 y scikit-learn en 1.9.1.
 NumPy, pandas, PyYAML y las restantes dependencias ya estaban declaradas y no se actualizaron.
 La instalación inicial usó el pip del Python explícito de cervecera_env; el archivo congelado se verifica con uv.
+La auditoría de las 135 versiones efectivas queda en results/xgboost/verificacion_dependencias.json.
+Las huellas del código y requirements verifican bytes: esta corrida usó checkout con core.autocrlf=true.
+Para restaurar exactamente esa configuración de saltos de línea, seguir el comando de clonación del README.
+Los datos mantienen sus bytes por el .gitattributes existente.
 Ver README para instalación en entorno limpio, ejecución y reanudación.
 
 Referencias: [TPE](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.TPESampler.html),
