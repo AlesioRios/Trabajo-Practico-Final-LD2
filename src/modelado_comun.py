@@ -90,13 +90,20 @@ def calcular_metricas(y_real, y_predicho):
             "r2": float(r2_score(y_real, y_predicho))}
 
 
-def _estado_de_git():
-    """Hash del commit actual y si hay cambios sin commitear. Si no se puede saber, devuelve ('desconocido', None)."""
+def _estado_de_git(carpeta=RAIZ):
+    """Hash del commit actual y si hay cambios sin commitear. Si no se puede saber, devuelve ('desconocido', None).
+
+    El hash (código único del último commit) dice con qué versión del código se corrió el experimento. Los
+    cambios sin commitear son archivos editados que todavía no están en ningún commit: si los hay, el hash no
+    alcanza para reconstruir lo que se ejecutó. El propio registro de experimentos no cuenta como cambio, porque
+    cada experimento lo modifica al agregar su fila.
+    """
+    sin_el_registro = ["--", ".", ":(exclude)results/experiment_logs.csv"]
     try:
-        commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=RAIZ, capture_output=True, text=True,
+        commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=carpeta, capture_output=True, text=True,
                                 timeout=20, check=True).stdout.strip()
-        sucio = bool(subprocess.run(["git", "status", "--porcelain"], cwd=RAIZ, capture_output=True, text=True,
-                                    timeout=20, check=True).stdout.strip())
+        sucio = bool(subprocess.run(["git", "status", "--porcelain", *sin_el_registro], cwd=carpeta,
+                                    capture_output=True, text=True, timeout=20, check=True).stdout.strip())
         return commit, sucio
     except (OSError, subprocess.SubprocessError):
         return "desconocido", None
