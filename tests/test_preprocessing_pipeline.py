@@ -124,13 +124,18 @@ def test_el_dataset_final_no_trae_las_filas_de_frontera_y_queda_sin_escalar(tmp_
     cierre = completar_fase2(resultado, tmp_path / "processed")
     guardado = pd.read_csv(cierre["rutas"]["dataset"], parse_dates=["DIA"])
     entrenamiento, validacion, prueba = dividir_por_fecha(resultado["tabla_con_variables"])
-    assert list(guardado.columns) == ["DIA", "x", "y", "consumo_dia", "objetivo", "tramo"]
+    assert list(guardado.columns) == ["DIA", "x", "y", "consumo_dia", "baseline_media_movil", "objetivo", "tramo"]
     assert entrenamiento["DIA"].iloc[-1] not in set(guardado["DIA"])      # su etiqueta es del primer día de validación
     assert validacion["DIA"].iloc[-1] not in set(guardado["DIA"])         # y la de esta, del primer día de prueba
     assert guardado["tramo"].value_counts().to_dict() == {"entrenamiento": 69, "validacion": 14, "prueba": 14}
     original = resultado["tabla_con_variables"].set_index("DIA").loc[guardado["DIA"]]
     np.testing.assert_allclose(guardado["consumo_dia"], original["consumo_dia"])   # mismas unidades que la tabla
     np.testing.assert_allclose(guardado["x"], original["x"])                       # los vacíos también se conservan
+    # La media móvil mira los 7 días hasta hoy y se calcula con toda la tabla. Con consumo = 1000 + 10 * fila,
+    # el día 7 (fila 6) promedia las filas 0 a 6: 1000 + 10 * 3. No es la persistencia (consumo_dia).
+    dia_7 = guardado.loc[guardado["DIA"] == pd.Timestamp("2026-01-07")].iloc[0]
+    assert dia_7["baseline_media_movil"] == pytest.approx(1030)
+    assert dia_7["baseline_media_movil"] != dia_7["consumo_dia"]
 
 
 def test_las_shapes_y_el_linaje_coinciden_con_lo_guardado(tmp_path, seleccion_de_dos_variables):
@@ -139,7 +144,9 @@ def test_las_shapes_y_el_linaje_coinciden_con_lo_guardado(tmp_path, seleccion_de
     assert cierre["forma_tras_el_pipeline"] == cierre["shapes"]            # la variante A no agrega columnas
     linaje = json.loads(cierre["rutas"]["linaje"].read_text(encoding="utf-8"))
     assert linaje["shapes"] == cierre["shapes"] and linaje["columnas"] == ["x", "y"]
-    assert linaje["columnas_auxiliares"] == ["consumo_dia"]
+    assert linaje["columnas_auxiliares"] == ["consumo_dia", "baseline_media_movil"]
+    assert linaje["baselines"] == {"persistencia": "consumo_dia", "media_movil": "baseline_media_movil",
+                                   "ventana_dias": 7, "minimo_dias_validos": 4}
     assert linaje["reglas"]["limpieza"] == {"a": 1} and "grupos" in linaje["reglas"]
     assert "processed/dataset_final.csv" in json.loads((tmp_path / "checksums.json").read_text(encoding="utf-8"))
 

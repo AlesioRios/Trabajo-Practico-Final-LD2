@@ -1,0 +1,5 @@
+fecha_hora,modelo,tramo,filas,hiperparametros,mae,rmse,r2,semilla,commit,arbol_sin_commitear,notas
+2026-11-14T13:35:50,persistencia,entrenamiento,813,{},3185.8843788437885,4120.55095672434,0.7217120036129443,42,dd8ea5cf0fa2b72c5e24af3f780c7693ddcff412,True,baseline sobre las filas comunes
+2026-11-14T13:35:50,media_movil,entrenamiento,813,"{""minimo_dias"": 4, ""ventana"": 7}",3293.6100597434543,4188.849926309676,0.7124101873017663,42,dd8ea5cf0fa2b72c5e24af3f780c7693ddcff412,True,baseline sobre las filas comunes
+2026-11-14T13:35:50,persistencia,validacion,171,{},2668.3274853801167,3319.4335844594675,0.27053191444721314,42,dd8ea5cf0fa2b72c5e24af3f780c7693ddcff412,True,baseline sobre las filas comunes
+2026-11-14T13:35:50,media_movil,validacion,171,"{""minimo_dias"": 4, ""ventana"": 7}",2497.6535783904205,3368.0752006558305,0.2489966261072022,42,dd8ea5cf0fa2b72c5e24af3f780c7693ddcff412,True,baseline sobre las filas comunes
