@@ -20,6 +20,8 @@ Si alguno de los dos factores está vacío, el producto queda vacío (NaN); la i
 Las justificaciones están en el notebook variables_interacciones.ipynb y en el ADR 0014.
 """
 
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import fcluster, linkage
@@ -115,13 +117,39 @@ def nombres_de_interacciones(variables_base):
     return [f"{variables_base[i]} x {variables_base[j]}" for i in range(n) for j in range(i + 1, n)]
 
 
+def construir_mapa_interacciones(reglas):
+    """Obtiene componentes desde reglas de variables o de interacciones, sin aprender.
+
+    Usa variables_base y el mismo orden/nombres que crear_interacciones. Devuelve
+    un diccionario de listas serializable a JSON; no interpreta nombres de columnas.
+    """
+    if not isinstance(reglas, dict):
+        raise ValueError("Faltan reglas de interacciones con variables_base.")
+    interacciones = reglas.get("interacciones", reglas)
+    if not isinstance(interacciones, dict) or "variables_base" not in interacciones:
+        raise ValueError("Falta variables_base en las reglas de interacciones.")
+    base = interacciones["variables_base"]
+    if not isinstance(base, list) or any(not isinstance(c, str) or not c for c in base):
+        raise ValueError("variables_base debe ser una lista de nombres no vacíos.")
+    if len(set(base)) != len(base):
+        raise ValueError("variables_base contiene nombres repetidos.")
+    if any(c in COLUMNAS_DE_CONTROL for c in base):
+        raise ValueError("Una variable base es objetivo o control.")
+    nombres = nombres_de_interacciones(base)
+    if len(set(nombres)) != len(nombres) or set(nombres) & set(base):
+        raise ValueError("Los nombres de interacciones son ambiguos o colisionan con sus bases.")
+    return {nombre: list(par) for nombre, par in zip(nombres, combinations(base, 2))}
+
+
 def crear_interacciones(tabla, reglas):
     """Devuelve una copia de `tabla` con una columna nueva por cada par de variables base (su producto).
 
     Usa `PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)`, que no acepta vacíos:
     se calcula con los vacíos en cero y después se anula (NaN) todo producto en que alguno de los dos
     factores estaba vacío, para no inventar un valor. No cambia filas, índice ni columnas originales.
+    Adjunta el mapa JSON en attrs["componentes_interacciones"] para el selector.
     """
+    componentes = construir_mapa_interacciones(reglas)
     base = reglas["variables_base"]
     _exigir_columnas(tabla, base, "necesarias para las interacciones")
     nuevas = nombres_de_interacciones(base)
@@ -138,4 +166,7 @@ def crear_interacciones(tabla, reglas):
     for k, potencias in enumerate(poly.powers_[n:]):            # cada fila de powers_ marca los dos factores
         i, j = np.flatnonzero(potencias)
         productos[vacios[:, i] | vacios[:, j], k] = np.nan
-    return pd.concat([tabla, pd.DataFrame(productos, index=tabla.index, columns=nuevas)], axis=1)
+    nueva = pd.concat([tabla, pd.DataFrame(productos, index=tabla.index, columns=nuevas)], axis=1)
+    nueva.attrs = tabla.attrs.copy()
+    nueva.attrs["componentes_interacciones"] = componentes
+    return nueva

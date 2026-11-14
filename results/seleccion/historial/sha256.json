@@ -1,0 +1,20 @@
+{
+  "ejecucion-20261113T184058Z-969d4545.zip": {
+    "archivos": 1419,
+    "bytes": 78431817,
+    "sha256": "64b6a0ee14ea5f4b660beda30f839c78517a4b4a7fb995ab0e929bf86fc46fb5",
+    "omite": "tablas_compartidas/ (cachés regenerables), __pycache__ y temporales"
+  },
+  "ejecucion-20261113T194441Z-union-a9b63e4f.zip": {
+    "archivos": 2848,
+    "bytes": 86153706,
+    "sha256": "b8e2b571112c109cdaa89b7928cd5a5f7ddb71435411567b8e59046ad732af17",
+    "omite": "tablas_compartidas/ (cachés regenerables), __pycache__ y temporales"
+  },
+  "ejecucion-forward30-20261113-01.zip": {
+    "archivos": 4793,
+    "bytes": 104544928,
+    "sha256": "96a1096ff6623581743ae069c85e71d0b1866452c07966722dd213e209baa7fe",
+    "omite": "tablas_compartidas/ (cachés regenerables), __pycache__ y temporales"
+  }
+}

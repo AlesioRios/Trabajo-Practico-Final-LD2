@@ -150,3 +150,5 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 
 - [`docs/acuerdos-de-datos.md`](docs/acuerdos-de-datos.md): formato de los datos, funciones compartidas y reglas de trabajo del equipo.
 - [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
+
+Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).

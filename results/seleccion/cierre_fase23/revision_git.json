@@ -1,0 +1,89 @@
+{
+  "rama": "feature/preprocessing-seleccion",
+  "estado": " M .gitignore\n M README.md\n M data/processed/dataset_unificado_inicial.csv\n M docs/decisions/0015-seleccion-de-variables.md\nMM docs/guia-fase2.md\n M notebooks/seleccion_de_variables.ipynb\n M src/auxiliar_functions.py\n M src/limpieza.py\nMM src/preprocessing_pipeline.py\n M src/seleccion_de_variables.py\n M src/variables_interacciones.py\nM  tests/test_preprocessing_pipeline.py\n M tests/test_seleccion_de_variables.py\n?? .gitattributes\n?? docs/informes/\n?? results/seleccion/\n?? src/comparar_selecciones_validation.py\n?? src/experimentos_seleccion.py\n?? src/forward_tradicional_independiente.py\n?? src/informe_seleccion.py\n?? src/seleccion_definitiva.py\n?? src/verificar_seleccion_definitiva.py\n?? tests/test_comparar_selecciones_validation.py\n?? tests/test_experimentos_seleccion.py\n?? tests/test_reproducibilidad_seleccion.py\n?? tests/test_seleccion_definitiva.py\n?? ver_progreso.ps1\n",
+  "staged_preexistente": "M\tdocs/guia-fase2.md\nM\tsrc/preprocessing_pipeline.py\nM\ttests/test_preprocessing_pipeline.py\n",
+  "indice_intacto": true,
+  "archivos_propuestos": 64,
+  "bytes_propuestos_existentes": 12536301,
+  "mayores_5_MB": [],
+  "eliminados": [],
+  "diff_check": "sin errores",
+  "huellas_historial_compacto": "coinciden",
+  "revision_minima": {
+    "carga_oficial": true,
+    "archivos_existentes": 59,
+    "rutas_personales_textuales_en_propuesta": 0,
+    "referencias_definitivas_existentes": true,
+    "artefactos_bytes_preservados_por_gitattributes": true,
+    "indice_y_archivos_equipo_intactos": true,
+    "bloqueo_commit_aislado": "Falta integrar construir_mapa_interacciones de src/variables_interacciones.py; dependencia preexistente excluida.",
+    "pruebas_generales_repetidas": false
+  },
+  "integracion_dependencias": {
+    "mapa_y_json_compatibles_localmente": true,
+    "dependencias_compartidas": {
+      "src/variables_interacciones.py": "1b0165f793ac857564dcc9df3ef1038fb0630754b26999fddb3fb2683134ece7",
+      "src/limpieza.py": "287ce057dd5d7d7d9f0aa8abafc9800ce3cadeda64b8de745ac1234362b4a2d8",
+      "src/preprocessing_pipeline.py": "06cde441f7e1aa3c1e12ea56d109851f2baf67bb28970987f3b6a850a0195929"
+    },
+    "archivos_propios": 59,
+    "rutas_integracion_total": 62,
+    "pruebas_puntuales_aprobadas": 3,
+    "pruebas_generales_repetidas": false,
+    "codigo_compartido_modificado": false,
+    "guia_modificada_en_esta_revision": false,
+    "indice_intacto": true,
+    "accion_pendiente": "Integrar en commit coordinado los tres módulos compartidos y preparar después la guía final; no se hizo staging."
+  },
+  "revision_pr_integrada": {
+    "head": "9b79521aa9357eae9ddc97b4a1b19598f8ca5d83",
+    "merge_pendiente": "2cfd478ca8a6ff72a4b4b35263c35609801d4d8f",
+    "base_pr": "feature/preprocessing",
+    "commit_creado": false,
+    "push": false,
+    "conflictos_sin_resolver": false,
+    "archivos_protegidos_iguales_a_origin": [
+      "src/preprocessing_pipeline.py",
+      "notebooks/preprocesamiento.ipynb",
+      "src/pipeline_sklearn.py",
+      "notebooks/pipeline_y_guardado.ipynb",
+      "tests/test_preprocessing_pipeline.py",
+      "tests/test_pipeline_sklearn.py",
+      "docs/decisions/0016-pipeline-y-guardado.md"
+    ],
+    "guia_solo_fila_seleccion": true,
+    "contrato_spearman_intacto": true,
+    "archivos_para_commit": 64,
+    "indice_tras_merge": "A\tdocs/decisions/0016-pipeline-y-guardado.md\nM\tdocs/guia-fase2.md\nA\tnotebooks/pipeline_y_guardado.ipynb\nA\tsrc/pipeline_sklearn.py\nM\tsrc/preprocessing_pipeline.py\nA\ttests/test_pipeline_sklearn.py\nM\ttests/test_preprocessing_pipeline.py\n",
+    "sin_preparar": "M\t.gitignore\nM\tREADME.md\nM\tdocs/decisions/0015-seleccion-de-variables.md\nM\tdocs/guia-fase2.md\nM\tnotebooks/seleccion_de_variables.ipynb\nM\tsrc/auxiliar_functions.py\nM\tsrc/limpieza.py\nM\tsrc/seleccion_de_variables.py\nM\tsrc/variables_interacciones.py\nM\ttests/test_seleccion_de_variables.py\n",
+    "estado": " M .gitignore\n M README.md\n M data/processed/dataset_unificado_inicial.csv\n M docs/decisions/0015-seleccion-de-variables.md\nA  docs/decisions/0016-pipeline-y-guardado.md\nMM docs/guia-fase2.md\nA  notebooks/pipeline_y_guardado.ipynb\n M notebooks/seleccion_de_variables.ipynb\n M src/auxiliar_functions.py\n M src/limpieza.py\nA  src/pipeline_sklearn.py\nM  src/preprocessing_pipeline.py\n M src/seleccion_de_variables.py\n M src/variables_interacciones.py\nA  tests/test_pipeline_sklearn.py\nM  tests/test_preprocessing_pipeline.py\n M tests/test_seleccion_de_variables.py\n?? .gitattributes\n?? docs/informes/\n?? results/seleccion/\n?? src/comparar_selecciones_validation.py\n?? src/experimentos_seleccion.py\n?? src/forward_tradicional_independiente.py\n?? src/informe_seleccion.py\n?? src/seleccion_definitiva.py\n?? src/verificar_seleccion_definitiva.py\n?? tests/conftest.py\n?? tests/test_comparar_selecciones_validation.py\n?? tests/test_experimentos_seleccion.py\n?? tests/test_reproducibilidad_seleccion.py\n?? tests/test_seleccion_definitiva.py\n?? ver_progreso.ps1\n",
+    "enlaces_revisados": 45,
+    "enlaces_rotos": [],
+    "referencias_obsoletas_activas": 0,
+    "suite": {
+      "aprobadas": 131,
+      "fallidas": 0,
+      "omitidas": 1
+    },
+    "notebook": {
+      "celdas": 9,
+      "errores": 0
+    },
+    "respaldo": "Directorio hermano respaldo-pre-pr-20261113T232220Z, dos stashes conservados"
+  },
+  "segunda_revision": {
+    "README": "Versión de origin/feature/preprocessing más un enlace al ADR; sin otras modificaciones.",
+    "informes_vigentes": [
+      "docs/informes/integracion_pr_fase23.md"
+    ],
+    "archivos_manifiesto_vigente": 56,
+    "modulos_compartidos_sin_cambios_adicionales": [
+      "src/limpieza.py",
+      "src/variables_interacciones.py",
+      "src/preprocessing_pipeline.py",
+      "notebooks/preprocesamiento.ipynb"
+    ],
+    "artefactos_descartados": "Copias locales preservadas; descripción y huellas en manifiesto_evidencia.json.",
+    "indice_antes_de_revision_vacio": true
+  }
+}

@@ -37,3 +37,31 @@ Thumbs.db
 
 # Copia de trabajo de la tabla completa (se regenera sola; ver cargar_tabla_completa)
 data/interim/
+
+# Fase 2.3: las ejecuciones completas se conservan comprimidas en historial/.
+# Se dejan visibles los artefactos que consume el notebook y las reglas originales.
+/results/seleccion/ejecucion-20261113T184058Z-969d4545/*
+!/results/seleccion/ejecucion-20261113T184058Z-969d4545/selecciones_por_metodo.json
+!/results/seleccion/ejecucion-20261113T184058Z-969d4545/configuraciones.json
+!/results/seleccion/ejecucion-20261113T184058Z-969d4545/datos.json
+!/results/seleccion/ejecucion-20261113T184058Z-969d4545/preparacion/
+/results/seleccion/ejecucion-20261113T184058Z-969d4545/preparacion/*
+!/results/seleccion/ejecucion-20261113T184058Z-969d4545/preparacion/final.json
+/results/seleccion/ejecucion-20261113T194441Z-union-a9b63e4f/
+/results/seleccion/ejecucion-forward30-20261113-01/
+/results/seleccion/**/tablas_compartidas/
+/results/seleccion/**/*.tmp
+/results/seleccion/progreso.json
+
+# Paquetes íntegros locales: evidencia compacta versionable en *-evidencia.zip.
+/results/seleccion/historial/*.zip
+!/results/seleccion/historial/ejecucion-20261113T184058Z-969d4545-evidencia.zip
+/results/seleccion/auditoria/
+/results/seleccion/baselines-20261113T194523Z/
+/results/seleccion/comparacion-ridge-20261113T193636Z-121dc7e7/
+
+# Copias íntegras locales previas a relativizar metadatos personales.
+/results/seleccion/**/*.original-local.json
+
+# Salidas locales de reproducción; el contrato oficial no se ignora.
+/results/seleccion/reproduccion-*/
