@@ -17,8 +17,12 @@ from auxiliar_functions import (
     unir_versiones,
 )
 from limpieza import aprender_reglas_de_limpieza, limpiar
-from variables_interacciones import aprender_reglas_de_interacciones, crear_interacciones
-from variables_planta import aprender_reglas_de_planta, crear_variables_planta
+from variables_interacciones import (aprender_reglas_de_interacciones, construir_mapa_interacciones,
+                                     crear_interacciones)
+from variables_planta import NOMBRES_NUEVAS as NOMBRES_RAZONES
+from variables_planta import RAZONES, aprender_reglas_de_planta, crear_variables_planta
+from variables_temporales import COLUMNA_FRIO
+from variables_temporales import NOMBRES_NUEVAS as NOMBRES_TEMPORALES
 from variables_temporales import crear_variables_temporales
 
 # Cortes de la división temporal (consigna 2.4): 70 % entrenamiento, 15 % validación, 15 % prueba
@@ -109,6 +113,141 @@ def transform_variables(tabla_limpia, reglas):
     con_temporales = crear_variables_temporales(tabla_limpia)
     con_planta = crear_variables_planta(con_temporales, reglas["planta"])
     return crear_interacciones(con_planta, reglas["interacciones"])
+
+
+#----------------------------------------------------------------------------------------------------
+# Datos nuevos (Fase 4): un solo Excel, solo las hojas y columnas que el modelo usa, errores claros.
+
+HOJA_OBJETIVO = "Consolidado EE"
+
+
+class ErrorDeEntrada(ValueError):
+    """El archivo de entrada no tiene lo que el modelo necesita; el mensaje dice qué falta."""
+
+
+def resolver_dependencias(columnas_modelo, reglas):
+    """Deduce qué hay que leer del Excel para construir las columnas que el modelo pide.
+
+    `reglas` es el diccionario del linaje (`limpieza` y `variables`). No adivina por el texto del nombre:
+    una columna es temporal si está en `variables_temporales.NOMBRES_NUEVAS`, una razón si está en
+    `variables_planta.NOMBRES_NUEVAS`, un producto si está en el mapa de `construir_mapa_interacciones`, y
+    cualquier otra es una medición del Excel. Devuelve `columnas_crudas` (mediciones a limpiar), `hojas`
+    (las que hay que leer, siempre con la del objetivo), `bases` (variables base de las interacciones
+    pedidas) y `razones` (si hay que calcular las razones de planta).
+    """
+    mapa = construir_mapa_interacciones(reglas["variables"])
+    crudas, bases, razones = {COLUMNA_FRIO}, set(), False        # el frío siempre: de él salen los rezagos y los controles
+    for columna in columnas_modelo:
+        if columna in mapa:
+            bases.update(mapa[columna])
+        elif columna in NOMBRES_TEMPORALES:
+            pass                                                  # solo necesita DIA y Frio (Kw)
+        elif columna in NOMBRES_RAZONES:
+            razones = True
+        else:
+            crudas.add(columna)
+    for base in bases:                                            # las bases que no son temporales son mediciones
+        if base not in NOMBRES_TEMPORALES:
+            crudas.add(base)
+    if razones:                                                   # las razones se calculan juntas
+        crudas.update(c for _, numerador, denominador in RAZONES for c in (numerador, denominador))
+    hojas = {HOJA_OBJETIVO} | {c.split(" | ")[0] for c in crudas if " | " in c}
+    return {"columnas_crudas": sorted(crudas), "hojas": sorted(hojas), "bases": bases, "razones": razones}
+
+
+def leer_hojas_de_prediccion(ruta, hojas_necesarias):
+    """Lee de un Excel solo las hojas pedidas, por nombre. Devuelve (tabla del objetivo, {hoja: tabla} de las demás).
+
+    Falla con `ErrorDeEntrada` si el archivo no existe, no se puede abrir, le falta alguna hoja o a alguna
+    hoja le faltan `DIA`, `HORA` o (en `Consolidado EE`) `Frio (Kw)`. Los nombres de hoja se comparan sin
+    espacios en los bordes. Las hojas de más se ignoran sin leerlas.
+    """
+    ruta = Path(ruta)
+    if not ruta.is_file():
+        raise ErrorDeEntrada(f"No se encontró el archivo {str(ruta)!r}.")
+    try:
+        libro = pd.ExcelFile(ruta)
+    except Exception as error:                                    # formato inválido, archivo dañado o sin permisos
+        raise ErrorDeEntrada(f"No se pudo abrir {ruta.name!r} como Excel: {error}") from error
+    with libro:
+        reales = {str(nombre).strip(): nombre for nombre in libro.sheet_names}
+        faltan = [h for h in hojas_necesarias if h not in reales]
+        if faltan:
+            raise ErrorDeEntrada(f"Al archivo {ruta.name!r} le faltan las hojas {faltan}. Tiene: {libro.sheet_names}.")
+        try:
+            if reales[HOJA_OBJETIVO] == HOJA_OBJETIVO:
+                tabla_objetivo, _ = leer_consolidado_ee(libro)           # el mismo lector del entrenamiento
+            else:                                                       # el nombre real tiene espacios en los bordes
+                tabla_objetivo = _leer_hoja_renombrada(libro, reales[HOJA_OBJETIVO])
+        except KeyError as error:
+            raise ErrorDeEntrada(f"A la hoja {HOJA_OBJETIVO!r} le falta la columna {error.args[0]!r}.") from error
+        otras = {h: pd.read_excel(libro, sheet_name=reales[h]) for h in hojas_necesarias if h != HOJA_OBJETIVO}
+    for hoja, tabla in {HOJA_OBJETIVO: tabla_objetivo, **otras}.items():
+        faltan = [c for c in ("DIA", "HORA") if c not in tabla.columns]
+        if faltan:
+            raise ErrorDeEntrada(f"A la hoja {hoja!r} le faltan las columnas {faltan}. Tiene: {list(tabla.columns)[:12]}...")
+    if COLUMNA_FRIO not in tabla_objetivo.columns:
+        raise ErrorDeEntrada(f"A la hoja {HOJA_OBJETIVO!r} le falta la columna {COLUMNA_FRIO!r}.")
+    return tabla_objetivo, otras
+
+
+def _leer_hoja_renombrada(libro, nombre_real):
+    """Igual que `leer_consolidado_ee`, para cuando la hoja se llama igual pero con espacios en los bordes."""
+    tabla = pd.read_excel(libro, sheet_name=nombre_real)
+    tabla = tabla.dropna(subset=["DIA"])
+    tabla["DIA"] = pd.to_datetime(tabla["DIA"])
+    return tabla
+
+
+def construir_tabla_para_prediccion(ruta, hojas_necesarias):
+    """Tabla con una fila por día de UN Excel, con las mismas columnas de control que en entrenamiento.
+
+    Hace lo mismo que `construir_tabla_completa` (cierre de cada día, unión por bloque, marca de día válido),
+    pero con un solo archivo y solo las hojas pedidas.
+    """
+    tabla_ee, otras = leer_hojas_de_prediccion(ruta, hojas_necesarias)
+    de_ee = cierres_por_bloque(tabla_ee, Path(ruta).stem)
+    if otras:
+        de_otras = cierres_de_otras_hojas(otras)
+        if len(de_otras) != len(de_ee):
+            raise ErrorDeEntrada(f"Las hojas {sorted(otras)} y {HOJA_OBJETIVO!r} no tienen la misma cantidad de días "
+                                 f"({len(de_otras)} contra {len(de_ee)}); no se pueden alinear.")
+        de_ee = pd.concat([de_ee, de_otras], axis=1)
+    return construir_diario(unir_versiones(de_ee))
+
+
+def transform_para_prediccion(tabla_limpia, reglas, columnas_modelo, dependencias):
+    """Crea, sobre la tabla limpia, solo las variables que el modelo usa y las devuelve en su orden.
+
+    Mismas funciones que en entrenamiento (`crear_variables_temporales`, `crear_variables_planta`,
+    `crear_interacciones`), con las mismas reglas aprendidas: solo cambia que las interacciones se calculan con
+    las variables base necesarias (un producto A x B depende solo de A y de B, así que da el mismo valor).
+    """
+    tabla = crear_variables_temporales(tabla_limpia)
+    if dependencias["razones"]:
+        tabla = crear_variables_planta(tabla, reglas["variables"]["planta"])
+    bases = [b for b in reglas["variables"]["interacciones"]["variables_base"] if b in dependencias["bases"]]
+    if len(bases) >= 2:                                           # el orden de las bases define los nombres «A x B»
+        tabla = crear_interacciones(tabla, {**reglas["variables"]["interacciones"], "variables_base": bases})
+    faltan = [c for c in columnas_modelo if c not in tabla.columns]
+    if faltan:
+        raise ErrorDeEntrada(f"No se pudieron construir estas variables que el modelo necesita: {faltan}.")
+    return tabla[list(columnas_modelo)]
+
+
+def preparar_para_prediccion(ruta, columnas_modelo, reglas):
+    """De un Excel nuevo a (X, fechas): las columnas que el modelo pide, sin imputar ni escalar.
+
+    La imputación y el escalado los hace el `Pipeline` guardado con el modelo. `X` conserva los vacíos.
+    """
+    dependencias = resolver_dependencias(columnas_modelo, reglas)
+    tabla = construir_tabla_para_prediccion(ruta, dependencias["hojas"])
+    try:
+        limpia = limpiar(tabla, reglas["limpieza"], dependencias["columnas_crudas"])
+    except ValueError as error:                                   # falta una columna de medición: se dice cuál
+        raise ErrorDeEntrada(f"Al archivo {Path(ruta).name!r}: {error}") from error
+    X = transform_para_prediccion(limpia, reglas, columnas_modelo, dependencias)
+    return X, limpia["DIA"]
 
 
 #----------------------------------------------------------------------------------------------------

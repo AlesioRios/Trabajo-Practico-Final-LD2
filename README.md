@@ -123,7 +123,10 @@ después reutiliza la copia de trabajo de `data/interim/`.
 
 `predict.py` carga el modelo desde `models/model_registry.json` y escribe las
 predicciones diarias (una fila por día, correspondientes al consumo del día D+1) en
-`results/predicciones.csv`.
+`results/predicciones.csv`. Lee del Excel solo las hojas y columnas que usan las variables del modelo,
+siempre por nombre, e ignora las demás. Si falta alguna, termina con un mensaje que dice cuál (código de salida 1,
+sin escribir el CSV). Predice todos los días y avisa por consola cuáles tenían datos incompletos, por
+ejemplo los primeros del archivo, que no tienen historia para los rezagos (ADR 0022). No usa internet.
 
 ## Reproducibilidad
 

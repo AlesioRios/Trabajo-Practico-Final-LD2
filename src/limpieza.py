@@ -84,19 +84,34 @@ def aprender_reglas_de_limpieza(entrenamiento):
     }
 
 
-def limpiar(tabla, reglas):
+def limpiar(tabla, reglas, columnas_requeridas=None):
     """Aplica las reglas de limpieza: descarta columnas, anula días inválidos y valores absurdos.
 
     No borra filas ni imputa nada. No modifica la tabla recibida. Las columnas de más se ignoran;
     si falta alguna columna necesaria levanta un ValueError que dice cuáles faltan.
     Admite límites JSON (dict con None) y los límites históricos representados como Series.
+
+    Con `columnas_requeridas` (predict.py) se exigen y se limpian solo esas columnas de medición, en vez de
+    todas las conservadas en entrenamiento: cada columna se limpia por su cuenta (su propio límite y su
+    propia anulación de días inválidos), así que el resultado para ellas es el mismo que con todas.
     """
     conservadas = reglas["columnas_conservadas"]
+    de_energia = reglas["columnas_de_energia"]
+    de_temperatura = reglas["columnas_de_temperatura"]
+    if columnas_requeridas is not None:
+        pedidas = set(columnas_requeridas)
+        desconocidas = sorted(pedidas - set(conservadas))
+        if desconocidas:
+            raise ValueError(f"Las reglas de limpieza no conservan estas columnas: {desconocidas}. "
+                             "Probablemente el modelo y el linaje (data_lineage.json) no son de la misma corrida.")
+        conservadas = [c for c in conservadas if c in pedidas]                  # mismo orden que en entrenamiento
+        de_energia = [c for c in de_energia if c in pedidas]
+        de_temperatura = [c for c in de_temperatura if c in pedidas]
     _exigir_columnas(tabla, ["valido"], "de control que la limpieza necesita")
     _exigir_columnas(tabla, conservadas, "de medición que el modelo necesita")
     mantener = [c for c in tabla.columns if c in COLUMNAS_DE_CONTROL or c in set(conservadas)]
-    limpia = anular_dias_invalidos(tabla[mantener], reglas["columnas_de_energia"])
+    limpia = anular_dias_invalidos(tabla[mantener], de_energia)
     negativas, muy_altas = marcar_valores_absurdos(limpia, conservadas, reglas["limite_superior"],
-                                                   reglas["columnas_de_temperatura"])
+                                                   de_temperatura)
     limpia[conservadas] = limpia[conservadas].apply(pd.to_numeric, errors="coerce").mask(negativas | muy_altas)
     return limpia
