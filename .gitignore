@@ -71,3 +71,6 @@ data/interim/
 
 # Estudio independiente de 15 predictoras; evidencia final en results/xgboost_15/.
 /results/optuna/xgboost_15/
+
+# Segunda búsqueda independiente de 60 trials.
+/results/optuna/xgboost_15_refinado/
