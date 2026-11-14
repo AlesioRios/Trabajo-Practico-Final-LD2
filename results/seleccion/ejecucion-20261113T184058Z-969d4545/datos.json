@@ -1,0 +1,42 @@
+{
+  "divisiones": [
+    {
+      "tramo": "train",
+      "filas": 848,
+      "inicio_pos": 0,
+      "fin_pos": 847,
+      "etiqueta_inicio": "2020-07-01 00:00:00",
+      "etiqueta_fin": "2022-10-28 00:00:00"
+    },
+    {
+      "tramo": "validation",
+      "filas": 182,
+      "inicio_pos": 848,
+      "fin_pos": 1029,
+      "etiqueta_inicio": "2022-10-29 00:00:00",
+      "etiqueta_fin": "2023-04-27 00:00:00"
+    },
+    {
+      "tramo": "test",
+      "filas": 182,
+      "inicio_pos": 1030,
+      "fin_pos": 1211,
+      "etiqueta_inicio": "2023-04-28 00:00:00",
+      "etiqueta_fin": "2023-10-26 00:00:00"
+    }
+  ],
+  "fuentes": {
+    "Totalizadores Planta 2020-2022.xlsx": "coincide",
+    "Totalizadores Planta 2021-2023.xlsx": "coincide",
+    "Totalizadores Planta 2022-2023.xlsx": "coincide",
+    "processed/dataset_unificado_inicial.csv": "coincide"
+  },
+  "filas_estrictas_menos_24": [
+    365,
+    377,
+    485
+  ],
+  "etiquetas_utilizables": 829,
+  "ultima_etiqueta_excluida": true,
+  "fechas": "etiquetas originales; horizonte por bloque, no calendario certificado"
+}

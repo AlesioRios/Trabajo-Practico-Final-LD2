@@ -1,0 +1,17 @@
+{
+  "sha256_anterior": "75709ff964305e1f03719c96751d93375ce73d15b52278252234b959f9ef47c3",
+  "sha256_actual": "d8bd88779741e62d72cafd372b99c114cf6abe272a73cf82abc577a814088067",
+  "cambios": "Solo referencias relativas y texto; métricas, variables, orden y reglas intactos",
+  "referencias_anteriores": {
+    "candidatos": "results/seleccion/candidatos_congelados_validation/candidatos.json",
+    "resultados": "results/seleccion/comparacion_validation_congelada/resultados.json",
+    "reglas_originales": "results/seleccion/ejecucion-20261113T184058Z-969d4545/preparacion/final.json",
+    "codigo": "src/comparar_selecciones_validation.py",
+    "codigo_sha256": "d658cecccd60886c0470c003b06304050802ca69e96f79d8d9a8dfec4d5c54b3",
+    "comando": "python src/comparar_selecciones_validation.py"
+  },
+  "nota_referencias_anteriores": "Se omite el prefijo personal de las rutas históricas; se conservan sus sufijos relativos.",
+  "candidatos_sha256_original": "149d0ac4490447130d2fe021646b49215d94b5c3cc4b50e6d9722ade947d9baf",
+  "candidatos_sha256_actual": "12d4dc91dba08a648abbe281633c781b80767dd2e2951628d03374b21dc21c28",
+  "nota_candidatos": "Solo se relativizaron procedencia y claves de huellas. Conjuntos, criterio previo, fecha, métricas y reglas intactos. resultados.json conserva el candidatos_sha256 de la evaluación original. Las copias *.original-local.json preservan los bytes previos y quedan fuera de Git."
+}

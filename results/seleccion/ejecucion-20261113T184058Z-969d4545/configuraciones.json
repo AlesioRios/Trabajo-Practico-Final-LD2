@@ -1,0 +1,82 @@
+{
+  "politica": {
+    "semilla": 42,
+    "externos": 4,
+    "internos": 3,
+    "gap": 1,
+    "ridge_alpha": 100.0,
+    "min_observaciones": 20,
+    "min_cobertura": 0.6,
+    "equivalencia": 0.01,
+    "cantidades": [
+      1,
+      2,
+      3,
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60,
+      80,
+      120
+    ],
+    "alphas": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0
+    ],
+    "escaladores": [
+      "standard",
+      "robust"
+    ],
+    "transformaciones": [
+      "ninguna",
+      "yeo-johnson"
+    ],
+    "forward_prefiltro": 10,
+    "forward_max_directas": 5,
+    "forward_internos": 2,
+    "forward_externos": 3,
+    "forward_max_ajustes": 320,
+    "forward_segundos": 1800,
+    "criterio": "MAE dentro del 1% del minimo; menor cantidad efectiva; menor desviacion; ID estable"
+  },
+  "codigo": {
+    "src/auxiliar_functions.py": "62ced64ddafaff573a8993b06dc456e3c8ec166aeda9db28cd0a4d351ec77c6f",
+    "src/experimentos_seleccion.py": "498d6ba48fcd3ec24693a6f3abdc25dc1c26845413238e6444dd3846824804b6",
+    "src/informe_seleccion.py": "f8ef886c6748b6431164f9e5c87d3403aa9a10c29483a88771906ad3a49c1e34",
+    "src/limpieza.py": "287ce057dd5d7d7d9f0aa8abafc9800ce3cadeda64b8de745ac1234362b4a2d8",
+    "src/predict.py": "cd45aaeaf5bf1a94f37028b4759aa0263650ea375c29afcde3d16c5780e5c259",
+    "src/preprocessing_pipeline.py": "06cde441f7e1aa3c1e12ea56d109851f2baf67bb28970987f3b6a850a0195929",
+    "src/seleccion_de_variables.py": "38738e4be7a63143b5c1f4d2fe1a6baf4fd75c0a5b53f5e2f1399b4bb90cfd6a",
+    "src/train_model.py": "a732e2b749ddf7c88daa4dc7ac8631e73aeb6a19674da116de9f23347461b418",
+    "src/variables_interacciones.py": "1b0165f793ac857564dcc9df3ef1038fb0630754b26999fddb3fb2683134ece7",
+    "src/variables_planta.py": "a44ef7664e95a70d2bdbffd9562e99cf057c4f1c91bd0c9d70056293e824b043",
+    "src/variables_temporales.py": "fb47b96d0ccf76e2139e80aa582b1b3545c060d0c262d4a95c3873eb9a59a352",
+    "requirements.txt": "c3faeb7ec6d583c5307dd548c8fac11db223c0ba3f3bb0fe43700e0c10cb40b4"
+  },
+  "commit": "9b79521aa9357eae9ddc97b4a1b19598f8ca5d83",
+  "codigo_sin_commit_sha256": "771b5acf65d255ff4c71093c17d9b98748a1a9ac1689d58ee1594d9d8fe17f39",
+  "python": "3.12.14 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:37:13) [MSC v.1942 64 bit (AMD64)]",
+  "plataforma": "Windows-11-10.0.26200-SP0",
+  "dependencias": {
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "openpyxl": "3.1.5",
+    "threadpoolctl": "3.7.0"
+  },
+  "fuentes": {
+    "Totalizadores Planta 2020-2022.xlsx": "7bb3474c1686712eed9634b1afc757540766dad56c15580a866a3145ad9c53d7",
+    "Totalizadores Planta 2021-2023.xlsx": "b4dbfacd0fd8d7720ec6dfc09dc593fac479d78a7c17ea671692590dc85f90fb",
+    "Totalizadores Planta 2022-2023.xlsx": "aba9f9ff11e6fa477af282f14a88354f8a55c782941d5a4eb403e4c742e6df98",
+    "processed/dataset_unificado_inicial.csv": "859f1aa24c749f5df681394938bd1d5b7614e1fbf71906b581d8e4d6f67950e5"
+  },
+  "restauracion": "fase23-20261113-152329-a7172f93"
+}
