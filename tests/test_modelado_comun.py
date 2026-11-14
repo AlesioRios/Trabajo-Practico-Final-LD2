@@ -1,6 +1,7 @@
 """Pruebas de las piezas comunes de la Fase 3: carga, filas comunes, baselines y registro de experimentos."""
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -10,7 +11,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from modelado_comun import (COLUMNAS_DEL_LOG, RUTA_DATASET_FINAL, RUTA_LINAJE, cargar_dataset_final,
+from modelado_comun import (_estado_de_git, COLUMNAS_DEL_LOG, RUTA_DATASET_FINAL, RUTA_LINAJE, cargar_dataset_final,
                             calcular_metricas, evaluar_baselines, filas_comunes, registrar_baselines,
                             registrar_experimento, validacion_cruzada_temporal)
 
@@ -130,6 +131,25 @@ def test_los_pliegues_son_cronologicos_y_dejan_un_dia_de_separacion():
         assert ajuste.max() + 1 < evaluacion.min()                          # el gap deja libre al menos una fila
         assert (np.diff(evaluacion) == 1).all()                             # la evaluación es un bloque seguido
     assert pliegues[1][0].max() >= pliegues[0][1].max() - 1                 # cada pliegue ve más historia que el anterior
+
+
+def test_el_estado_de_git_ignora_el_registro_pero_no_otros_cambios(tmp_path):
+    def git(*argumentos):
+        subprocess.run(["git", "-c", "user.name=prueba", "-c", "user.email=prueba@example.com", *argumentos],
+                       cwd=tmp_path, check=True, capture_output=True)
+
+    (tmp_path / "results").mkdir()
+    (tmp_path / "codigo.py").write_text("x = 1\n", encoding="utf-8")
+    (tmp_path / "results" / "experiment_logs.csv").write_text("a\n", encoding="utf-8")
+    git("init", "-q")
+    git("add", ".")
+    git("commit", "-q", "-m", "inicial")
+    commit, sucio = _estado_de_git(tmp_path)
+    assert len(commit) == 40 and sucio is False                              # todo commiteado
+    (tmp_path / "results" / "experiment_logs.csv").write_text("a\nb\n", encoding="utf-8")
+    assert _estado_de_git(tmp_path)[1] is False                              # agregar una fila al registro no cuenta
+    (tmp_path / "codigo.py").write_text("x = 2\n", encoding="utf-8")
+    assert _estado_de_git(tmp_path)[1] is True                               # editar el código sí
 
 
 def test_el_dataset_final_versionado_cumple_el_contrato():
