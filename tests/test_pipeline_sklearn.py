@@ -10,10 +10,25 @@ from numpy.testing import assert_allclose
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from pipeline_sklearn import (
-    aprender_reglas_de_grupos, armar_pipeline, escribir_linaje,
-    guardar_dataset_final, separar_xy,
+    aprender_reglas_de_grupos, armar_pipeline, comparar_variantes, elegir_variante,
+    escribir_linaje, evaluar_en_validacion, guardar_dataset_final, resumir_comparacion,
+    separar_xy,
 )
 from variables_planta import NOMBRES_NUEVAS
+
+
+def _tabla_diaria(dias, desde_cambio=None):
+    """Tabla diaria chica: `x` es la mitad del consumo de hoy y `objetivo` el consumo de mañana.
+
+    Si se da `desde_cambio`, el consumo de esos días en adelante se multiplica por 10 (el "futuro" cambia).
+    """
+    consumo = 1000 + 10.0 * np.arange(dias) + 30 * np.sin(np.arange(dias))
+    if desde_cambio is not None:
+        consumo[desde_cambio:] *= 10
+    tabla = pd.DataFrame({"DIA": pd.date_range("2026-01-01", periods=dias),
+                          "consumo_dia": consumo, "x": consumo / 2})
+    tabla["objetivo"] = tabla["consumo_dia"].shift(-1)         # el consumo del día siguiente
+    return tabla
 
 
 def test_mediana_de_entrenamiento_y_parametros_estables():
@@ -71,3 +86,51 @@ def test_guardado_conserva_escala_y_registra_huella_y_linaje(tmp_path):
     shapes = {"X_train": [2, 1], "X_val": [1, 1], "X_test": [1, 1]}
     linaje = json.loads(escribir_linaje(salida, reglas, ["x"], shapes).read_text(encoding="utf-8"))
     assert linaje["reglas"] == reglas and linaje["shapes"] == shapes
+
+
+def test_comparar_variantes_devuelve_una_fila_por_variante_alpha_y_pliegue():
+    detalle, referencias = comparar_variantes(_tabla_diaria(60), ["x"], variantes=("A", "B"),
+                                              alphas=(1, 10), pliegues=3)
+    assert len(detalle) == 2 * 2 * 3                           # variantes x alphas x pliegues
+    assert sorted(detalle["pliegue"].unique()) == [1, 2, 3]
+    assert referencias["filas_ajuste"].is_monotonic_increasing  # cada pliegue ve más historia
+    assert (referencias["inicio"].iloc[1:].values > referencias["fin"].iloc[:-1].values).all()  # sin solaparse
+
+
+def test_el_futuro_no_cambia_el_error_de_los_pliegues_anteriores():
+    base, _ = comparar_variantes(_tabla_diaria(60), ["x"], variantes=("A",), alphas=(1,), pliegues=3)
+    cambiado, _ = comparar_variantes(_tabla_diaria(60, desde_cambio=50), ["x"], variantes=("A",),
+                                     alphas=(1,), pliegues=3)
+    assert_allclose(base["mae"].iloc[:2], cambiado["mae"].iloc[:2])      # pliegues 1 y 2 no se enteran
+    assert base["mae"].iloc[2] != cambiado["mae"].iloc[2]                # el último sí ve el cambio
+
+
+def test_resumir_y_elegir_variante_con_la_regla_de_un_desvio():
+    detalle = pd.DataFrame({
+        "variante": ["A"] * 4 + ["B"] * 4, "alpha": [1, 1, 10, 10] * 2, "pliegue": [1, 2] * 4,
+        "mae": [110, 110, 120, 120, 90, 110, 100, 100],
+    })
+    resumen = resumir_comparacion(detalle)
+    assert resumen["alpha"].to_dict() == {"A": 1, "B": 10}      # el alpha de menor MAE promedio por variante
+    assert resumen["mae_promedio"].to_dict() == {"A": 110, "B": 100}
+    variante, limite = elegir_variante(resumen)                 # B tiene desvío 0: el límite es 100 y A (110) queda afuera
+    assert (variante, limite) == ("B", 100)
+    resumen.loc["B", "desvio"] = 20                             # con desvío 20 el límite sube a 120 y gana la más simple
+    assert elegir_variante(resumen) == ("A", 120)
+
+
+def test_evaluar_en_validacion_usa_las_filas_con_baselines_y_calcula_la_mejora():
+    tabla = _tabla_diaria(120)
+    entrenamiento, validacion = tabla.iloc[:90], tabla.iloc[90:]
+    resultado = evaluar_en_validacion(entrenamiento, validacion, ["x"], "A", 1)
+    assert resultado["filas"] == 29                             # se descarta la última fila: su objetivo es del tramo siguiente
+    mejor = min(resultado["persistencia"], resultado["media_movil"])
+    assert_allclose(resultado["mejora_relativa"], 100 * (mejor - resultado["mae"]) / mejor)
+
+
+def test_un_producto_con_el_coseno_no_es_ciclico():
+    X = pd.DataFrame({"dia_anio_coseno": [-1, 0, 1, 0.5],
+                      "dia_anio_coseno x Agua": [-500, 0, 800, 300], "medicion": [10, 20, 30, 40]})
+    grupos = aprender_reglas_de_grupos(X, list(X))
+    assert grupos["ciclicas"] == ["dia_anio_coseno"]
+    assert grupos["numericas"] == ["dia_anio_coseno x Agua", "medicion"]
