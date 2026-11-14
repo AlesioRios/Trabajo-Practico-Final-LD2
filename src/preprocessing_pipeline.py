@@ -135,13 +135,78 @@ def ejecutar_preprocesamiento(carpeta_datos=CARPETA_DATOS_POR_DEFECTO, usar_cach
             "reglas": {"limpieza": reglas_limpieza, "variables": reglas_variables}}
 
 
+CARPETA_SALIDA_POR_DEFECTO = CARPETA_DATOS_POR_DEFECTO / "processed"
+# Se guardan en el CSV, pero NO son entradas del modelo. `consumo_dia` vale lo mismo que la variable `Frio (Kw)`
+# (es el consumo de hoy): se conserva aparte porque la Fase 3 la necesita para recalcular los baselines
+# (persistencia y media móvil) y no queremos que eso dependa de qué variables eligió la selección (ADR 0017).
+COLUMNAS_AUXILIARES = ("consumo_dia",)
+
+
+def _quitar_etiquetas_de_frontera(tabla_con_variables):
+    """Devuelve una copia donde la última fila de entrenamiento y la de validación quedan sin objetivo.
+
+    El objetivo de una fila es el consumo del día siguiente. En la última fila de cada tramo ese día ya
+    pertenece al tramo que sigue, así que esa etiqueta cruzaría la frontera: se la deja vacía y
+    `separar_xy` y `guardar_dataset_final` descartan esas filas. Son 2 filas de unas 1.030.
+    """
+    nueva = tabla_con_variables.copy()
+    entrenamiento, validacion, _ = dividir_por_fecha(nueva)
+    nueva.loc[[entrenamiento.index[-1], validacion.index[-1]], "objetivo"] = float("nan")
+    return nueva
+
+
+def completar_fase2(resultado, carpeta_salida=CARPETA_SALIDA_POR_DEFECTO, guardar=True):
+    """Cierra la Fase 2: elige las variables, ajusta el Pipeline con entrenamiento y guarda el dataset final.
+
+    `resultado` es el diccionario que devuelve `ejecutar_preprocesamiento`; `carpeta_salida`, la carpeta donde
+    se escriben `dataset_final.csv` y `data_lineage.json` (el checksum va a `checksums.json`, una carpeta más
+    arriba). Con `guardar=False` hace todas las comprobaciones sin escribir nada.
+
+    El Pipeline se ajusta solo con `X_train` y se aplica a `X_val` y `X_test` solo para comprobar que corre y
+    registrar sus shapes: lo transformado no se guarda ni se usa para medir nada con las etiquetas de prueba.
+    """
+    # Importaciones locales: pipeline_sklearn importa este módulo al cargarse, y arriba formarían un ciclo.
+    from pipeline_sklearn import (ALPHA_ELEGIDO, VARIANTE_POR_DEFECTO, aprender_reglas_de_grupos, armar_pipeline,
+                                  escribir_linaje, guardar_dataset_final, separar_xy)
+    from seleccion_de_variables import seleccionar_variables
+
+    tabla = _quitar_etiquetas_de_frontera(resultado["tabla_con_variables"])
+    for columna in COLUMNAS_AUXILIARES:
+        if columna not in tabla.columns:
+            raise ValueError(f"Falta la columna auxiliar {columna!r} en la tabla con variables.")
+    entrenamiento, validacion, prueba = dividir_por_fecha(tabla)
+    columnas = seleccionar_variables(entrenamiento, entrenamiento["objetivo"])      # lista congelada: no aprende
+    X_train, _ = separar_xy(entrenamiento, columnas)
+    X_val, _ = separar_xy(validacion, columnas)
+    X_test, _ = separar_xy(prueba, columnas)
+
+    grupos = aprender_reglas_de_grupos(X_train, columnas)                             # grupos: solo con entrenamiento
+    preprocesador = armar_pipeline(VARIANTE_POR_DEFECTO, columnas, grupos).named_steps["preprocessor"].fit(X_train)
+    shapes = {"X_train": list(X_train.shape), "X_val": list(X_val.shape), "X_test": list(X_test.shape)}
+    forma_tras_el_pipeline = {nombre: list(preprocesador.transform(X).shape)
+                              for nombre, X in (("X_train", X_train), ("X_val", X_val), ("X_test", X_test))}
+
+    rutas = {}
+    if guardar:
+        rutas["dataset"] = guardar_dataset_final(tabla, columnas, carpeta_salida, COLUMNAS_AUXILIARES)
+        rutas["linaje"] = escribir_linaje(
+            carpeta_salida, {**resultado["reglas"], "grupos": grupos}, columnas, shapes,
+            {"columnas_auxiliares": list(COLUMNAS_AUXILIARES), "variante_pipeline": VARIANTE_POR_DEFECTO,
+             "alpha_de_referencia": ALPHA_ELEGIDO, "forma_tras_el_pipeline": forma_tras_el_pipeline,
+             "filas_de_frontera_quitadas": 2})
+    return {"columnas": columnas, "shapes": shapes, "forma_tras_el_pipeline": forma_tras_el_pipeline,
+            "rutas": rutas}
+
+
 def main(argumentos=None):
     """Punto de entrada por línea de comandos: ejecuta el preprocesamiento e imprime un resumen de cada paso."""
-    analizador = argparse.ArgumentParser(description="Preprocesamiento de la Fase 2: de los Excel a la tabla con todas las variables.")
+    analizador = argparse.ArgumentParser(description="Preprocesamiento de la Fase 2: de los Excel al dataset final.")
     analizador.add_argument("--carpeta-datos", default=str(CARPETA_DATOS_POR_DEFECTO),
                             help="carpeta con los Excel (por defecto, data/ del repositorio)")
     analizador.add_argument("--sin-cache", action="store_true",
                             help="reconstruir la tabla completa desde los Excel (tarda unos 6 minutos)")
+    analizador.add_argument("--sin-guardar", action="store_true",
+                            help="hacer todas las comprobaciones sin escribir dataset_final.csv ni el linaje")
     opciones = analizador.parse_args(argumentos)
 
     resultado = ejecutar_preprocesamiento(opciones.carpeta_datos, usar_cache=not opciones.sin_cache)
@@ -150,12 +215,16 @@ def main(argumentos=None):
     print(f"3. Variables nuevas: {len(resultado['tabla_con_variables'])} días x {resultado['tabla_con_variables'].shape[1]} columnas")
     print(f"   Entrenamiento {resultado['entrenamiento'].shape}, validación {resultado['validacion'].shape}, prueba {resultado['prueba'].shape}")
 
-    # PENDIENTE (a conectar cuando estén integradas las otras tareas de la Fase 2):
-    #   4. Selección de variables:   seleccionar_variables(X_train, y_train)      (src/seleccion_de_variables.py)
-    #   5. Pipeline de imputación, transformación y escalado, ajustado solo con entrenamiento   (src/pipeline_sklearn.py)
-    #   6. Quitar filas inutilizables y guardar data/processed/dataset_final.csv sin escalar, con su checksum en
-    #      data/checksums.json, data/processed/data_lineage.json y las shapes de X_train, X_val y X_test.
-    print("Pendiente de conectar: selección de variables, Pipeline y guardado (dataset_final.csv).")
+    cierre = completar_fase2(resultado, guardar=not opciones.sin_guardar)
+    print(f"4. Selección de variables: {len(cierre['columnas'])} variables (lista congelada, ADR 0015)")
+    print(f"5. Pipeline ajustado solo con entrenamiento. Shapes de entrada {cierre['shapes']}")
+    print(f"   Shapes tras el Pipeline {cierre['forma_tras_el_pipeline']}")
+    if opciones.sin_guardar:
+        print("6. Guardado omitido (--sin-guardar): no se escribió ningún archivo.")
+    else:
+        print(f"6. Guardado: {cierre['rutas']['dataset']} (sin escalar, con su checksum en data/checksums.json) "
+              f"y {cierre['rutas']['linaje']}")
+    resultado["cierre"] = cierre
     return resultado
 
 

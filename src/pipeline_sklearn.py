@@ -17,6 +17,7 @@ from preprocessing_pipeline import dividir_por_fecha
 from variables_planta import NOMBRES_NUEVAS
 
 VARIANTE_POR_DEFECTO = "A"
+ALPHA_ELEGIDO = 10      # el que dio el menor MAE promedio de la variante A con las 14 variables (comparar_variantes)
 COLUMNAS_CICLICAS = ("dia_anio_seno", "dia_anio_coseno")   # ya están entre -1 y 1: no se transforman ni escalan
 ALPHAS_POR_DEFECTO = (0.1, 1, 10, 100)           # grilla acordada para la regularización de Ridge
 ORDEN_DE_SIMPLICIDAD = ("A", "B", "D", "C", "E", "F")   # de la que menos pasos tiene a la que más
@@ -99,11 +100,15 @@ def armar_pipeline(variante=VARIANTE_POR_DEFECTO, columnas=None, reglas_grupos=N
     return Pipeline([("preprocessor", ColumnTransformer(bloques)), ("regressor", Ridge())])
 
 
-def guardar_dataset_final(tabla_con_variables, columnas, carpeta_salida):
-    """Escribe las filas etiquetadas en sus unidades originales y guarda la huella."""
+def guardar_dataset_final(tabla_con_variables, columnas, carpeta_salida, columnas_auxiliares=()):
+    """Escribe las filas etiquetadas en sus unidades originales y guarda la huella.
+
+    `columnas_auxiliares` se guardan junto a las variables, pero no son entradas del modelo (por ejemplo,
+    `consumo_dia`, que la Fase 3 necesita para recalcular los baselines).
+    """
     salida = Path(carpeta_salida)
     salida.mkdir(parents=True, exist_ok=True)
-    campos = ["DIA", *columnas, "objetivo"]
+    campos = ["DIA", *columnas, *columnas_auxiliares, "objetivo"]
     nombres = ("entrenamiento", "validacion", "prueba")
     partes = [
         tramo.loc[tramo["objetivo"].notna(), campos].assign(tramo=nombre)
@@ -115,14 +120,17 @@ def guardar_dataset_final(tabla_con_variables, columnas, carpeta_salida):
     return ruta
 
 
-def escribir_linaje(carpeta_salida, reglas, columnas, shapes):
-    """Escribe el origen, las reglas, las columnas y las dimensiones del dataset."""
+def escribir_linaje(carpeta_salida, reglas, columnas, shapes, adicional=None):
+    """Escribe el origen, las reglas, las columnas y las dimensiones del dataset.
+
+    `adicional` es un diccionario opcional con más campos (columnas auxiliares, variante elegida, etc.).
+    """
     salida = Path(carpeta_salida)
     salida.mkdir(parents=True, exist_ok=True)
     ruta = salida / "data_lineage.json"
     datos = {
         "script": "src/pipeline_sklearn.py", "fecha": date.today().isoformat(),
-        "reglas": reglas, "columnas": list(columnas), "shapes": shapes,
+        "reglas": reglas, "columnas": list(columnas), "shapes": shapes, **(adicional or {}),
     }
     ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
                     encoding="utf-8")

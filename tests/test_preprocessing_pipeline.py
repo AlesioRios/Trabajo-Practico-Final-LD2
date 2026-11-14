@@ -10,8 +10,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from preprocessing_pipeline import (CARPETA_DATOS_POR_DEFECTO, ejecutar_preprocesamiento, fitear_reglas_de_variables,
-                                    transform_variables)
+import pipeline_sklearn
+import seleccion_de_variables
+from preprocessing_pipeline import (CARPETA_DATOS_POR_DEFECTO, completar_fase2, dividir_por_fecha, ejecutar_preprocesamiento,
+                                    fitear_reglas_de_variables, transform_variables)
 from variables_interacciones import nombres_de_interacciones
 from variables_planta import HL_ENVASADOS, NOMBRES_NUEVAS as NOMBRES_PLANTA, PLANTA_KW
 from variables_temporales import NOMBRES_NUEVAS as NOMBRES_TEMPORALES
@@ -96,3 +98,83 @@ def test_el_punto_de_entrada_da_la_tabla_con_todas_las_variables():
     assert resultado["tabla_con_variables"].shape == (1212, 337)
     assert [len(resultado[k]) for k in ("entrenamiento", "validacion", "prueba")] == [848, 182, 182]
     assert set(resultado["reglas"]) == {"limpieza", "variables"}
+
+
+# ----------------------------------------------------------------------------------------------------
+# completar_fase2: selección, Pipeline y guardado, con una tabla chica y la selección reemplazada por una lista fija.
+
+def resultado_de_cierre(dias=100):
+    """Tabla de 100 días (70 de entrenamiento, 15 de validación, 15 de prueba) con dos variables y su consumo."""
+    consumo = 1000 + 10.0 * np.arange(dias)
+    tabla = pd.DataFrame({"DIA": pd.date_range("2026-01-01", periods=dias), "consumo_dia": consumo,
+                          "x": consumo / 2, "y": np.arange(dias) % 7 + 0.5})
+    tabla.loc[[3, 80], "x"] = np.nan                          # un vacío en entrenamiento y otro en prueba
+    tabla["objetivo"] = tabla["consumo_dia"].shift(-1)
+    return {"tabla_con_variables": tabla, "reglas": {"limpieza": {"a": 1}, "variables": {"b": [2]}}}
+
+
+@pytest.fixture
+def seleccion_de_dos_variables(monkeypatch):
+    """Reemplaza la lista oficial de 14 variables por ["x", "y"] para poder usar una tabla chica."""
+    monkeypatch.setattr(seleccion_de_variables, "seleccionar_variables", lambda X, y: ["x", "y"])
+
+
+def test_el_dataset_final_no_trae_las_filas_de_frontera_y_queda_sin_escalar(tmp_path, seleccion_de_dos_variables):
+    resultado = resultado_de_cierre()
+    cierre = completar_fase2(resultado, tmp_path / "processed")
+    guardado = pd.read_csv(cierre["rutas"]["dataset"], parse_dates=["DIA"])
+    entrenamiento, validacion, prueba = dividir_por_fecha(resultado["tabla_con_variables"])
+    assert list(guardado.columns) == ["DIA", "x", "y", "consumo_dia", "objetivo", "tramo"]
+    assert entrenamiento["DIA"].iloc[-1] not in set(guardado["DIA"])      # su etiqueta es del primer día de validación
+    assert validacion["DIA"].iloc[-1] not in set(guardado["DIA"])         # y la de esta, del primer día de prueba
+    assert guardado["tramo"].value_counts().to_dict() == {"entrenamiento": 69, "validacion": 14, "prueba": 14}
+    original = resultado["tabla_con_variables"].set_index("DIA").loc[guardado["DIA"]]
+    np.testing.assert_allclose(guardado["consumo_dia"], original["consumo_dia"])   # mismas unidades que la tabla
+    np.testing.assert_allclose(guardado["x"], original["x"])                       # los vacíos también se conservan
+
+
+def test_las_shapes_y_el_linaje_coinciden_con_lo_guardado(tmp_path, seleccion_de_dos_variables):
+    cierre = completar_fase2(resultado_de_cierre(), tmp_path / "processed")
+    assert cierre["shapes"] == {"X_train": [69, 2], "X_val": [14, 2], "X_test": [14, 2]}
+    assert cierre["forma_tras_el_pipeline"] == cierre["shapes"]            # la variante A no agrega columnas
+    linaje = json.loads(cierre["rutas"]["linaje"].read_text(encoding="utf-8"))
+    assert linaje["shapes"] == cierre["shapes"] and linaje["columnas"] == ["x", "y"]
+    assert linaje["columnas_auxiliares"] == ["consumo_dia"]
+    assert linaje["reglas"]["limpieza"] == {"a": 1} and "grupos" in linaje["reglas"]
+    assert "processed/dataset_final.csv" in json.loads((tmp_path / "checksums.json").read_text(encoding="utf-8"))
+
+
+def test_el_pipeline_se_ajusta_solo_con_entrenamiento(tmp_path, seleccion_de_dos_variables, monkeypatch):
+    armados = []
+    original = pipeline_sklearn.armar_pipeline
+
+    def espia(*argumentos, **opciones):
+        armados.append(original(*argumentos, **opciones))
+        return armados[-1]
+
+    monkeypatch.setattr(pipeline_sklearn, "armar_pipeline", espia)
+    resultado = resultado_de_cierre()
+    resultado["tabla_con_variables"].loc[70:, "x"] = 1e9                    # validación y prueba con valores enormes
+    completar_fase2(resultado, tmp_path / "processed")
+    imputador = armados[0].named_steps["preprocessor"].named_transformers_["numericas"].named_steps["imputar"]
+    entrenamiento, _, _ = dividir_por_fecha(resultado["tabla_con_variables"])
+    esperado = entrenamiento["x"].iloc[:-1].median()                        # sin la fila de frontera y sin vacíos
+    assert imputador.statistics_[0] == pytest.approx(esperado)
+
+
+def test_sin_guardar_no_escribe_ningun_archivo(tmp_path, seleccion_de_dos_variables):
+    cierre = completar_fase2(resultado_de_cierre(), tmp_path / "processed", guardar=False)
+    assert cierre["rutas"] == {} and not (tmp_path / "processed").exists()
+    assert cierre["shapes"]["X_train"] == [69, 2]
+
+
+def test_falla_con_un_mensaje_claro_si_falta_una_columna(tmp_path, seleccion_de_dos_variables):
+    resultado = resultado_de_cierre()
+    resultado["tabla_con_variables"] = resultado["tabla_con_variables"].drop(columns=["consumo_dia"])
+    with pytest.raises(ValueError, match="consumo_dia"):
+        completar_fase2(resultado, tmp_path / "processed")
+
+
+def test_con_la_seleccion_oficial_avisa_que_variables_faltan(tmp_path):
+    with pytest.raises(ValueError, match="Faltan variables definitivas"):
+        completar_fase2(resultado_de_cierre(), tmp_path / "processed")
