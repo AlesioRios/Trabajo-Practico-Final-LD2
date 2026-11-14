@@ -163,3 +163,45 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
 
 Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).
+
+## Búsqueda XGBoost con Optuna (primera etapa de Fase 3)
+
+Trabajar en `feature/modeling-xgboost`. Esta etapa usa solo entrenamiento: no entrena ni serializa
+un modelo definitivo y no evalúa validación independiente ni prueba. Metodología en el
+[ADR 0019](docs/decisions/0019-xgboost-optuna.md).
+
+La instalación conserva conda + uv y las versiones exactas existentes:
+
+```bash
+conda create -n cervecera_env python=3.12
+conda activate cervecera_env
+python -m pip install uv==0.13.1
+uv pip install -r requirements.txt
+uv pip check
+python -m pytest tests -q
+```
+
+En una carpeta sincronizada por OneDrive, si se rechazan vínculos permanentes, usar
+`uv pip install --link-mode=copy -r requirements.txt` (mismas versiones).
+Se agregaron Optuna y cinco dependencias de persistencia, migraciones y presentación;
+las versiones reales y la justificación están en el ADR. No se actualizaron otras bibliotecas.
+
+Desde la raíz, con el código commiteado y sin cambios pendientes:
+
+```bash
+python src/modelado_xgboost.py --total 100 --guardar-evidencia
+```
+
+El indicador `--guardar-evidencia` exporta al terminar la copia SQLite consistente y los resultados versionables;
+si se planean más tandas, omitirlo hasta la última para mantener el árbol limpio.
+El mismo comando reanuda hasta un máximo de 100 trials en TOTAL, contando completos, podados y fallidos.
+`--total 10` permite una primera tanda; luego `--total 100` continúa sin duplicar los anteriores.
+Se comprueban versiones, configuración y huellas y se reproduce el estado de TPE sin reentrenar.
+Si una interrupción deja un trial RUNNING, se detiene para revisarlo; no ejecutarlo desde varios procesos.
+
+La base SQLite y las salidas de trabajo están en `results/optuna/xgboost/`, ignorada para no contaminar
+el estado Git de cada experimento. La evidencia terminada está en `results/xgboost/`: copia comprimida de
+SQLite, detalle JSON por trial, tabla CSV y resumen. Los completos también quedan en `results/experiment_logs.csv`.
+Para restaurar desde un clon, abrir `notebooks/modelado_xgboost.ipynb`: si falta la base local, la notebook
+restaura la copia versionada sin sobrescribir bases existentes. Consultarla nunca inicia trials adicionales.
+La búsqueda todavía no realiza el análisis exhaustivo ni el entrenamiento definitivo.

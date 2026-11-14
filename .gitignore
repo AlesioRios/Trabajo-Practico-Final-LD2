@@ -65,3 +65,6 @@ data/interim/
 
 # Salidas locales de reproducción; el contrato oficial no se ignora.
 /results/seleccion/reproduccion-*/
+
+# Estado mutable de la búsqueda; la evidencia terminada se versiona aparte.
+/results/optuna/xgboost/
