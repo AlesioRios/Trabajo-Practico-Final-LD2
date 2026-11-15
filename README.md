@@ -122,9 +122,13 @@ su huella en `data/checksums.json` y `data/processed/data_lineage.json`. Con `--
 comprobaciones sin escribir archivos. La primera vez reconstruye la tabla desde los Excel (unos 6 minutos) y
 después reutiliza la copia de trabajo de `data/interim/`.
 
-`predict.py` carga el modelo desde `models/model_registry.json` y escribe las
+`predict.py` carga el modelo desde `models/model_registry.json` (por defecto la versión más alta, hoy la
+1.0.0: Lasso con 14 variables) y escribe las
 predicciones diarias (una fila por día, correspondientes al consumo del día D+1) en
-`results/predicciones.csv`.
+`results/predicciones.csv`. Lee del Excel solo las hojas y columnas que usan las variables del modelo,
+siempre por nombre, e ignora las demás. Si falta alguna, termina con un mensaje que dice cuál (código de salida 1,
+sin escribir el CSV). Predice todos los días y avisa por consola cuáles tenían datos incompletos, por
+ejemplo los primeros del archivo, que no tienen historia para los rezagos (ADR 0025). No usa internet.
 
 ## Reproducibilidad
 
@@ -155,8 +159,8 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [x] Fase 0 - Entorno, control de versiones y trazabilidad
 - [x] Fase 1 - Análisis exploratorio de datos (EDA)
 - [x] Fase 2 - Preprocesamiento y selección de variables
-- [ ] Fase 3 - Entrenamiento y versionado de modelos
-- [ ] Fase 4 - Pipeline de predicción
+- [x] Fase 3 - Entrenamiento y versionado de modelos
+- [x] Fase 4 - Pipeline de predicción
 
 ## Decisiones y acuerdos
 
@@ -280,9 +284,9 @@ que lo consulta, los ejecutores de entrenamiento y evaluación y los modelos de
 validación guardados utilizan el mismo conjunto. No se implementa compatibilidad
 permanente con otra selección ni se modifican los artefactos históricos.
 
-Este PR corresponde al modelado, la optimización y la evaluación. Los puntos de
-entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el
-pipeline final de predicción no se presenta como implementado en este desarrollo.
+Esta sección corresponde al modelado, la optimización y la evaluación. `train_model.py`
+entrena y evalúa el modelo final (ver "Cierre de Fase 3: Lasso con catorce entradas") y
+`predict.py` es el pipeline de predicción de la Fase 4 (ADR 0025).
 
 ### Diagnóstico offline de LightGBM (15/11/2026)
 
@@ -423,4 +427,4 @@ Resultados, predicciones auditables, residuos, coeficientes, gráficos y control
 `results/lasso_final/`. El resultado local no acredita el umbral del test oculto.
 Validation fue utilizada antes para selección de variables. DIA puede repetirse y
 el horizonte certificado es el bloque siguiente; la disponibilidad real de cada
-entrada a las 23:59 sigue sin demostrarse. `src/predict.py` y Fase 4 no se modifican.
+entrada a las 23:59 sigue sin demostrarse. La Fase 4 usa este modelo desde `src/predict.py` (ADR 0025).
