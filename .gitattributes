@@ -20,3 +20,10 @@ src/modelado_gradient_boosting.py -text
 src/diagnostico_gradient_boosting.py -text
 results/gradient_boosting/** -text
 models/gradient_boosting/** -text
+
+# Archivos propios incluidos en el manifiesto SHA-256.
+notebooks/modelado_gradient_boosting.ipynb -text
+tests/test_modelado_gradient_boosting.py -text
+tests/test_diagnostico_gradient_boosting.py -text
+docs/gradient-boosting.md -text
+docs/decisions/0023-gradient-boosting-optuna.md -text
