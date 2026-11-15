@@ -1,0 +1,9 @@
+{
+  "auxiliar_functions.py": "309d29d202665d09eb77a9ec0e66398c5ca69373da6433d319b51260a863b600",
+  "diagnostico_gradient_boosting.py": "0b834d5e73455a2bec9430b6efe462dbae643e4e3ac992f7aa56ac5c116fd4fa",
+  "matplotlibrc": "0b9b62f33a2e742b625a40d5a7401b23a07779d04e362a9341a236dc376f25e6",
+  "modelado_comun.py": "67d9f077dde3a38ebfda5253d93e2770f248d7ebe9dff81de80b3856773130b2",
+  "modelado_gradient_boosting.py": "571044f0aa91d4d5dcc428a955348370a99bceb628119950ce49806019bfd891",
+  "pipeline_sklearn.py": "c6599ebc146d5106ab48857b653f611215797b4d5e4b2f10dddf022cd9c5bad8",
+  "requirements.txt": "6351cebd4615a7e8b07a08b6572b0e085f5ce37e31889b1b9d61903e4774c4ea"
+}

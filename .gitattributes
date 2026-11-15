@@ -14,3 +14,9 @@ results/lightgbm/** -text
 results/lightgbm_2/** -text
 models/lightgbm/** -text
 models/lightgbm_2/** -text
+
+# Gradient Boosting: contrato reproducible y evidencia byte a byte.
+src/modelado_gradient_boosting.py -text
+src/diagnostico_gradient_boosting.py -text
+results/gradient_boosting/** -text
+models/gradient_boosting/** -text
