@@ -26,7 +26,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
-│       ├── dataset_final.csv               (Fase 2: 14 variables sin escalar, objetivo y tramo)
+│       ├── dataset_final.csv               (15 variables oficiales sin escalar, objetivo y tramo)
 │       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
 │   ├── modelo_v1.0.0.pkl
@@ -115,8 +115,8 @@ repositorio.
 | Modelado y entrenamiento | `jupyter lab notebooks/modelado.ipynb` y `python src/train_model.py` | Fase 3 |
 | Predicción sobre un Excel nuevo | `python src/predict.py "<ruta al archivo .xlsx>"` | Fase 4 |
 
-`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, elige las 14
-variables, ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
+`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, aplica las 15
+variables oficiales (incluida `es_fin_de_anio`), ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
 su huella en `data/checksums.json` y `data/processed/data_lineage.json`. Con `--sin-guardar` hace las mismas
 comprobaciones sin escribir archivos. La primera vez reconstruye la tabla desde los Excel (unos 6 minutos) y
 después reutiliza la copia de trabajo de `data/interim/`.
@@ -163,3 +163,46 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
 
 Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).
+
+## Primera búsqueda LightGBM
+
+Configuración, ejecución y límites: [ADR 0021](docs/decisions/0021-lightgbm-optuna.md).
+Ejecutar `python src/modelado_lightgbm.py` en esta copia con Python 3.12.
+Produce 100 trials totales, evaluación del ganador en validación y tres PNG.
+Resultados: `results/lightgbm/`; modelo: `models/lightgbm/`. No evalúa test.
+
+## Segunda búsqueda LightGBM
+
+Metodología y auditoría: [ADR 0022](docs/decisions/0022-lightgbm-segunda-busqueda.md).
+Ejecutar python src/modelado_lightgbm_2.py con Python 3.12.
+Resultados, comparación y PNG: results/lightgbm_2/. Modelo: models/lightgbm_2/.
+Se conservan los 100 trials de la primera búsqueda y todos sus artefactos.
+
+
+### Revisión de LightGBM sin entrenar
+
+Leer `results/lightgbm_2/informe.md`, `comparacion.csv`, `validacion.json` y los
+PNG de `results/lightgbm_2/graficos/`; la primera búsqueda permanece en
+`results/lightgbm/`. No ejecutar los scripts de búsqueda para consultar resultados.
+Las copias `codigo_ejecutado/` documentan lo ejecutado; se corre el código de `src/`.
+Las huellas y versiones registradas permiten auditar las corridas históricas;
+la semilla por sí sola no garantiza igualdad entre sistemas y versiones diferentes.
+
+El PR individual de `feature/modeling-lightgbm` apunta a `feature/modeling` y
+contiene únicamente LightGBM y su soporte de datos de 15 variables. No incorpora
+implementaciones ni commits de RF/Ridge/Lasso. Su log tiene cuatro baselines
+heredados y 86 registros propios. Las uniones de logs de todos los modelos y los
+informes de auditoría general están fuera del repositorio; no entran en este PR.
+
+### Conjunto oficial definitivo
+
+El conjunto oficial del proyecto tiene **15 variables**, incluida `es_fin_de_anio`,
+con idénticos nombres y orden que XGBoost y que `data/processed/data_lineage.json`.
+`src/seleccion_definitiva.py` devuelve siempre esas 15 variables. El preprocesamiento
+que lo consulta, los ejecutores de entrenamiento y evaluación y los modelos de
+validación guardados utilizan el mismo conjunto. No se implementa compatibilidad
+permanente con otra selección ni se modifican los artefactos históricos.
+
+Este PR corresponde al modelado, la optimización y la evaluación. Los puntos de
+entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el
+pipeline final de predicción no se presenta como implementado en este desarrollo.
