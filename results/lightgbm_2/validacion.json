@@ -1,0 +1,147 @@
+{
+  "trial": 99,
+  "mae_cv": 3948.7260599146152,
+  "parametros": {
+    "subsample_freq": 1,
+    "random_state": 42,
+    "verbosity": -1,
+    "n_jobs": 1,
+    "n_estimators": 200,
+    "learning_rate": 0.036985470389312915,
+    "max_depth": 3,
+    "num_leaves": 8,
+    "min_child_samples": 31,
+    "subsample": 0.7870286296445328,
+    "colsample_bytree": 0.8638540491377883,
+    "reg_alpha": 0.4172446705183493,
+    "reg_lambda": 2.5151783649755584
+  },
+  "metricas": {
+    "mae": 2276.735433652959,
+    "rmse": 2873.1356736323023,
+    "r2": 0.45349945701800165
+  },
+  "filas_ajuste": 830,
+  "filas_validacion": 171,
+  "registro": {
+    "fecha_hora": "2026-11-14T20:04:25",
+    "modelo": "lightgbm",
+    "tramo": "validacion",
+    "filas": 171,
+    "hiperparametros": "{\"colsample_bytree\": 0.8638540491377883, \"learning_rate\": 0.036985470389312915, \"max_depth\": 3, \"min_child_samples\": 31, \"n_estimators\": 200, \"n_jobs\": 1, \"num_leaves\": 8, \"random_state\": 42, \"reg_alpha\": 0.4172446705183493, \"reg_lambda\": 2.5151783649755584, \"subsample\": 0.7870286296445328, \"subsample_freq\": 1, \"verbosity\": -1}",
+    "mae": 2276.735433652959,
+    "rmse": 2873.1356736323023,
+    "r2": 0.45349945701800165,
+    "semilla": 42,
+    "commit": "1f54dff3f96a75d3e4765bce40e9320517ab1fdc",
+    "arbol_sin_commitear": true,
+    "notas": "Optuna lightgbm-temporal-v2; ganador trial=99; validacion independiente; solo ajuste entrenamiento"
+  },
+  "configuracion": {
+    "version": 1,
+    "direccion": "minimize",
+    "metrica": "mae",
+    "max_trials": 100,
+    "espacio": {
+      "n_estimators": {
+        "tipo": "int",
+        "low": 150,
+        "high": 900
+      },
+      "learning_rate": {
+        "tipo": "float",
+        "low": 0.01,
+        "high": 0.1
+      },
+      "max_depth": {
+        "tipo": "int",
+        "low": 3,
+        "high": 6
+      },
+      "num_leaves": {
+        "tipo": "int",
+        "low": 8,
+        "high": 31
+      },
+      "min_child_samples": {
+        "tipo": "int",
+        "low": 10,
+        "high": 60
+      },
+      "subsample": {
+        "tipo": "float",
+        "low": 0.75,
+        "high": 1.0
+      },
+      "colsample_bytree": {
+        "tipo": "float",
+        "low": 0.65,
+        "high": 1.0
+      },
+      "reg_alpha": {
+        "tipo": "float",
+        "low": 0.001,
+        "high": 10.0,
+        "log": true
+      },
+      "reg_lambda": {
+        "tipo": "float",
+        "low": 0.001,
+        "high": 10.0,
+        "log": true
+      }
+    },
+    "fijos": {
+      "subsample_freq": 1,
+      "random_state": 42,
+      "verbosity": -1,
+      "n_jobs": 1
+    },
+    "pruner": {
+      "n_startup_trials": 5,
+      "n_warmup_steps": 2,
+      "interval_steps": 1,
+      "n_min_trials": 3
+    },
+    "sampler": "TPESampler(seed=42)",
+    "num_leaves_max": "min(31, 2 ** max_depth)",
+    "referencia_optuna": "LightGBM primera busqueda, lightgbm-temporal-v1",
+    "predictoras": [
+      "Frio (Kw)",
+      "Frio (Kw) x frio_hace_2_dias",
+      "frio_media_7_dias",
+      "Sala Maq (Kw)",
+      "Frio (Kw) x Consolidado Agua | Agua Planta (Hl)",
+      "Servicios (Kw)",
+      "Frio (Kw) x Totalizadores Energia | KW Trafo 9",
+      "dia_anio_coseno",
+      "frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl)",
+      "dia_anio_coseno x Consolidado Agua | Agua Planta (Hl)",
+      "KW Gral Planta",
+      "frio_hace_2_dias",
+      "Consolidado Agua | Agua Planta (Hl)",
+      "Totalizadores Energia | KW Trafo 9",
+      "es_fin_de_anio"
+    ],
+    "pliegues": 5,
+    "gap": 1,
+    "dataset_sha256": "3bda0f26952d01412f5970de0fb5999659c6fb6965c4f28935ed3bc538134dec",
+    "linaje_sha256": "a1baa63e31e8d804d1c86056c1dc11963ccd072ba0e4172578e7b6147c326b71",
+    "codigo_sha256": "1081947bb5f6fd4c0f6e0f5a14c02985b9f65e03f1965eab11974aa719adebae",
+    "comunes_sha256": {
+      "modelado_comun.py": "67d9f077dde3a38ebfda5253d93e2770f248d7ebe9dff81de80b3856773130b2",
+      "auxiliar_functions.py": "309d29d202665d09eb77a9ec0e66398c5ca69373da6433d319b51260a863b600"
+    },
+    "requirements_sha256": "6b780e74e43b9a093f7187003393e4227c59edf5d8c8735034aeb82f1b31b9f0",
+    "python": "3.12.14",
+    "versiones": {
+      "optuna": "5.0.0",
+      "lightgbm": "4.7.0",
+      "numpy": "2.5.4",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "modelo": "models/lightgbm_2/modelo_validacion.joblib",
+  "alcance": "Modelo para validación; sin reentrenar con validación y sin evaluar test"
+}

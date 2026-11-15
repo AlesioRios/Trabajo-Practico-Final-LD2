@@ -1,0 +1,19 @@
+{
+  "timestamp_utc": "2026-11-15T04:19:13.321676+00:00",
+  "controles": {
+    "100_trials_terminados": true,
+    "mismas_filas_comparacion": true,
+    "originales_intactos": true,
+    "log_previo_preservado": true,
+    "candidato_reproduce_predicciones": true,
+    "tracking_por_ajuste_y_trial": true,
+    "test_no_evaluado": true
+  },
+  "registros_propios": 483,
+  "metricas_entrenamiento": {
+    "mae": 2402.3094698364466,
+    "rmse": 3255.518649658377,
+    "r2": 0.8262902197972998
+  },
+  "modelo_sha256": "5d41f1ed891c24eea0537e629529b7be19dcc6415ff2cf231eb1cb5648d296ef"
+}

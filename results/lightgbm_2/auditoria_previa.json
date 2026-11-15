@@ -1,0 +1,156 @@
+{
+  "entrenamiento": {
+    "filas": 830,
+    "filas_comunes": 813,
+    "desde": "2020-07-01",
+    "hasta": "2022-10-27",
+    "primer_indice": 0,
+    "ultimo_indice": 829
+  },
+  "validacion_independiente": {
+    "filas": 176,
+    "filas_comunes": 171,
+    "desde": "2022-10-29",
+    "hasta": "2023-04-26",
+    "primer_indice": 830,
+    "ultimo_indice": 1005
+  },
+  "pliegues": [
+    {
+      "pliegue": 0,
+      "ajuste": {
+        "filas": 139,
+        "filas_comunes": 135,
+        "desde": "2020-07-01",
+        "hasta": "2020-11-20",
+        "primer_indice": 0,
+        "ultimo_indice": 138
+      },
+      "evaluacion": {
+        "filas": 138,
+        "filas_comunes": 138,
+        "desde": "2020-11-22",
+        "hasta": "2021-04-06",
+        "primer_indice": 140,
+        "ultimo_indice": 277
+      },
+      "gap_filas": 1
+    },
+    {
+      "pliegue": 1,
+      "ajuste": {
+        "filas": 277,
+        "filas_comunes": 273,
+        "desde": "2020-07-01",
+        "hasta": "2021-04-05",
+        "primer_indice": 0,
+        "ultimo_indice": 276
+      },
+      "evaluacion": {
+        "filas": 138,
+        "filas_comunes": 131,
+        "desde": "2021-04-07",
+        "hasta": "2021-09-01",
+        "primer_indice": 278,
+        "ultimo_indice": 415
+      },
+      "gap_filas": 1
+    },
+    {
+      "pliegue": 2,
+      "ajuste": {
+        "filas": 415,
+        "filas_comunes": 404,
+        "desde": "2020-07-01",
+        "hasta": "2021-08-28",
+        "primer_indice": 0,
+        "ultimo_indice": 414
+      },
+      "evaluacion": {
+        "filas": 138,
+        "filas_comunes": 137,
+        "desde": "2021-09-02",
+        "hasta": "2022-01-18",
+        "primer_indice": 416,
+        "ultimo_indice": 553
+      },
+      "gap_filas": 1
+    },
+    {
+      "pliegue": 3,
+      "ajuste": {
+        "filas": 553,
+        "filas_comunes": 541,
+        "desde": "2020-07-01",
+        "hasta": "2022-01-17",
+        "primer_indice": 0,
+        "ultimo_indice": 552
+      },
+      "evaluacion": {
+        "filas": 138,
+        "filas_comunes": 134,
+        "desde": "2022-01-19",
+        "hasta": "2022-06-09",
+        "primer_indice": 554,
+        "ultimo_indice": 691
+      },
+      "gap_filas": 1
+    },
+    {
+      "pliegue": 4,
+      "ajuste": {
+        "filas": 691,
+        "filas_comunes": 675,
+        "desde": "2020-07-01",
+        "hasta": "2022-06-08",
+        "primer_indice": 0,
+        "ultimo_indice": 690
+      },
+      "evaluacion": {
+        "filas": 138,
+        "filas_comunes": 137,
+        "desde": "2022-06-10",
+        "hasta": "2022-10-27",
+        "primer_indice": 692,
+        "ultimo_indice": 829
+      },
+      "gap_filas": 1
+    }
+  ],
+  "predictoras": [
+    "Frio (Kw)",
+    "Frio (Kw) x frio_hace_2_dias",
+    "frio_media_7_dias",
+    "Sala Maq (Kw)",
+    "Frio (Kw) x Consolidado Agua | Agua Planta (Hl)",
+    "Servicios (Kw)",
+    "Frio (Kw) x Totalizadores Energia | KW Trafo 9",
+    "dia_anio_coseno",
+    "frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl)",
+    "dia_anio_coseno x Consolidado Agua | Agua Planta (Hl)",
+    "KW Gral Planta",
+    "frio_hace_2_dias",
+    "Consolidado Agua | Agua Planta (Hl)",
+    "Totalizadores Energia | KW Trafo 9",
+    "es_fin_de_anio"
+  ],
+  "mae_cv_primera": 3982.2352900988362,
+  "metricas_validacion_primera": {
+    "mae": 2321.0388311700585,
+    "rmse": 2937.758378144207,
+    "r2": 0.42863915413104614
+  },
+  "conclusion": "MAE distintos por períodos, tamaños de ajuste y distribuciones de consumo diferentes. No se detectó fuga entre ajustes y evaluaciones en la implementación revisada.",
+  "controles": {
+    "datos_iguales_primera": true,
+    "gap_cv_una_fila": true,
+    "fronteras_etiquetas_eliminadas_en_fase2": true,
+    "variables_temporales_solo_hoy_y_pasado": true,
+    "test_no_entregado": true
+  },
+  "limitaciones": [
+    "Selección de variables previa, no anidada en cada pliegue, y comparaciones previas en validación.",
+    "DIA contiene fechas repetidas/desfasadas: se divide por posiciones del archivo; los períodos informados corresponden a las etiquetas DIA.",
+    "La disponibilidad operacional de todas las mediciones no está certificada (ADR 0017)."
+  ]
+}

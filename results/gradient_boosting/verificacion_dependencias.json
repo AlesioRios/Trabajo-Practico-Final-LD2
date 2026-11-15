@@ -1,0 +1,710 @@
+{
+  "todas_coinciden": true,
+  "dependencias": [
+    {
+      "paquete": "alembic",
+      "version": "1.20.1",
+      "cumple": true
+    },
+    {
+      "paquete": "anyio",
+      "version": "4.15.1",
+      "cumple": true
+    },
+    {
+      "paquete": "argon2-cffi",
+      "version": "25.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "argon2-cffi-bindings",
+      "version": "26.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "arrow",
+      "version": "1.4.0",
+      "cumple": true
+    },
+    {
+      "paquete": "asttokens",
+      "version": "3.0.2",
+      "cumple": true
+    },
+    {
+      "paquete": "async-lru",
+      "version": "2.4.0",
+      "cumple": true
+    },
+    {
+      "paquete": "attrs",
+      "version": "26.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "babel",
+      "version": "2.18.0",
+      "cumple": true
+    },
+    {
+      "paquete": "beautifulsoup4",
+      "version": "4.15.0",
+      "cumple": true
+    },
+    {
+      "paquete": "bleach",
+      "version": "6.4.0",
+      "cumple": true
+    },
+    {
+      "paquete": "certifi",
+      "version": "2026.7.22",
+      "cumple": true
+    },
+    {
+      "paquete": "cffi",
+      "version": "2.1.1",
+      "cumple": true
+    },
+    {
+      "paquete": "charset-normalizer",
+      "version": "3.5.2",
+      "cumple": true
+    },
+    {
+      "paquete": "cloudpickle",
+      "version": "3.1.2",
+      "cumple": true
+    },
+    {
+      "paquete": "colorama",
+      "version": "0.4.6",
+      "cumple": true
+    },
+    {
+      "paquete": "colorlog",
+      "version": "6.12.0",
+      "cumple": true
+    },
+    {
+      "paquete": "comm",
+      "version": "0.2.3",
+      "cumple": true
+    },
+    {
+      "paquete": "contourpy",
+      "version": "1.4.0",
+      "cumple": true
+    },
+    {
+      "paquete": "cycler",
+      "version": "0.12.1",
+      "cumple": true
+    },
+    {
+      "paquete": "debugpy",
+      "version": "1.8.22",
+      "cumple": true
+    },
+    {
+      "paquete": "defusedxml",
+      "version": "0.7.1",
+      "cumple": true
+    },
+    {
+      "paquete": "et-xmlfile",
+      "version": "2.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "executing",
+      "version": "2.3.0",
+      "cumple": true
+    },
+    {
+      "paquete": "fastjsonschema",
+      "version": "2.22.2",
+      "cumple": true
+    },
+    {
+      "paquete": "fonttools",
+      "version": "4.67.0",
+      "cumple": true
+    },
+    {
+      "paquete": "formulaic",
+      "version": "1.2.2",
+      "cumple": true
+    },
+    {
+      "paquete": "fqdn",
+      "version": "1.6.0",
+      "cumple": true
+    },
+    {
+      "paquete": "h11",
+      "version": "0.16.0",
+      "cumple": true
+    },
+    {
+      "paquete": "httpcore",
+      "version": "1.0.9",
+      "cumple": true
+    },
+    {
+      "paquete": "httpx",
+      "version": "0.28.1",
+      "cumple": true
+    },
+    {
+      "paquete": "idna",
+      "version": "3.20",
+      "cumple": true
+    },
+    {
+      "paquete": "iniconfig",
+      "version": "2.3.1",
+      "cumple": true
+    },
+    {
+      "paquete": "interface-meta",
+      "version": "2.0.1",
+      "cumple": true
+    },
+    {
+      "paquete": "ipykernel",
+      "version": "7.4.0",
+      "cumple": true
+    },
+    {
+      "paquete": "ipython",
+      "version": "9.17.1",
+      "cumple": true
+    },
+    {
+      "paquete": "ipython-pygments-lexers",
+      "version": "1.1.1",
+      "cumple": true
+    },
+    {
+      "paquete": "ipywidgets",
+      "version": "8.1.9",
+      "cumple": true
+    },
+    {
+      "paquete": "isoduration",
+      "version": "20.11.0",
+      "cumple": true
+    },
+    {
+      "paquete": "jedi",
+      "version": "0.20.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jinja2",
+      "version": "3.1.6",
+      "cumple": true
+    },
+    {
+      "paquete": "joblib",
+      "version": "1.6.0",
+      "cumple": true
+    },
+    {
+      "paquete": "json5",
+      "version": "0.17.3",
+      "cumple": true
+    },
+    {
+      "paquete": "jsonpointer",
+      "version": "3.2.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jsonschema",
+      "version": "4.26.0",
+      "cumple": true
+    },
+    {
+      "paquete": "jsonschema-specifications",
+      "version": "2025.9.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter",
+      "version": "1.1.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-builder",
+      "version": "1.2.3",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-client",
+      "version": "8.10.0",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-console",
+      "version": "6.6.3",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-core",
+      "version": "5.9.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-events",
+      "version": "0.12.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-lsp",
+      "version": "2.3.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-server",
+      "version": "2.21.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyter-server-terminals",
+      "version": "0.5.4",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyterlab",
+      "version": "4.6.4",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyterlab-pygments",
+      "version": "0.3.0",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyterlab-server",
+      "version": "2.28.1",
+      "cumple": true
+    },
+    {
+      "paquete": "jupyterlab-widgets",
+      "version": "3.0.17",
+      "cumple": true
+    },
+    {
+      "paquete": "kiwisolver",
+      "version": "1.5.1",
+      "cumple": true
+    },
+    {
+      "paquete": "lark",
+      "version": "1.3.1",
+      "cumple": true
+    },
+    {
+      "paquete": "lightgbm",
+      "version": "4.7.0",
+      "cumple": true
+    },
+    {
+      "paquete": "mako",
+      "version": "1.4.3",
+      "cumple": true
+    },
+    {
+      "paquete": "markupsafe",
+      "version": "3.0.4",
+      "cumple": true
+    },
+    {
+      "paquete": "matplotlib",
+      "version": "3.11.2",
+      "cumple": true
+    },
+    {
+      "paquete": "matplotlib-inline",
+      "version": "0.2.2",
+      "cumple": true
+    },
+    {
+      "paquete": "mistune",
+      "version": "3.3.4",
+      "cumple": true
+    },
+    {
+      "paquete": "narwhals",
+      "version": "2.27.1",
+      "cumple": true
+    },
+    {
+      "paquete": "nbclient",
+      "version": "0.11.0",
+      "cumple": true
+    },
+    {
+      "paquete": "nbconvert",
+      "version": "7.17.2",
+      "cumple": true
+    },
+    {
+      "paquete": "nbformat",
+      "version": "5.11.1",
+      "cumple": true
+    },
+    {
+      "paquete": "nest-asyncio2",
+      "version": "1.7.4",
+      "cumple": true
+    },
+    {
+      "paquete": "notebook",
+      "version": "7.6.3",
+      "cumple": true
+    },
+    {
+      "paquete": "notebook-shim",
+      "version": "0.2.4",
+      "cumple": true
+    },
+    {
+      "paquete": "numpy",
+      "version": "2.5.4",
+      "cumple": true
+    },
+    {
+      "paquete": "openpyxl",
+      "version": "3.1.5",
+      "cumple": true
+    },
+    {
+      "paquete": "optuna",
+      "version": "5.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "packaging",
+      "version": "26.3",
+      "cumple": true
+    },
+    {
+      "paquete": "pandas",
+      "version": "3.0.6",
+      "cumple": true
+    },
+    {
+      "paquete": "pandocfilters",
+      "version": "1.5.1",
+      "cumple": true
+    },
+    {
+      "paquete": "parso",
+      "version": "0.8.7",
+      "cumple": true
+    },
+    {
+      "paquete": "patsy",
+      "version": "1.0.3",
+      "cumple": true
+    },
+    {
+      "paquete": "pillow",
+      "version": "13.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "pip",
+      "version": "26.2.1",
+      "cumple": true
+    },
+    {
+      "paquete": "platformdirs",
+      "version": "4.13.3",
+      "cumple": true
+    },
+    {
+      "paquete": "pluggy",
+      "version": "1.7.0",
+      "cumple": true
+    },
+    {
+      "paquete": "prometheus-client",
+      "version": "0.26.0",
+      "cumple": true
+    },
+    {
+      "paquete": "prompt-toolkit",
+      "version": "3.0.53",
+      "cumple": true
+    },
+    {
+      "paquete": "psutil",
+      "version": "7.2.2",
+      "cumple": true
+    },
+    {
+      "paquete": "pure-eval",
+      "version": "0.2.4",
+      "cumple": true
+    },
+    {
+      "paquete": "pyarrow",
+      "version": "26.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "pycparser",
+      "version": "3.11",
+      "cumple": true
+    },
+    {
+      "paquete": "pygments",
+      "version": "2.21.0",
+      "cumple": true
+    },
+    {
+      "paquete": "pyparsing",
+      "version": "3.3.3",
+      "cumple": true
+    },
+    {
+      "paquete": "pytest",
+      "version": "9.1.1",
+      "cumple": true
+    },
+    {
+      "paquete": "python-dateutil",
+      "version": "2.9.0.post0",
+      "cumple": true
+    },
+    {
+      "paquete": "python-json-logger",
+      "version": "4.2.0",
+      "cumple": true
+    },
+    {
+      "paquete": "pywinpty",
+      "version": "3.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "pyyaml",
+      "version": "6.0.3",
+      "cumple": true
+    },
+    {
+      "paquete": "pyzmq",
+      "version": "27.2.0",
+      "cumple": true
+    },
+    {
+      "paquete": "referencing",
+      "version": "0.37.0",
+      "cumple": true
+    },
+    {
+      "paquete": "requests",
+      "version": "2.34.2",
+      "cumple": true
+    },
+    {
+      "paquete": "rfc3339-validator",
+      "version": "0.1.4",
+      "cumple": true
+    },
+    {
+      "paquete": "rfc3986-validator",
+      "version": "0.1.1",
+      "cumple": true
+    },
+    {
+      "paquete": "rfc3987-syntax",
+      "version": "1.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "rpds-py",
+      "version": "2026.9.1",
+      "cumple": true
+    },
+    {
+      "paquete": "scikit-learn",
+      "version": "1.9.1",
+      "cumple": true
+    },
+    {
+      "paquete": "scipy",
+      "version": "1.18.1",
+      "cumple": true
+    },
+    {
+      "paquete": "seaborn",
+      "version": "0.13.2",
+      "cumple": true
+    },
+    {
+      "paquete": "send2trash",
+      "version": "2.1.0",
+      "cumple": true
+    },
+    {
+      "paquete": "setuptools",
+      "version": "83.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "six",
+      "version": "1.17.0",
+      "cumple": true
+    },
+    {
+      "paquete": "soupsieve",
+      "version": "3.0.3",
+      "cumple": true
+    },
+    {
+      "paquete": "sqlalchemy",
+      "version": "2.1.8",
+      "cumple": true
+    },
+    {
+      "paquete": "stack-data",
+      "version": "0.6.3",
+      "cumple": true
+    },
+    {
+      "paquete": "statsmodels",
+      "version": "0.15.0",
+      "cumple": true
+    },
+    {
+      "paquete": "terminado",
+      "version": "0.18.1",
+      "cumple": true
+    },
+    {
+      "paquete": "threadpoolctl",
+      "version": "3.7.0",
+      "cumple": true
+    },
+    {
+      "paquete": "tinycss2",
+      "version": "1.5.1",
+      "cumple": true
+    },
+    {
+      "paquete": "tornado",
+      "version": "6.5.10",
+      "cumple": true
+    },
+    {
+      "paquete": "tqdm",
+      "version": "4.70.1",
+      "cumple": true
+    },
+    {
+      "paquete": "traitlets",
+      "version": "5.16.1",
+      "cumple": true
+    },
+    {
+      "paquete": "typing-extensions",
+      "version": "4.16.0",
+      "cumple": true
+    },
+    {
+      "paquete": "tzdata",
+      "version": "2026.5",
+      "cumple": true
+    },
+    {
+      "paquete": "uri-template",
+      "version": "1.3.0",
+      "cumple": true
+    },
+    {
+      "paquete": "urllib3",
+      "version": "2.8.0",
+      "cumple": true
+    },
+    {
+      "paquete": "uv",
+      "version": "0.13.1",
+      "cumple": true
+    },
+    {
+      "paquete": "wcwidth",
+      "version": "0.9.2",
+      "cumple": true
+    },
+    {
+      "paquete": "webcolors",
+      "version": "25.10.0",
+      "cumple": true
+    },
+    {
+      "paquete": "webencodings",
+      "version": "0.6.1",
+      "cumple": true
+    },
+    {
+      "paquete": "websocket-client",
+      "version": "1.9.2",
+      "cumple": true
+    },
+    {
+      "paquete": "wheel",
+      "version": "0.47.0",
+      "cumple": true
+    },
+    {
+      "paquete": "widgetsnbextension",
+      "version": "4.0.16",
+      "cumple": true
+    },
+    {
+      "paquete": "wrapt",
+      "version": "2.5.1",
+      "cumple": true
+    },
+    {
+      "paquete": "xgboost",
+      "version": "3.4.1",
+      "cumple": true
+    },
+    {
+      "paquete": "optuna",
+      "version": "5.0.0",
+      "cumple": true
+    },
+    {
+      "paquete": "alembic",
+      "version": "1.20.1",
+      "cumple": true
+    },
+    {
+      "paquete": "sqlalchemy",
+      "version": "2.1.8",
+      "cumple": true
+    },
+    {
+      "paquete": "mako",
+      "version": "1.4.3",
+      "cumple": true
+    },
+    {
+      "paquete": "colorlog",
+      "version": "6.12.0",
+      "cumple": true
+    },
+    {
+      "paquete": "tqdm",
+      "version": "4.70.1",
+      "cumple": true
+    }
+  ]
+}

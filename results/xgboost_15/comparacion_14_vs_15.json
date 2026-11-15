@@ -1,0 +1,10 @@
+{
+  "estudio_14": "xgboost-temporal-v1",
+  "estudio_15": "xgboost-temporal-15-features-v1",
+  "mae_14": 3986.6487995637926,
+  "mae_15": 3957.959999884601,
+  "diferencia_mae_15_menos_14": -28.68879967919156,
+  "mejora_porcentual": 0.719621946190259,
+  "mejora": true,
+  "alcance": "MAE provisional de CV temporal en entrenamiento; búsquedas independientes, no evaluación final"
+}

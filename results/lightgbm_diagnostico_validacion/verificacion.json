@@ -1,0 +1,101 @@
+{
+  "fecha_diagnostico": "2026-11-15",
+  "fuentes_sha256": {
+    "results/experiment_logs.csv": "fe4bd94fd53f4a9183f5dc54a77c8747aba7efe3ae15846ad61a830e0af869ec",
+    "results/lightgbm/detalle.json": "fcf2a2fbb0b1847b2532e1da3ec9c8e2b9fe59d24c9e4521968e3154148235d0",
+    "results/lightgbm/estudio.sqlite3.zip": "7169ac0076bc6e4d4e9e324a3f3618a6ff313b365ce0eeefc51adefc6d245fcc",
+    "results/lightgbm/experiment_logs.csv": "568d42e757503c177e54e36ccccbccafd7644a833743c19b4fbeef8d16bb6983",
+    "results/lightgbm/predicciones_validacion.csv": "b08f03ecab6866c48fb8491b9ca16b8b2c0d769990fa046611964c0a95836c07",
+    "results/lightgbm/progreso.jsonl": "3fefaa3748148507afa19dce2a63d77c94973066f9a7bb56b2fad1c36e785cd1",
+    "results/lightgbm/referencia_xgboost_sha256.json": "ce9440d0a4d568b32dfcd4529d3a471bf20182ac1bfbde827c5e1b085301f965",
+    "results/lightgbm/resumen.json": "623894801b4dd1fd3bdda632fb493bd694face110fa5faedef02e45e330b35dd",
+    "results/lightgbm/trials.csv": "fa4d856ada41ea32c7e117799d24c89b47ded05f42cf0c5c0b38222d02f19cf4",
+    "results/lightgbm/validacion.json": "f50131e62d55a82f4b741897205eeb041ba09d6041d4a0ae766e871eb8756e43",
+    "results/lightgbm/verificacion.json": "ba377c2e3e6cb60ce9415c72833bc35f349ec1303bdf99e2051761c83ca09bb1",
+    "results/lightgbm/codigo_ejecutado/auxiliar_functions.py": "309d29d202665d09eb77a9ec0e66398c5ca69373da6433d319b51260a863b600",
+    "results/lightgbm/codigo_ejecutado/matplotlibrc": "0b9b62f33a2e742b625a40d5a7401b23a07779d04e362a9341a236dc376f25e6",
+    "results/lightgbm/codigo_ejecutado/modelado_comun.py": "67d9f077dde3a38ebfda5253d93e2770f248d7ebe9dff81de80b3856773130b2",
+    "results/lightgbm/codigo_ejecutado/modelado_lightgbm.py": "ed90f7984512356b9d6c0a52424b94a48fde961766f709e6e243dec0a35a82fa",
+    "results/lightgbm/codigo_ejecutado/requirements.txt": "6b780e74e43b9a093f7187003393e4227c59edf5d8c8735034aeb82f1b31b9f0",
+    "results/lightgbm/graficos/coordenadas_paralelas.png": "9b0109a1768b841b597511d6d9236030e0e5c160c52b09050ebb987e4ccba9f0",
+    "results/lightgbm/graficos/historial_optimizacion.png": "9257a88573c6f83ccac305e19931dbae89578eaa2e8eac766aed39105193b6f8",
+    "results/lightgbm/graficos/importancias.json": "4bf6323d01bc27e7f040d7244cecb27d2e8eacc1980f33fd766a88cb0c693a08",
+    "results/lightgbm/graficos/importancia_hiperparametros_fanova.png": "d3ac5b94cef65c23fcdad947e792aaee9012c0b7fd9fa0a10abc093b4a5a6e47",
+    "results/lightgbm_2/auditoria_previa.json": "861356c6a0c33179b5f31f0d88185661c96fb11a29ed503682ef346a136bd318",
+    "results/lightgbm_2/codigo_sha256.json": "0017d1b82346e8e8e8407def4c7ebdb6d08f7555acf420fdcbdd615b2805e239",
+    "results/lightgbm_2/comparacion.csv": "66bbdadd9e9760baf9da866ad45ddda48d0c11d7efb67488c165ac0f5256f18c",
+    "results/lightgbm_2/comparacion.json": "2fdc8bd4940735e20d489b16c5c45c7fecf9709e40252aabba6231601611e51f",
+    "results/lightgbm_2/detalle.json": "d227c1ccd1ff5eb301572c9ec469c6ad585e5865216c18c1a904a2b7a3165a02",
+    "results/lightgbm_2/estudio.sqlite3.zip": "c90dd6443e00d20f76d47f186513298dfb35ebc262e3e6b7877e8cb41bf02523",
+    "results/lightgbm_2/experiment_logs.csv": "ce3b1e5fc804b2d84871f6dfbf8ed46de41f0245aef88096ddb13cb303e699de",
+    "results/lightgbm_2/informe.md": "ff31a1cc6902fd0cfec2a5e342bb0b6d71d2d65b4c9153cf5d0a7b81ab707be5",
+    "results/lightgbm_2/limites.csv": "6c341041886f09d9ca208695058ba8eb8f21170a626acf8ba99b6a74f9ce6433",
+    "results/lightgbm_2/parametros_comparados.csv": "85450f9384a25aa9e30f7ef10a0727a1186dd8fde04a9163317434ad995cdc61",
+    "results/lightgbm_2/predicciones_validacion.csv": "a4f23b730b16ddc26524dec2ed9b7043c1dc157298c41e0e4ee4196b448facb6",
+    "results/lightgbm_2/primera_busqueda_sha256.json": "305e769af50cad943e3a183ffe780d48eb4944079ded23b8cdf58da12f0c73f1",
+    "results/lightgbm_2/progreso.jsonl": "56adb47e9c31f5954c09d54afbc1e26d73107d87abf1a9a984f62cddc23919ca",
+    "results/lightgbm_2/resumen.json": "96a034c088f6ad2c5024ec5cacdd74b9606986fa2d496626344d13f213b97ae3",
+    "results/lightgbm_2/trials.csv": "87de02cc2014a89b0e03566444846adaf1f0c524c12f9fcba600fb744fd1d610",
+    "results/lightgbm_2/validacion.json": "37fe23bd03392bdd60dfe6fb9dc31732b1af817290d1df129b04f513cc35c146",
+    "results/lightgbm_2/verificacion.json": "36748c344147d41c00f594df8b35f9af6282b9e92a8c5fc84c8959f67f60c101",
+    "results/lightgbm_2/codigo_ejecutado/auxiliar_functions.py": "309d29d202665d09eb77a9ec0e66398c5ca69373da6433d319b51260a863b600",
+    "results/lightgbm_2/codigo_ejecutado/comparar_lightgbm.py": "8ecdc6e48145c4b818f30b76b9f8ec610d86dc4b6c5a29ed2e16b44d8a0e3913",
+    "results/lightgbm_2/codigo_ejecutado/matplotlibrc": "0b9b62f33a2e742b625a40d5a7401b23a07779d04e362a9341a236dc376f25e6",
+    "results/lightgbm_2/codigo_ejecutado/modelado_comun.py": "67d9f077dde3a38ebfda5253d93e2770f248d7ebe9dff81de80b3856773130b2",
+    "results/lightgbm_2/codigo_ejecutado/modelado_lightgbm_2.py": "1081947bb5f6fd4c0f6e0f5a14c02985b9f65e03f1965eab11974aa719adebae",
+    "results/lightgbm_2/codigo_ejecutado/requirements.txt": "6b780e74e43b9a093f7187003393e4227c59edf5d8c8735034aeb82f1b31b9f0",
+    "results/lightgbm_2/graficos/coordenadas_paralelas.png": "f3cd0ce4cfa3793a92f5386e650735ab552f08db830dacc4cec2ee572705b98b",
+    "results/lightgbm_2/graficos/historial_optimizacion.png": "109c2a89b557f68957a9a47dfca21c3738f7da2ff1fdce7cfdd4f7d4db5f0ef4",
+    "results/lightgbm_2/graficos/importancias.json": "34c6f0e6bcfa79f882f6626e8d3e64323beea1d207d4b2eeed4391af7ddc340f",
+    "results/lightgbm_2/graficos/importancia_hiperparametros_fanova.png": "5558a44ea4d46407362efe61421e1ab444580a851231b6ee83be443d0a99ff85"
+  },
+  "nota_log": "El hash completo acredita preservación en esta ejecución. La firma de registros propios permite integrar otras familias sin invalidar la evidencia LightGBM.",
+  "figuras": [
+    "prediccion_vs_real.png",
+    "predicciones_temporales.png",
+    "distribucion_residuos.png",
+    "residuos_vs_predicciones.png",
+    "residuos_temporales.png"
+  ],
+  "tracking": {
+    "registros_lightgbm": 86,
+    "cv_completos": 84,
+    "validaciones": 2,
+    "estudios": [
+      {
+        "estudio": "lightgbm-temporal-v1",
+        "complete": 38,
+        "pruned": 62,
+        "fail": 0
+      },
+      {
+        "estudio": "lightgbm-temporal-v2",
+        "complete": 46,
+        "pruned": 54,
+        "fail": 0
+      }
+    ],
+    "registros_propios_sha256": "cb1b69831f08685c8774c0ab3875e2161fbfe5afc5520bc38fdaf34a22c53fd6",
+    "cumplimiento_literal_por_ajuste": "Parcial",
+    "limite": "Una fila por COMPLETE agrupa cinco ajustes. Los PRUNED quedan en JSON/Optuna. Timestamp de registro sin zona horaria; no equivale al inicio de cada ajuste. Las corridas conservan arbol_sin_commitear=True; código y hashes están archivados."
+  },
+  "controles": {
+    "metricas_coinciden_con_evaluaciones": true,
+    "mismas_171_filas_y_objetivos": true,
+    "contrato_15_variables_igual": true,
+    "ganadores_y_parametros_verificados": true,
+    "tracking_conciliado": true,
+    "originales_intactos": true
+  },
+  "python": "3.12.14",
+  "versiones": {
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "matplotlib": "3.11.2"
+  },
+  "ayudante_reutilizado": {
+    "ruta": "src/diagnostico_xgboost.py",
+    "sha256": "2e3eb0aeacebab839a29533ca2c2755227f005946744b3c229d922c9e597075d"
+  },
+  "alcance": "CSV/JSON/PNG archivados; sin modelos, entrenamiento, predicción, Optuna ni dataset/test."
+}

@@ -157,7 +157,8 @@ def test_el_dataset_final_versionado_cumple_el_contrato():
     datos = cargar_dataset_final(incluir_prueba=True)
     linaje = json.loads(RUTA_LINAJE.read_text(encoding="utf-8"))
     assert {t: len(d["X"]) for t, d in datos.items()} == {"entrenamiento": 830, "validacion": 176, "prueba": 178}
-    assert list(datos["entrenamiento"]["X"].columns) == linaje["columnas"] and len(linaje["columnas"]) == 14
+    assert list(datos["entrenamiento"]["X"].columns) == linaje["columnas"] and len(linaje["columnas"]) == 15
+    assert "es_fin_de_anio" in linaje["columnas"]
     assert_allclose(datos["validacion"]["persistencia"].dropna(), datos["validacion"]["X"]["Frio (Kw)"].dropna())
     assert pd.read_csv(RUTA_DATASET_FINAL, parse_dates=["DIA"])["DIA"].is_monotonic_increasing
     # Con los baselines del dataset, las filas comunes de validación son las 171 que medimos en la Fase 2
