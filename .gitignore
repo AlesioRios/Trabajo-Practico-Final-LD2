@@ -74,3 +74,9 @@ data/interim/
 
 # Segunda búsqueda independiente de 60 trials.
 /results/optuna/xgboost_15_refinado/
+
+# Estado mutable de Optuna; el log común ya está versionado.
+/results/optuna/lightgbm/
+/.pytest_tmp*/
+
+/results/optuna/lightgbm_2/

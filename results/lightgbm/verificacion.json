@@ -1,0 +1,17 @@
+{
+  "pruebas_aprobadas": 168,
+  "pruebas_omitidas": 1,
+  "detalle_pruebas": "Suite: 167 aprobadas, una omitida, una expectativa anterior de 14 columnas corregida a 15 y repetida con éxito.",
+  "xgboost_archivos_intactos": 110,
+  "trials": 100,
+  "registros_lightgbm": 39,
+  "evaluaciones_validacion": 1,
+  "arboles_modelo": 181,
+  "predicciones_modelo_coinciden": true,
+  "baselines_validacion": {
+    "filas": 171,
+    "persistencia": 2668.3274853801167,
+    "media_movil": 2497.6535783904205
+  },
+  "mejora_mae_vs_media_movil_pct": 7.071226720487756
+}

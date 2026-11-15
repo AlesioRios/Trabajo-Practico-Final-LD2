@@ -1,0 +1,27 @@
+{
+  "estudio": "lightgbm-temporal-v2",
+  "total": 100,
+  "estados": {
+    "COMPLETE": 46,
+    "PRUNED": 54
+  },
+  "commit_codigo": "1f54dff3f96a75d3e4765bce40e9320517ab1fdc",
+  "mejor_trial_provisional": 99,
+  "parametros_provisionales": {
+    "n_estimators": 200,
+    "learning_rate": 0.036985470389312915,
+    "max_depth": 3,
+    "num_leaves": 8,
+    "min_child_samples": 31,
+    "subsample": 0.7870286296445328,
+    "colsample_bytree": 0.8638540491377883,
+    "reg_alpha": 0.4172446705183493,
+    "reg_lambda": 2.5151783649755584
+  },
+  "metricas_provisionales": {
+    "mae": 3948.7260599146152,
+    "rmse": 5238.107391201661,
+    "r2": 0.5948493079411987
+  },
+  "sqlite_sha256": "f2e695cb7a70c4a4341350eae7b4f8b180a14e2af914cbcfb9959d45f6ea5a2b"
+}

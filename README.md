@@ -27,6 +27,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
 │       ├── dataset_final.csv               (Fase 2: 15 variables sin escalar, objetivo y tramo)
+│       ├── dataset_final.csv               (15 variables oficiales sin escalar, objetivo y tramo)
 │       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
 │   ├── modelo_v1.0.0.pkl
@@ -240,14 +241,44 @@ referencias atribuidas utilizadas en la comparación histórica de XGBoost. No s
 implementaciones ni nuevas corridas de los modelos de otra integrante. No se borran
 para aparentar una ejecución distinta de la realizada.
 
+## Primera búsqueda LightGBM
+
+Configuración, ejecución y límites: [ADR 0021](docs/decisions/0021-lightgbm-optuna.md).
+Ejecutar `python src/modelado_lightgbm.py` en esta copia con Python 3.12.
+Produce 100 trials totales, evaluación del ganador en validación y tres PNG.
+Resultados: `results/lightgbm/`; modelo: `models/lightgbm/`. No evalúa test.
+
+## Segunda búsqueda LightGBM
+
+Metodología y auditoría: [ADR 0022](docs/decisions/0022-lightgbm-segunda-busqueda.md).
+Ejecutar python src/modelado_lightgbm_2.py con Python 3.12.
+Resultados, comparación y PNG: results/lightgbm_2/. Modelo: models/lightgbm_2/.
+Se conservan los 100 trials de la primera búsqueda y todos sus artefactos.
+
+
+### Revisión de LightGBM sin entrenar
+
+Leer `results/lightgbm_2/informe.md`, `comparacion.csv`, `validacion.json` y los
+PNG de `results/lightgbm_2/graficos/`; la primera búsqueda permanece en
+`results/lightgbm/`. No ejecutar los scripts de búsqueda para consultar resultados.
+Las copias `codigo_ejecutado/` documentan lo ejecutado; se corre el código de `src/`.
+Las huellas y versiones registradas permiten auditar las corridas históricas;
+la semilla por sí sola no garantiza igualdad entre sistemas y versiones diferentes.
+
+El PR individual de `feature/modeling-lightgbm` apunta a `feature/modeling` y
+contiene únicamente LightGBM y su soporte de datos de 15 variables. No incorpora
+implementaciones ni commits de RF/Ridge/Lasso. Su log tiene cuatro baselines
+heredados y 86 registros propios. Las uniones de logs de todos los modelos y los
+informes de auditoría general están fuera del repositorio; no entran en este PR.
+
 ### Conjunto oficial definitivo
 
 El conjunto oficial del proyecto tiene **15 variables**, incluida `es_fin_de_anio`,
-con los nombres y el orden registrados en `data/processed/data_lineage.json`.
-El selector y los ejecutores vigentes de entrenamiento y evaluación utilizan ese
-mismo conjunto. No se implementa compatibilidad permanente con otra selección.
-Los artefactos de experimentos anteriores se conservan únicamente como evidencia
-histórica, con sus identificadores y contratos originales.
+con idénticos nombres y orden que XGBoost y que `data/processed/data_lineage.json`.
+`src/seleccion_definitiva.py` devuelve siempre esas 15 variables. El preprocesamiento
+que lo consulta, los ejecutores de entrenamiento y evaluación y los modelos de
+validación guardados utilizan el mismo conjunto. No se implementa compatibilidad
+permanente con otra selección ni se modifican los artefactos históricos.
 
 Este PR corresponde al modelado, la optimización y la evaluación. Los puntos de
 entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el

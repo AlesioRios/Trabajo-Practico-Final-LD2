@@ -5,3 +5,12 @@ data/processed/* -text
 
 # El registro de experimentos solo crece: si dos ramas agregan filas, el merge local conserva las de ambas.
 results/experiment_logs.csv -text merge=union
+
+# LightGBM: preservar bytes y hashes de los ejecutores y la evidencia histórica.
+src/modelado_lightgbm.py -text
+src/modelado_lightgbm_2.py -text
+src/comparar_lightgbm.py -text
+results/lightgbm/** -text
+results/lightgbm_2/** -text
+models/lightgbm/** -text
+models/lightgbm_2/** -text
