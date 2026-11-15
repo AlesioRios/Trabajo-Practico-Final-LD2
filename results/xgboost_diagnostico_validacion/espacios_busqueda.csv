@@ -1,0 +1,11 @@
+experimento,hiperparametro,tipo,low,high,log
+inicial_15,n_estimators,int,100.0,2000.0,
+inicial_15,learning_rate,float,0.001,0.3,True
+inicial_15,max_depth,int,3.0,10.0,
+inicial_15,min_child_weight,float,0.1,10.0,True
+inicial_15,subsample,float,0.5,1.0,
+inicial_15,colsample_bytree,float,0.5,1.0,
+refinado_15,n_estimators,int,1750.0,3000.0,
+refinado_15,min_child_weight,float,4.0,5.0,True
+refinado_15,subsample,float,0.87,0.97,
+refinado_15,colsample_bytree,float,0.8,1.0,
