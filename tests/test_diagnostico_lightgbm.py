@@ -83,6 +83,15 @@ def test_integrar_otra_familia_no_invalida_los_registros_propios(monkeypatch):
     assert original["registros_propios_sha256"] == nuevo["registros_propios_sha256"]
 
 
+def test_registros_podados_de_otra_familia_no_cambian_la_firma(tmp_path):
+    """El CSV compartido admite métricas ausentes sin cambiar tipos de LightGBM."""
+    ruta = tmp_path / "log.csv"
+    ruta.write_text("modelo,mae,rmse,r2\nlightgbm,1.5,2.0,0.5\notra,,,\n", encoding="utf-8")
+    tabla = pd.read_csv(ruta, keep_default_na=False, na_values={k: [""] for k in diagnostico.METRICAS},
+                        dtype={k: float for k in diagnostico.METRICAS})
+    assert tabla.loc[0, "mae"] == 1.5 and np.isnan(tabla.loc[1, "mae"])
+
+
 def test_rutas_offline_no_leen_datasets_ni_modelos(monkeypatch):
     abrir = builtins.open
     abrir_path = Path.open
