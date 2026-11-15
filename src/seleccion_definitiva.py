@@ -38,7 +38,7 @@ def aplicar_conjunto_definitivo(X, reglas=None):
     """Extrae nombres y orden oficiales de una tabla con ingenierÃ­a reconstruida."""
     reglas = cargar_seleccion_definitiva() if reglas is None else reglas
     if not X.columns.is_unique:
-        raise ValueError("Las columnas de entrada deben ser Ãºnicas")
+        raise ValueError("Las columnas de entrada deben ser únicas")
     faltan = set(reglas["variables"]) - set(X.columns)
     if faltan:
         raise ValueError(f"Faltan variables definitivas: {sorted(faltan)}")

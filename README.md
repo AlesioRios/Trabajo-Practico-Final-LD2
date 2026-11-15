@@ -115,8 +115,8 @@ repositorio.
 | Modelado y entrenamiento | `jupyter lab notebooks/modelado.ipynb` y `python src/train_model.py` | Fase 3 |
 | Predicción sobre un Excel nuevo | `python src/predict.py "<ruta al archivo .xlsx>"` | Fase 4 |
 
-`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, elige las 14
-variables, ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
+`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, aplica las 15
+variables oficiales (incluida `es_fin_de_anio`), ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
 su huella en `data/checksums.json` y `data/processed/data_lineage.json`. Con `--sin-guardar` hace las mismas
 comprobaciones sin escribir archivos. La primera vez reconstruye la tabla desde los Excel (unos 6 minutos) y
 después reutiliza la copia de trabajo de `data/interim/`.
@@ -164,21 +164,45 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 
 Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).
 
-## Búsqueda XGBoost con Optuna (primera etapa de Fase 3)
+## XGBoost: resultados y revisión sin entrenar
 
-Trabajar en `feature/modeling-xgboost`. Esta etapa usa solo entrenamiento: no entrena ni serializa
-un modelo definitivo y no evalúa validación independiente ni prueba. Metodología en el
-[ADR 0019](docs/decisions/0019-xgboost-optuna.md).
+El desarrollo de `feature/modeling-xgboost` contiene tres estudios independientes:
 
-Para restaurar exactamente las huellas del estudio publicado, esta ejecución usó Windows y checkout
-con `core.autocrlf=true`; los datos conservan sus bytes por `.gitattributes`. Desde otra carpeta:
+| Estudio | Variables | Trials | Mejor trial | MAE CV | MAE validación independiente |
+|---|---:|---:|---:|---:|---:|
+| xgboost-temporal-v1 | 14 | 100 | 88 | 3986.65 | No evaluada |
+| xgboost-temporal-15-features-v1 | 15 | 100 | 56 | 3957.96 | 2221.76 |
+| xgboost-temporal-15-features-refinado-v1 | 15 | 60 | 49 | 3941.22 | 2229.22 |
 
-```bash
-git -c core.autocrlf=true clone --branch feature/modeling-xgboost https://github.com/AlesioRios/Trabajo-Practico-Final-LD2.git
-cd Trabajo-Practico-Final-LD2
-```
+La validación independiente usa las mismas 171 filas comunes (29/10/2022–26/04/2023),
+con ajuste solo sobre 830 filas de entrenamiento. El menor MAE CV del refinamiento
+no se tradujo en menor MAE de validación. No se eligió un modelo de producción ni
+se reentrenó con entrenamiento más validación; no se evaluó test.
 
-La instalación conserva conda + uv y las versiones exactas existentes (la corrida usó Python 3.12.14):
+Leer el [ADR 0019](docs/decisions/0019-xgboost-optuna.md), los JSON/CSV bajo
+`results/xgboost*/` y `notebooks/modelado_xgboost.ipynb`. La notebook consulta
+resultados guardados y muestra PNG existentes; su primera sección usa el dataset
+histórico de `data/processed/seleccion_original_14/`. No ejecutar los scripts de
+búsqueda ni evaluación para revisar un PR. Si falta SQLite histórico, la notebook
+lo restaura desde su ZIP; no crea trials. No sobrescribe figuras al consultarlas.
+Las salidas ejecutadas se conservaron; las correcciones de lectura de esta auditoría
+se verificaron estáticamente y no se reejecutó la notebook.
+
+Los scripts de búsqueda son entradas explícitas para experimentos autorizados:
+`src/modelado_xgboost_15.py` y `src/modelado_xgboost_15_refinado.py`.
+`src/modelado_xgboost.py` conserva el identificador histórico de 14 variables,
+pero el validador vigente exige 15: no usar su CLI para reproducir la corrida
+original. El código exacto original está en el commit registrado en su resumen;
+los datos originales están archivados. La reanudación verifica hashes y rechaza
+cambios de datos, versiones o código. Los ZIP y JSON bastan para consultar resultados
+sin reanudar ni restaurar estudios nuevos.
+
+### Entorno y portabilidad
+
+La ejecución registrada usó Python 3.12.14 y las versiones exactas de
+`requirements.txt`, incluidos Optuna 5.0.0, XGBoost 3.4.1 y scikit-learn 1.9.1.
+El nombre `cervecera_env` es convencional y se puede recrear; las rutas se resuelven
+respecto del repositorio, sin depender de la carpeta personal del autor.
 
 ```bash
 conda create -n cervecera_env python=3.12.14
@@ -186,38 +210,45 @@ conda activate cervecera_env
 python -m pip install uv==0.13.1
 uv pip install -r requirements.txt
 uv pip check
-python -m ipykernel install --user --name cervecera_env --display-name "Python (cervecera_env)"
-python -m pytest tests -q
 ```
 
-En una carpeta sincronizada por OneDrive, si se rechazan vínculos permanentes, usar
-`uv pip install --link-mode=copy -r requirements.txt` (mismas versiones).
-Se agregaron Optuna y cinco dependencias de persistencia, migraciones y presentación;
-las versiones reales y la justificación están en el ADR. No se actualizaron otras bibliotecas.
+En OneDrive, `uv pip install --link-mode=copy -r requirements.txt` evita enlaces
+permanentes. Para reproducir hashes históricos del código se requiere conservar
+los finales de línea de Windows (`core.autocrlf=true`), además de datos y versiones.
+La semilla sola no garantiza igualdad entre sistemas o versiones diferentes.
 
-Desde la raíz, con el código commiteado y sin cambios pendientes:
+El evaluador de la primera búsqueda de 15 variables lee por defecto los resultados
+ya guardados. Solo si se lo usa expresamente para una nueva evaluación y faltan
+esas salidas necesita la referencia Git `origin/feature/modeling-rf-lineales-experimentos`.
+Esa rama remota no es necesaria para consultar los resultados versionados; no se
+recomienda eliminarla sin revisar ese mecanismo de reproducción.
 
-```bash
-python src/modelado_xgboost.py --total 100 --guardar-evidencia
-```
+### Alcance del PR individual
 
-El indicador `--guardar-evidencia` exporta al terminar la copia SQLite consistente y los resultados versionables;
-si se planean más tandas, omitirlo hasta la última para mantener el árbol limpio.
-El mismo comando reanuda hasta un máximo de 100 trials en TOTAL, contando completos, podados y fallidos.
-`--total 10` permite una primera tanda; luego `--total 100` continúa sin duplicar los anteriores.
-Se comprueban versiones, configuración y huellas y se reproduce el estado de TPE sin reentrenar.
-Si una interrupción deja un trial RUNNING, se detiene para revisarlo; no ejecutarlo desde varios procesos.
+El PR de `feature/modeling-xgboost` apunta a `feature/modeling` y contiene el
+trabajo de XGBoost y los cambios propios vinculados al indicador de fin de año.
+No incorpora implementaciones, notebooks ni commits de Random Forest, Ridge o Lasso.
+`git fetch` solo actualiza referencias remotas; no integra esas ramas.
 
-La base SQLite y las salidas de trabajo están en `results/optuna/xgboost/`, ignorada para no contaminar
-el estado Git de cada experimento. La evidencia terminada está en `results/xgboost/`: copia comprimida de
-SQLite, detalle JSON por trial, tabla CSV y resumen. Los completos también quedan en `results/experiment_logs.csv`.
-Para restaurar desde un clon, abrir `notebooks/modelado_xgboost.ipynb`: si falta la base local, la notebook
-restaura la copia versionada sin sobrescribir bases existentes. Consultarla nunca inicia trials adicionales.
-La búsqueda todavía no realiza el análisis exhaustivo ni el entrenamiento definitivo.
+El log de esta rama contiene cuatro baselines heredados de la base y 139 registros
+propios de XGBoost. Las uniones de logs y los informes generales de auditoría se
+mantienen fuera del repositorio y no forman parte de este PR. La unión del registro
+general corresponde a la integración del equipo, conservando todas las filas originales.
 
+`results/xgboost_15_validacion/referencias_companera.csv` y `comparacion.csv` conservan
+referencias atribuidas utilizadas en la comparación histórica de XGBoost. No son
+implementaciones ni nuevas corridas de los modelos de otra integrante. No se borran
+para aparentar una ejecución distinta de la realizada.
 
-La selección vigente incluye 15 predictoras: las 14 originales más `es_fin_de_anio`, incorporada
-manualmente por posible información estacional (ADR 0015). Los resultados de selección y de Optuna
-existentes corresponden a las 14 originales y requieren revisión; no se han reentrenado modelos.
-El estudio anterior permanece intacto: el comando de búsqueda documentado es histórico y no debe
-utilizarse para continuar ese estudio con las 15 variables. Una futura búsqueda requiere identidad nueva.
+### Conjunto oficial definitivo
+
+El conjunto oficial del proyecto tiene **15 variables**, incluida `es_fin_de_anio`,
+con los nombres y el orden registrados en `data/processed/data_lineage.json`.
+El selector y los ejecutores vigentes de entrenamiento y evaluación utilizan ese
+mismo conjunto. No se implementa compatibilidad permanente con otra selección.
+Los artefactos de experimentos anteriores se conservan únicamente como evidencia
+histórica, con sus identificadores y contratos originales.
+
+Este PR corresponde al modelado, la optimización y la evaluación. Los puntos de
+entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el
+pipeline final de predicción no se presenta como implementado en este desarrollo.

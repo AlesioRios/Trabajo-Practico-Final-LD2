@@ -6,13 +6,35 @@
 
 ## Contexto
 
-La Fase 3 requiere optimización y seguimiento de experimentos. El ADR 0018 ya define las funciones comunes,
-las 14 variables, las filas comparables y cinco pliegues cronológicos con una fila de separación.
-Esta etapa busca configuraciones prometedoras solo en entrenamiento. No elige el modelo definitivo.
+La Fase 3 requiere optimización y seguimiento de experimentos. Este ADR documenta
+los estudios vigentes `xgboost-temporal-15-features-v1` y
+`xgboost-temporal-15-features-refinado-v1`, y conserva los antecedentes experimentales
+archivados con sus identificadores, métricas y commits, sin reinterpretarlos como
+resultados de los estudios vigentes.
+
+Al comenzar la Fase 3 y antes del entrenamiento de los modelos de los experimentos
+vigentes, decidimos incorporar la característica `fin_de_año`, identificada como
+`es_fin_de_anio` en el código y los datos. La decisión se basó en la hipótesis de
+que este indicador de calendario podía aportar información predictiva sobre el
+consumo del sistema de refrigeración durante el período de fin de año.
+
+Los experimentos vigentes de XGBoost y LightGBM se realizaron con 15 características,
+incluyendo `fin_de_año`. Su incorporación es una decisión de ingeniería de
+características motivada por una hipótesis, no una mejora demostrada del MAE:
+los resultados disponibles no permiten atribuirle de manera aislada una reducción
+del error. El indicador utiliza calendario conocido al emitir la predicción;
+vale 1 para DIA + 1 entre el 24 de diciembre y el 6 de enero inclusive, y 0 en el
+resto del año.
+
+El ADR 0018 define las funciones comunes, las filas comparables y cinco pliegues
+cronológicos con una fila de separación. Se buscan configuraciones prometedoras
+solo en entrenamiento; esta etapa no elige un modelo definitivo.
 
 ## Decisión
 
-Usar Optuna con TPESampler(seed=42), dirección minimize y máximo TOTAL de 100 trials secuenciales.
+Usar Optuna con TPESampler(seed=42), dirección minimize y máximo TOTAL de 100 trials
+secuenciales en la búsqueda inicial vigente; el refinamiento utiliza 60, como se
+detalla en la sección de experimentos ejecutados.
 Minimizar el MAE de todas las predicciones reunidas sobre las filas comunes de los cinco pliegues;
 registrar también RMSE y R² agregados y por pliegue, reutilizando las funciones comunes.
 No imputar, escalar ni transformar el objetivo. Crear un XGBRegressor nuevo por pliegue, sin early stopping.
@@ -32,9 +54,14 @@ MedianPruner usa n_startup_trials=5, n_warmup_steps=2, interval_steps=1 y n_min_
 Reportar MAE acumulado en los pasos 0 a 4. La poda puede comenzar en el tercer pliegue,
 una vez disponibles las referencias exigidas; Optuna compara el mejor intermedio del trial con la mediana del paso.
 
-Persistir en results/optuna/xgboost/estudio.sqlite3. La carpeta mutable se ignora para que no altere
-el control Git de los experimentos siguientes; results/experiment_logs.csv ya está excluido por el módulo común.
-Guardar al terminar una copia SQLite comprimida, detalle JSON, tabla CSV y resumen en results/xgboost/.
+Persistir los estudios vigentes por separado en
+results/optuna/xgboost_15/estudio_15.sqlite3 y
+results/optuna/xgboost_15_refinado/estudio_60.sqlite3. Las carpetas mutables se ignoran
+para que no alteren el control Git de los experimentos siguientes; el control del
+árbol excluye las escrituras de results/experiment_logs.csv. Guardar las copias
+SQLite comprimidas, detalle JSON, CSV y resumen en results/xgboost_15/ y
+results/xgboost_15_refinado/. La evidencia archivada en results/xgboost/ conserva su
+identidad y sus resultados, sin reasignarlos a los estudios vigentes.
 Registrar solo trials completos en el log común: podados y fallidos conservan estados y motivos en SQLite y JSON.
 El código debe estar commiteado antes de ejecutar; no se modifica la infraestructura común.
 
@@ -54,7 +81,10 @@ MedianPruner evita terminar siempre los cinco ajustes de configuraciones poco pr
 Los cinco pliegues respetan el orden cronológico y hacen comparables los modelos (tabla 2 del notebook).
 El MAE acumulado pondera observaciones, evitando que un pliegue con menos filas comunes pese lo mismo que otro mayor.
 No usar early stopping garantiza que n_estimators represente la cantidad de árboles realmente entrenada.
-Las tablas 6 a 9 y results/xgboost/resumen.json contienen los resultados ejecutados: 100 trials,
+### Antecedente experimental archivado
+
+Las tablas 6 a 9 y results/xgboost/resumen.json conservan el antecedente identificado
+como xgboost-temporal-v1. Sus resultados no se atribuyen a los estudios vigentes: 100 trials,
 45 completos, 55 podados y 0 fallidos. La mejor configuración provisional es el trial 88,
 con MAE 3.986,65 kW, RMSE 5.198,78 kW y R² 0,6009 sobre 677 filas comunes reunidas de los cinco pliegues.
 Sus parámetros son n_estimators=1258, learning_rate=0.0042724261637713265, max_depth=4,
@@ -86,7 +116,8 @@ La selección previa de variables no se repite dentro de cada pliegue: no es una
 Los trials podados no tienen métricas finales comparables con los completos.
 La reproducción exacta requiere mismos datos, versiones y orden; la ejecución es de un único proceso.
 Una interrupción abrupta necesita revisar el trial activo antes de reanudar.
-Quedan pendientes el análisis exhaustivo de resultados, el entrenamiento definitivo y la evaluación independiente.
+El entrenamiento definitivo y la elección final siguen pendientes. Las evaluaciones
+independientes de los estudios vigentes se detallan en la sección de resultados ejecutados.
 
 ## Dependencias y reproducción
 
@@ -107,9 +138,69 @@ Referencias: [TPE](https://optuna.readthedocs.io/en/stable/reference/samplers/ge
 [XGBRegressor](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBRegressor).
 
 
-## Vigencia tras la ampliación manual
+## Experimentos vigentes ejecutados
 
-Este ADR y todos sus resultados corresponden a las 14 variables originales. La selección vigente
-tiene 15 por la incorporación manual de es_fin_de_anio (ADR 0015). El estudio se conserva sin cambios
-y deberá revisarse mediante un estudio nuevo con identidad y almacenamiento distintos cuando se autorice.
-No se ejecutaron nuevos trials ni entrenamientos en esta actualización.
+Los estudios siguientes utilizan 15 características, incluido el indicador de fin
+de año incorporado por la hipótesis descrita en Contexto. Los resultados se conservan
+con sus identificadores y contratos, sin atribuir las diferencias entre búsquedas
+exclusivamente a esa característica.
+
+1. **Búsqueda inicial vigente.** El conjunto de 15 características incluye
+   `fin_de_año` (`es_fin_de_anio`), según la decisión de ingeniería de características
+   documentada en el ADR 0015. Estudio xgboost-temporal-15-features-v1: 100 trials, 47 completos,
+   53 podados, cero fallidos; ganador 56, MAE CV 3957.959999884601. Mismo TPE(42),
+   MedianPruner, cinco pliegues con gap=1 y MAE ponderado sobre filas comunes.
+   Evidencia en results/xgboost_15/; ejecutor src/modelado_xgboost_15.py.
+2. **Refinamiento.** Estudio xgboost-temporal-15-features-refinado-v1: 60 trials,
+   45 completos, 15 podados, cero fallidos; ganador 49, MAE CV 3941.2233212356905.
+   Se fijaron learning_rate=0.0020702351473759497 y max_depth=3 del ganador anterior.
+   Rangos: n_estimators 1750–3000, min_child_weight 4–5 logarítmico, subsample
+   0.87–0.97 y colsample_bytree 0.80–1.0. Sin early stopping. Rangos, top 10 y
+   justificación en results/xgboost_15_refinado/ y src/modelado_xgboost_15_refinado.py.
+3. **Validación independiente.** Cada ganador de 15 variables se ajustó solo con
+   las 830 filas de entrenamiento y se midió en las mismas 171 filas comunes de
+   validación (29/10/2022–26/04/2023). Primer estudio: MAE 2221.7606336805557,
+   RMSE 2844.3074191916603, R² 0.4644113105021027. Refinado: MAE
+   2229.2246293631215, RMSE 2853.130567574821, R² 0.4610833242874175.
+   El refinado mejora CV pero empeora validación en 7.4639956825658. No se cambian
+   hiperparámetros a partir de las curvas de validación. Se preservan ambos resultados.
+4. **Curvas.** El refinado registra train y validación en eval_set solo para
+   diagnóstico: sin early stopping, callbacks de selección ni truncamiento de árboles;
+   se entrenaron los 1994 árboles fijados antes de evaluar. PNG y CSV por árbol en
+   results/xgboost_15_refinado_validacion/.
+
+No se guardó un modelo XGBoost serializado como artefacto de producción. Las
+predicciones guardadas permiten verificar las métricas sin reentrenar. El registro
+común conserva los commits y el estado Git reales de cada ejecución. No se evaluó
+prueba ni se modificó model_registry.json. La elección y el reentrenamiento final
+siguen pendientes de decisión del equipo.
+
+La auditoría corrigió solo documentación, la base de la plantilla PR y la lectura
+idempotente de la notebook propia: contratos de los artefactos archivados
+explícitos, PNG y evaluaciones consultados sin generar nuevos ajustes.
+Los módulos usados en las búsquedas no se tocaron para conservar sus hashes.
+El texto con codificación antigua en esos módulos se preserva por esa trazabilidad;
+no hay rutas personales ejecutables. Las salidas de la notebook no se reejecutaron.
+
+## Auditoría del tracking exigido en 3.2
+
+Se contrastaron los trials COMPLETE y las evaluaciones guardadas con el log:
+139 registros: 137 configuraciones CV completas y 2 ajustes evaluados en validación. Todas las filas incluyen parámetros fijos
+y sugeridos en hiperparametros (JSON), mae, rmse, r2 y fecha_hora ISO. El timestamp
+lo genera registrar_experimento al registrar; no representa el inicio del fit.
+El callback de Optuna escribe automáticamente y usa estudio/trial para evitar
+duplicados. Cada experimento CV completo agrupa los cinco pliegues; no se registra
+una fila por ajuste de pliegue. Los trials podados conservan sus tiempos, estados
+e intermedios originales en SQLite y detalle.json; no se inventan métricas finales
+para agregarlos como COMPLETE al CSV. No se detectaron registros completos faltantes.
+
+El atributo merge=union del CSV no valida filas ni deduplica. La integración debe
+conservar las filas completas de todas las ramas, normalizando solo el orden JSON
+para detectar copias idénticas; no deduplicar por modelo/hiperparámetros/MAE, porque
+ejecuciones reales distintas pueden repetir esos valores. Se preservan exactamente
+fecha_hora, commit, notas y métricas. La consolidación de registros de todos los modelos corresponde a la integración
+posterior del equipo, fuera de los PR individuales. Los logs de estas ramas
+conservan solo sus registros propios y los baselines heredados. Los archivos de
+unión y auditoría general se mantienen fuera de ambos repositorios y no se
+proponen para estos PR. No se repitieron entrenamientos ni se asignaron timestamps
+históricos nuevos.
