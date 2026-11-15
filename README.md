@@ -283,3 +283,44 @@ permanente con otra selección ni se modifican los artefactos históricos.
 Este PR corresponde al modelado, la optimización y la evaluación. Los puntos de
 entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el
 pipeline final de predicción no se presenta como implementado en este desarrollo.
+
+### Diagnóstico de validación sin ejecutar modelos (15/11/2026)
+
+El [informe de diagnóstico](results/xgboost_diagnostico_validacion/informe.md)
+completa los gráficos de predicción frente a real y el análisis de residuos de
+las dos búsquedas vigentes usando exclusivamente sus CSV de validación guardados.
+La carpeta contiene cinco PNG comparativos, residuos por fila y mes, errores
+mayores, parámetros completos, espacios de búsqueda y auditoría del tracking.
+`verificacion.json` registra las huellas de los originales y el entorno del análisis.
+No se abre `dataset_final.csv`, no se cargan estimadores y no se escribe en el log.
+
+Desde la raíz del repositorio, con `cervecera_env` (Python 3.12):
+
+```powershell
+python -B src/diagnostico_xgboost.py
+python -B src/actualizar_diagnostico_notebook.py
+python -B -m pytest tests/test_diagnostico_xgboost.py -q -p no:cacheprovider
+```
+
+El segundo comando requiere el kernel Jupyter `cervecera_env`: ejecuta únicamente
+el apéndice autónomo de las secciones 13–16 de `notebooks/modelado_xgboost.ipynb`.
+Si el entorno todavía no está registrado en Jupyter, hacerlo desde ese entorno con
+`python -m ipykernel install --user --name cervecera_env --display-name cervecera_env`.
+Preserva las fuentes y salidas de las 33 celdas históricas; no ejecuta el notebook
+completo ni restaura estudios de Optuna. La lectura del informe y de los PNG no
+requiere Jupyter. El archivo de pruebas indicado no contiene entrenamiento.
+No ejecutar la suite completa ni los evaluadores para esta consulta: contienen
+ajustes de modelos. No se agregaron dependencias a `requirements.txt`.
+
+El log conserva 139 registros XGBoost, con parámetros, métricas y timestamps
+originales verificados. La granularidad es por experimento completo, no por
+ajuste de pliegue; los trials podados se conservan fuera del CSV. Esta limitación
+de la sección 3.2 queda documentada, sin inventar registros ni tiempos históricos.
+La diferencia entre métricas del CSV decimal y del log se explica por float32;
+su recuperación reproduce las métricas históricas sin modificar predicciones.
+
+La [auditoría de ambos modelos](docs/auditoria-fase3-modelos.md) contrasta las
+secciones 3.1–3.4 del PDF oficial de referencias y la ubicación de los entregables.
+LightGBM se inspeccionó en su rama sin modificarlo. La integración al notebook
+común, elección global, importancia de variables del ganador y registro semántico
+siguen pendientes. No se presenta la Fase 3 completa como finalizada.

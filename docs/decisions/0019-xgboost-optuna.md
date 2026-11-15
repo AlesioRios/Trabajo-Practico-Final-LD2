@@ -204,3 +204,45 @@ conservan solo sus registros propios y los baselines heredados. Los archivos de
 unión y auditoría general se mantienen fuera de ambos repositorios y no se
 proponen para estos PR. No se repitieron entrenamientos ni se asignaron timestamps
 históricos nuevos.
+
+## Diagnóstico de predicciones archivadas (15/11/2026)
+
+Se completa el diagnóstico de 3.3 con `src/diagnostico_xgboost.py`, sin importar
+estimadores ni abrir el dataset. Se leen únicamente las predicciones y evaluaciones
+guardadas de las dos búsquedas de 15 variables, los estudios exportados y el log.
+Los originales se conservan por SHA-256; no hay nuevos entrenamientos ni registros
+de experimentos. El código previo de búsqueda y evaluación no se modifica.
+
+Se guardan cinco PNG en `results/xgboost_diagnostico_validacion/`: predicción frente
+a real, serie temporal real/predicho, histograma de residuos, residuos frente a
+predicción y residuos temporales. `resumen_residuos.csv`, `residuos_por_mes.csv` y
+`errores_mayores.csv` fundamentan el informe. El residuo es real menos predicho.
+Las secciones 13–16 del notebook propio leen esos resultados de forma autónoma.
+`src/actualizar_diagnostico_notebook.py` ejecuta solo ese apéndice; las celdas
+históricas conservan sus fuentes y salidas sin reejecución.
+
+El sesgo global inicial es −79,93 kW y el refinado −53,41 kW, pero el desvío inicial
+es 2851,53 kW. En enero el sesgo inicial es +1599,66 kW (29 filas), y en abril,
+−1673,62 kW (22 filas). El mayor error inicial es 7672,62 kW, índice CSV 953,
+emisión 02/03/2023. Los diez mayores concentran 16,89 % del error absoluto.
+El refinado mejora CV en 16,74 kW pero empeora validación en 7,46 kW; no se
+modifican hiperparámetros ni se interpreta esa diferencia como significativa.
+
+Las representaciones decimales del CSV tienen un pequeño error de serialización:
+recuperar las predicciones float32 reproduce las métricas registradas. Los
+residuos usan los decimales originales y las métricas históricas se muestran
+separadas. No se alteran ni corrigen retrospectivamente los resultados.
+
+`auditoria_tracking.csv` contrasta 137 COMPLETE históricos y vigentes y dos
+validaciones con sus 139 registros originales. No faltan esos experimentos y
+coinciden parámetros, métricas, filas, semilla, commit y fecha. Sigue pendiente
+la lectura literal del tracking por cada ajuste de 3.2: el CSV agrupa pliegues,
+los podados quedan en Optuna/JSON y no existen timestamps por ajuste recuperables
+sin inventarlos. No se fabrican filas para declarar cumplimiento total.
+
+Se descarta entrenar o reconstruir un modelo para extraer importancias: no hay
+estimador XGBoost serializado y la consigna exige feature importance del ganador
+global, aún no elegido. El diagnóstico no prueba normalidad, independencia,
+causas operativas ni generalización a prueba. Las fechas siguen siendo rótulos
+de emisión por bloque y los meses parciales no son comparables como años completos.
+El informe completo y los controles son la evidencia para la integración posterior.
