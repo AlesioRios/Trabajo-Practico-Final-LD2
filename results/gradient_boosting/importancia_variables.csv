@@ -1,0 +1,16 @@
+variable,importancia
+Frio (Kw),0.15090297510517808
+Frio (Kw) x frio_hace_2_dias,0.05559372108574826
+frio_media_7_dias,0.16407571100194265
+Sala Maq (Kw),0.04595051847988478
+Frio (Kw) x Consolidado Agua | Agua Planta (Hl),0.05567977746633471
+Servicios (Kw),0.028103278521365075
+Frio (Kw) x Totalizadores Energia | KW Trafo 9,0.06950809103078541
+dia_anio_coseno,0.21164753984948556
+frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl),0.0355237290517752
+dia_anio_coseno x Consolidado Agua | Agua Planta (Hl),0.09101477705479606
+KW Gral Planta,0.02158043304862401
+frio_hace_2_dias,0.021545725179556375
+Consolidado Agua | Agua Planta (Hl),0.023552841827709434
+Totalizadores Energia | KW Trafo 9,0.02532088129681441
+es_fin_de_anio,0.0
