@@ -40,7 +40,6 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   ├── preprocessing_pipeline.py           (punto de entrada de la Fase 2)
 │   ├── limpieza.py, variables_*.py         (limpieza y variables nuevas)
 │   ├── seleccion_*.py, pipeline_sklearn.py (selección de variables y Pipeline)
-│   ├── modelado_comun.py                   (Fase 3: carga del dataset, baselines y registro de experimentos)
 │   ├── train_model.py
 │   ├── predict.py
 │   └── auxiliar_functions.py

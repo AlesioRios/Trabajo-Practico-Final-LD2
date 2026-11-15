@@ -7,9 +7,6 @@ from pathlib import Path
 import pandas as pd
 
 from auxiliar_functions import (
-    MINIMO_DIAS_MEDIA_MOVIL,
-    VENTANA_MEDIA_MOVIL,
-    calcular_baselines,
     cierres_de_otras_hojas,
     cierres_por_bloque,
     construir_diario,
@@ -139,14 +136,10 @@ def ejecutar_preprocesamiento(carpeta_datos=CARPETA_DATOS_POR_DEFECTO, usar_cach
 
 
 CARPETA_SALIDA_POR_DEFECTO = CARPETA_DATOS_POR_DEFECTO / "processed"
-# Se guardan en el CSV, pero NO son entradas del modelo (ADR 0017 y 0018). `consumo_dia` vale lo mismo que la
-# variable `Frio (Kw)` (es el consumo de hoy) y es el baseline de persistencia. `baseline_media_movil` es el promedio
-# de los últimos 7 días (mínimo 4 válidos). Se guardan aparte porque la Fase 3 las necesita para comparar los modelos
-# contra los baselines, y la media móvil necesita los días anteriores, que el CSV ya no tiene (se quitaron las filas
-# sin objetivo): por eso se calcula acá, con toda la tabla y mirando solo el pasado.
-COLUMNA_PERSISTENCIA = "consumo_dia"
-COLUMNA_MEDIA_MOVIL = "baseline_media_movil"
-COLUMNAS_AUXILIARES = (COLUMNA_PERSISTENCIA, COLUMNA_MEDIA_MOVIL)
+# Se guardan en el CSV, pero NO son entradas del modelo. `consumo_dia` vale lo mismo que la variable `Frio (Kw)`
+# (es el consumo de hoy): se conserva aparte porque la Fase 3 la necesita para recalcular los baselines
+# (persistencia y media móvil) y no queremos que eso dependa de qué variables eligió la selección (ADR 0017).
+COLUMNAS_AUXILIARES = ("consumo_dia",)
 
 
 def _quitar_etiquetas_de_frontera(tabla_con_variables):
@@ -178,10 +171,9 @@ def completar_fase2(resultado, carpeta_salida=CARPETA_SALIDA_POR_DEFECTO, guarda
     from seleccion_de_variables import seleccionar_variables
 
     tabla = _quitar_etiquetas_de_frontera(resultado["tabla_con_variables"])
-    if COLUMNA_PERSISTENCIA not in tabla.columns:
-        raise ValueError(f"Falta la columna auxiliar {COLUMNA_PERSISTENCIA!r} en la tabla con variables.")
-    # La media móvil mira solo hacia atrás y se calcula con TODAS las filas (también las que no llegan al CSV)
-    tabla[COLUMNA_MEDIA_MOVIL] = calcular_baselines(tabla)["media_movil"]
+    for columna in COLUMNAS_AUXILIARES:
+        if columna not in tabla.columns:
+            raise ValueError(f"Falta la columna auxiliar {columna!r} en la tabla con variables.")
     entrenamiento, validacion, prueba = dividir_por_fecha(tabla)
     columnas = seleccionar_variables(entrenamiento, entrenamiento["objetivo"])      # lista congelada: no aprende
     X_train, _ = separar_xy(entrenamiento, columnas)
@@ -201,9 +193,7 @@ def completar_fase2(resultado, carpeta_salida=CARPETA_SALIDA_POR_DEFECTO, guarda
             carpeta_salida, {**resultado["reglas"], "grupos": grupos}, columnas, shapes,
             {"columnas_auxiliares": list(COLUMNAS_AUXILIARES), "variante_pipeline": VARIANTE_POR_DEFECTO,
              "alpha_de_referencia": ALPHA_ELEGIDO, "forma_tras_el_pipeline": forma_tras_el_pipeline,
-             "filas_de_frontera_quitadas": 2,
-             "baselines": {"persistencia": COLUMNA_PERSISTENCIA, "media_movil": COLUMNA_MEDIA_MOVIL,
-                           "ventana_dias": VENTANA_MEDIA_MOVIL, "minimo_dias_validos": MINIMO_DIAS_MEDIA_MOVIL}})
+             "filas_de_frontera_quitadas": 2})
     return {"columnas": columnas, "shapes": shapes, "forma_tras_el_pipeline": forma_tras_el_pipeline,
             "rutas": rutas}
 
