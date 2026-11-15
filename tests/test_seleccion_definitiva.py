@@ -17,7 +17,9 @@ def test_oficial_no_recalcula_ni_usa_etiquetas(monkeypatch):
         raise AssertionError("No debe recalcular selección")
     monkeypatch.setattr(s, "aprender_seleccion", prohibido)
     assert s.seleccionar_variables(X, object()) == reglas["variables"]
-    assert d.preprocesar_conjunto_definitivo(X).shape == (2, 27)
+    assert len(reglas["variables"]) == 15
+    assert reglas["variables"][-1] == "es_fin_de_anio"
+    assert d.preprocesar_conjunto_definitivo(X).shape == (2, 28)
     with pytest.raises(ValueError, match="Faltan"):
         s.seleccionar_variables(X.drop(columns=X.columns[0]), None)
     with pytest.raises(ValueError, match="únicas"):
