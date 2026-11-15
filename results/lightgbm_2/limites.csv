@@ -1,0 +1,10 @@
+hiperparametro,valor,minimo,maximo,posicion_relativa,cerca_limite
+n_estimators,200.0,150.0,900.0,0.06666666666666667,no
+learning_rate,0.036985470389312915,0.01,0.1,0.2998385598812546,no
+max_depth,3.0,3.0,6.0,0.0,inferior
+num_leaves,8.0,8.0,8.0,,fijo por condición
+min_child_samples,31.0,10.0,60.0,0.42,no
+subsample,0.7870286296445328,0.75,1.0,0.14811451857813118,no
+colsample_bytree,0.8638540491377883,0.65,1.0,0.6110115689651093,no
+reg_alpha,0.4172446705183493,0.001,10.0,0.655097699531797,no
+reg_lambda,2.5151783649755584,0.001,10.0,0.8501421971668659,no

@@ -1,0 +1,268 @@
+{
+  "busquedas": [
+    {
+      "busqueda": 1,
+      "trial": 72,
+      "mae_optuna": 3982.2352900988362,
+      "mae_validacion": 2321.0388311700585,
+      "rmse_validacion": 2937.758378144207,
+      "r2_validacion": 0.42863915413104614,
+      "mae_entrenamiento": 2060.1252128109154,
+      "rmse_entrenamiento": 2681.561802264485,
+      "r2_entrenamiento": 0.8821418779244313,
+      "brecha_mae_val_train": 260.91361835914313,
+      "filas_ajuste": 830,
+      "filas_metricas_entrenamiento": 813,
+      "filas_validacion": 171,
+      "estados": {
+        "COMPLETE": 38,
+        "PRUNED": 62
+      }
+    },
+    {
+      "busqueda": 2,
+      "trial": 99,
+      "mae_optuna": 3948.7260599146152,
+      "mae_validacion": 2276.735433652959,
+      "rmse_validacion": 2873.1356736323023,
+      "r2_validacion": 0.45349945701800165,
+      "mae_entrenamiento": 2358.1345169707483,
+      "rmse_entrenamiento": 3044.9621524954755,
+      "r2_entrenamiento": 0.8480335587071621,
+      "brecha_mae_val_train": -81.39908331778952,
+      "filas_ajuste": 830,
+      "filas_metricas_entrenamiento": 813,
+      "filas_validacion": 171,
+      "estados": {
+        "COMPLETE": 46,
+        "PRUNED": 54
+      }
+    }
+  ],
+  "diferencias": {
+    "mae_optuna": {
+      "segunda_menos_primera": -33.509230184220996,
+      "variacion_porcentual": -0.8414678627236343
+    },
+    "mae_validacion": {
+      "segunda_menos_primera": -44.30339751709971,
+      "variacion_porcentual": -1.9087745074375138
+    },
+    "rmse_validacion": {
+      "segunda_menos_primera": -64.62270451190489,
+      "variacion_porcentual": -2.199728370878727
+    },
+    "r2_validacion": {
+      "segunda_menos_primera": 0.02486030288695551,
+      "variacion_porcentual": 5.799820816031908
+    }
+  },
+  "parametros": [
+    {
+      "busqueda": 1,
+      "hiperparametro": "subsample_freq",
+      "valor": 1
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "random_state",
+      "valor": 42
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "verbosity",
+      "valor": -1
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "n_jobs",
+      "valor": 1
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "n_estimators",
+      "valor": 181
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "learning_rate",
+      "valor": 0.03424176159068181
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "max_depth",
+      "valor": 6
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "num_leaves",
+      "valor": 19
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "min_child_samples",
+      "valor": 30
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "subsample",
+      "valor": 0.7707876885996955
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "colsample_bytree",
+      "valor": 0.8526564656588659
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "reg_alpha",
+      "valor": 0.04936749658169118
+    },
+    {
+      "busqueda": 1,
+      "hiperparametro": "reg_lambda",
+      "valor": 0.2615223634574941
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "subsample_freq",
+      "valor": 1
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "random_state",
+      "valor": 42
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "verbosity",
+      "valor": -1
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "n_jobs",
+      "valor": 1
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "n_estimators",
+      "valor": 200
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "learning_rate",
+      "valor": 0.036985470389312915
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "max_depth",
+      "valor": 3
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "num_leaves",
+      "valor": 8
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "min_child_samples",
+      "valor": 31
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "subsample",
+      "valor": 0.7870286296445328
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "colsample_bytree",
+      "valor": 0.8638540491377883
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "reg_alpha",
+      "valor": 0.4172446705183493
+    },
+    {
+      "busqueda": 2,
+      "hiperparametro": "reg_lambda",
+      "valor": 2.5151783649755584
+    }
+  ],
+  "limites_segunda_busqueda": [
+    {
+      "hiperparametro": "n_estimators",
+      "valor": 200,
+      "minimo": 150,
+      "maximo": 900,
+      "posicion_relativa": 0.06666666666666667,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "learning_rate",
+      "valor": 0.036985470389312915,
+      "minimo": 0.01,
+      "maximo": 0.1,
+      "posicion_relativa": 0.2998385598812546,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "max_depth",
+      "valor": 3,
+      "minimo": 3,
+      "maximo": 6,
+      "posicion_relativa": 0.0,
+      "cerca_limite": "inferior"
+    },
+    {
+      "hiperparametro": "num_leaves",
+      "valor": 8,
+      "minimo": 8,
+      "maximo": 8,
+      "posicion_relativa": null,
+      "cerca_limite": "fijo por condición"
+    },
+    {
+      "hiperparametro": "min_child_samples",
+      "valor": 31,
+      "minimo": 10,
+      "maximo": 60,
+      "posicion_relativa": 0.42,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "subsample",
+      "valor": 0.7870286296445328,
+      "minimo": 0.75,
+      "maximo": 1.0,
+      "posicion_relativa": 0.14811451857813118,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "colsample_bytree",
+      "valor": 0.8638540491377883,
+      "minimo": 0.65,
+      "maximo": 1.0,
+      "posicion_relativa": 0.6110115689651093,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "reg_alpha",
+      "valor": 0.4172446705183493,
+      "minimo": 0.001,
+      "maximo": 10.0,
+      "posicion_relativa": 0.655097699531797,
+      "cerca_limite": "no"
+    },
+    {
+      "hiperparametro": "reg_lambda",
+      "valor": 2.5151783649755584,
+      "minimo": 0.001,
+      "maximo": 10.0,
+      "posicion_relativa": 0.8501421971668659,
+      "cerca_limite": "no"
+    }
+  ],
+  "criterio_cerca_limite": "5% del ancho; escala log10 para regularización",
+  "limitacion": "Comparación descriptiva: no demuestra significación estadística. La validación ya se usó para comparar modelos y seleccionar variables; no reemplaza test."
+}

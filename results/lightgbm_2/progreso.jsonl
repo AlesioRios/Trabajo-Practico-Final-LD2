@@ -1,0 +1,100 @@
+{"trial": 0, "avance": "1/100", "estado": "COMPLETE", "mae": 4545.00652424564, "mae_parcial": null, "mejor_mae": 4545.00652424564, "mejor_trial": 0, "nuevos_mejores_parametros": {"n_estimators": 431, "learning_rate": 0.09556428757689246, "max_depth": 5, "num_leaves": 22, "min_child_samples": 17, "subsample": 0.7889986300840507, "colsample_bytree": 0.6703292642588699, "reg_alpha": 2.9154431891537547, "reg_lambda": 0.2537815508265665}}
+{"trial": 1, "avance": "2/100", "estado": "COMPLETE", "mae": 4075.02643247349, "mae_parcial": null, "mejor_mae": 4075.02643247349, "mejor_trial": 1, "nuevos_mejores_parametros": {"n_estimators": 681, "learning_rate": 0.011852604486622221, "max_depth": 6, "num_leaves": 27, "min_child_samples": 20, "subsample": 0.7954562418017752, "colsample_bytree": 0.7141915784487018, "reg_alpha": 0.016480446427978974, "reg_lambda": 0.12561043700013558}}
+{"trial": 2, "avance": "3/100", "estado": "COMPLETE", "mae": 4198.370380352555, "mae_parcial": null, "mejor_mae": 4075.02643247349, "mejor_trial": 1}
+{"trial": 3, "avance": "4/100", "estado": "COMPLETE", "mae": 4072.032967982335, "mae_parcial": null, "mejor_mae": 4072.032967982335, "mejor_trial": 3, "nuevos_mejores_parametros": {"n_estimators": 536, "learning_rate": 0.06331731119758383, "max_depth": 3, "num_leaves": 8, "min_child_samples": 40, "subsample": 0.7926310309218229, "colsample_bytree": 0.6727680575448478, "reg_alpha": 6.245139574743075, "reg_lambda": 7.2866537374910445}}
+{"trial": 4, "avance": "5/100", "estado": "COMPLETE", "mae": 4079.5434643746457, "mae_parcial": null, "mejor_mae": 4072.032967982335, "mejor_trial": 3}
+{"trial": 5, "avance": "6/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4109.769809073713, "mejor_mae": 4072.032967982335, "mejor_trial": 3}
+{"trial": 6, "avance": "7/100", "estado": "PRUNED", "mae": null, "mae_parcial": 5166.52724994279, "mejor_mae": 4072.032967982335, "mejor_trial": 3}
+{"trial": 7, "avance": "8/100", "estado": "COMPLETE", "mae": 4064.159014954594, "mae_parcial": null, "mejor_mae": 4064.159014954594, "mejor_trial": 7, "nuevos_mejores_parametros": {"n_estimators": 353, "learning_rate": 0.08458637582367365, "max_depth": 4, "num_leaves": 10, "min_child_samples": 37, "subsample": 0.7852310562436906, "colsample_bytree": 0.9307689432639139, "reg_alpha": 0.0019870215385428634, "reg_lambda": 8.862326508576253}}
+{"trial": 8, "avance": "9/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4551.083474292572, "mejor_mae": 4064.159014954594, "mejor_trial": 7}
+{"trial": 9, "avance": "10/100", "estado": "COMPLETE", "mae": 4045.2092436993203, "mae_parcial": null, "mejor_mae": 4045.2092436993203, "mejor_trial": 9, "nuevos_mejores_parametros": {"n_estimators": 419, "learning_rate": 0.020428215357261678, "max_depth": 6, "num_leaves": 22, "min_child_samples": 26, "subsample": 0.7658895875715059, "colsample_bytree": 0.7588438126004817, "reg_alpha": 0.01998634077852888, "reg_lambda": 0.8287522363768158}}
+{"trial": 10, "avance": "11/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4967.955732420749, "mejor_mae": 4045.2092436993203, "mejor_trial": 9}
+{"trial": 11, "avance": "12/100", "estado": "COMPLETE", "mae": 4033.651591284242, "mae_parcial": null, "mejor_mae": 4033.651591284242, "mejor_trial": 11, "nuevos_mejores_parametros": {"n_estimators": 438, "learning_rate": 0.036377409479467146, "max_depth": 3, "num_leaves": 8, "min_child_samples": 38, "subsample": 0.8016529647312713, "colsample_bytree": 0.8033753836560836, "reg_alpha": 0.019334437110518538, "reg_lambda": 2.2558396442319375}}
+{"trial": 12, "avance": "13/100", "estado": "COMPLETE", "mae": 3995.0076664782973, "mae_parcial": null, "mejor_mae": 3995.0076664782973, "mejor_trial": 12, "nuevos_mejores_parametros": {"n_estimators": 293, "learning_rate": 0.014906974134522747, "max_depth": 4, "num_leaves": 12, "min_child_samples": 25, "subsample": 0.7629845431463932, "colsample_bytree": 0.8464773120333192, "reg_alpha": 0.048152369087802425, "reg_lambda": 3.69676162382709}}
+{"trial": 13, "avance": "14/100", "estado": "COMPLETE", "mae": 4048.9073771966328, "mae_parcial": null, "mejor_mae": 3995.0076664782973, "mejor_trial": 12}
+{"trial": 14, "avance": "15/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4578.992771982493, "mejor_mae": 3995.0076664782973, "mejor_trial": 12}
+{"trial": 15, "avance": "16/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4586.546110876176, "mejor_mae": 3995.0076664782973, "mejor_trial": 12}
+{"trial": 16, "avance": "17/100", "estado": "COMPLETE", "mae": 4035.6709006006818, "mae_parcial": null, "mejor_mae": 3995.0076664782973, "mejor_trial": 12}
+{"trial": 17, "avance": "18/100", "estado": "COMPLETE", "mae": 3968.3297290468777, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17, "nuevos_mejores_parametros": {"n_estimators": 203, "learning_rate": 0.04078940249312388, "max_depth": 3, "num_leaves": 8, "min_child_samples": 30, "subsample": 0.7863368733845684, "colsample_bytree": 0.8508269036510431, "reg_alpha": 0.38882538693694124, "reg_lambda": 1.7262571292665427}}
+{"trial": 18, "avance": "19/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4524.974108257073, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 19, "avance": "20/100", "estado": "COMPLETE", "mae": 4000.1025464776644, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 20, "avance": "21/100", "estado": "COMPLETE", "mae": 3987.9859692494906, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 21, "avance": "22/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4513.706371706634, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 22, "avance": "23/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4787.560466199046, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 23, "avance": "24/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4557.827375215506, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 24, "avance": "25/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4520.44234094224, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 25, "avance": "26/100", "estado": "COMPLETE", "mae": 4003.5388960175806, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 26, "avance": "27/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4635.478732652312, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 27, "avance": "28/100", "estado": "COMPLETE", "mae": 4001.8771239069606, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 28, "avance": "29/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4638.894915139383, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 29, "avance": "30/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4582.742414665252, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 30, "avance": "31/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4518.893499087315, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 31, "avance": "32/100", "estado": "COMPLETE", "mae": 4005.3166437691507, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 32, "avance": "33/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4726.360894626981, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 33, "avance": "34/100", "estado": "COMPLETE", "mae": 3992.2312488508655, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 34, "avance": "35/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4040.0377751000356, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 35, "avance": "36/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4538.214703988034, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 36, "avance": "37/100", "estado": "COMPLETE", "mae": 4000.4000598008147, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 37, "avance": "38/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4546.895607988179, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 38, "avance": "39/100", "estado": "COMPLETE", "mae": 3997.0849512043715, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 39, "avance": "40/100", "estado": "COMPLETE", "mae": 4018.679524503356, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 40, "avance": "41/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4033.172105455009, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 41, "avance": "42/100", "estado": "COMPLETE", "mae": 4001.988742793258, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 42, "avance": "43/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4544.486348913534, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 43, "avance": "44/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4505.02208332723, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 44, "avance": "45/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4568.2708365849685, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 45, "avance": "46/100", "estado": "COMPLETE", "mae": 3993.1229269129253, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 46, "avance": "47/100", "estado": "COMPLETE", "mae": 4001.909773755358, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 47, "avance": "48/100", "estado": "COMPLETE", "mae": 3976.257830059675, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 48, "avance": "49/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4486.840617109917, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 49, "avance": "50/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4107.78926316765, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 50, "avance": "51/100", "estado": "COMPLETE", "mae": 3984.154240146161, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 51, "avance": "52/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4493.9589620376055, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 52, "avance": "53/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4502.149815976854, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 53, "avance": "54/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4523.648481364046, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 54, "avance": "55/100", "estado": "COMPLETE", "mae": 3974.3987129675897, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 55, "avance": "56/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4487.467273577315, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 56, "avance": "57/100", "estado": "COMPLETE", "mae": 3992.022448877607, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 57, "avance": "58/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4486.78513118927, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 58, "avance": "59/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4520.963749473313, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 59, "avance": "60/100", "estado": "COMPLETE", "mae": 3976.466655435469, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 60, "avance": "61/100", "estado": "COMPLETE", "mae": 3977.8388552210477, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 61, "avance": "62/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4552.610957003362, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 62, "avance": "63/100", "estado": "COMPLETE", "mae": 3977.4152169625263, "mae_parcial": null, "mejor_mae": 3968.3297290468777, "mejor_trial": 17}
+{"trial": 63, "avance": "64/100", "estado": "COMPLETE", "mae": 3962.6090031446756, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63, "nuevos_mejores_parametros": {"n_estimators": 214, "learning_rate": 0.03398495911439437, "max_depth": 3, "num_leaves": 8, "min_child_samples": 31, "subsample": 0.8007178894814254, "colsample_bytree": 0.8642254275542129, "reg_alpha": 0.16461431321276962, "reg_lambda": 1.1086291818557945}}
+{"trial": 64, "avance": "65/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4525.022434059793, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 65, "avance": "66/100", "estado": "COMPLETE", "mae": 3984.6601050366007, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 66, "avance": "67/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4508.922354674076, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 67, "avance": "68/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4500.876771142239, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 68, "avance": "69/100", "estado": "COMPLETE", "mae": 3983.135439779368, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 69, "avance": "70/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4499.241810617049, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 70, "avance": "71/100", "estado": "COMPLETE", "mae": 3972.772682231694, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 71, "avance": "72/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4520.887555698078, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 72, "avance": "73/100", "estado": "COMPLETE", "mae": 3988.7583495726662, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 73, "avance": "74/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4503.597450862617, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 74, "avance": "75/100", "estado": "COMPLETE", "mae": 3981.554304266947, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 75, "avance": "76/100", "estado": "COMPLETE", "mae": 3965.0201847627923, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 76, "avance": "77/100", "estado": "COMPLETE", "mae": 3964.3258289579658, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 77, "avance": "78/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4491.146519093501, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 78, "avance": "79/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4505.9768561080655, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 79, "avance": "80/100", "estado": "COMPLETE", "mae": 3970.380096573306, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 80, "avance": "81/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4511.879241923645, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 81, "avance": "82/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4489.255859056948, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 82, "avance": "83/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4484.370119810275, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 83, "avance": "84/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4498.532167125936, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 84, "avance": "85/100", "estado": "COMPLETE", "mae": 3968.5019693071163, "mae_parcial": null, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 85, "avance": "86/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4487.612481885705, "mejor_mae": 3962.6090031446756, "mejor_trial": 63}
+{"trial": 86, "avance": "87/100", "estado": "COMPLETE", "mae": 3961.366650284534, "mae_parcial": null, "mejor_mae": 3961.366650284534, "mejor_trial": 86, "nuevos_mejores_parametros": {"n_estimators": 222, "learning_rate": 0.02860128078816678, "max_depth": 3, "num_leaves": 8, "min_child_samples": 30, "subsample": 0.7853998524752874, "colsample_bytree": 0.819100782616199, "reg_alpha": 0.459567012972166, "reg_lambda": 0.6116006196530286}}
+{"trial": 87, "avance": "88/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4524.480946181641, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 88, "avance": "89/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4488.112885023485, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 89, "avance": "90/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4497.870797935638, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 90, "avance": "91/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4536.442607430943, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 91, "avance": "92/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4491.278976895099, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 92, "avance": "93/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4505.218707487548, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 93, "avance": "94/100", "estado": "COMPLETE", "mae": 3973.1088232054717, "mae_parcial": null, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 94, "avance": "95/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4482.350083922736, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 95, "avance": "96/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4504.702215264091, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 96, "avance": "97/100", "estado": "PRUNED", "mae": null, "mae_parcial": 4521.055164393627, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 97, "avance": "98/100", "estado": "COMPLETE", "mae": 3970.7646754529565, "mae_parcial": null, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 98, "avance": "99/100", "estado": "COMPLETE", "mae": 3970.27214139305, "mae_parcial": null, "mejor_mae": 3961.366650284534, "mejor_trial": 86}
+{"trial": 99, "avance": "100/100", "estado": "COMPLETE", "mae": 3948.7260599146152, "mae_parcial": null, "mejor_mae": 3948.7260599146152, "mejor_trial": 99, "nuevos_mejores_parametros": {"n_estimators": 200, "learning_rate": 0.036985470389312915, "max_depth": 3, "num_leaves": 8, "min_child_samples": 31, "subsample": 0.7870286296445328, "colsample_bytree": 0.8638540491377883, "reg_alpha": 0.4172446705183493, "reg_lambda": 2.5151783649755584}}
