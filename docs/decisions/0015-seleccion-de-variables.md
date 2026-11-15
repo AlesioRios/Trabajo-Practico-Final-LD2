@@ -44,3 +44,28 @@ El punto de entrada compartido conserva su política de etiqueta de frontera y d
 ## Reproducción
 
 El notebook ejecuta solo lectura y controles de artefactos versionables. La tabla 8 identifica fuentes, scripts, comandos y tiempos registrados; Forward max60 duró aproximadamente 450 segundos. Los tiempos de etapas individuales constan en resumen_resultados.csv dentro del paquete de evidencia. No se registró duración verificable de la comparación común; no se inventa una estimación. La regeneración costosa es explícita y usa directorios nuevos; no se sobrescribe el conjunto oficial ni se ejecuta automáticamente durante la lectura del notebook. Ver [procedimiento y contrato](../informes/integracion_pr_fase23.md).
+
+
+## Incorporación manual posterior: selección vigente de 15 variables (14/11/2026)
+
+Se decide agregar `es_fin_de_anio` a las 14 predictoras originales, conservando sus nombres y orden.
+El indicador ya existe en `variables_temporales.py`: vale 1 cuando DIA + 1 está entre el 24 de diciembre
+y el 6 de enero inclusive, y 0 en el resto del año. Es calendario conocido al emitir la predicción.
+La incorporación es manual: no fue elegida por el selector original. Consideramos que puede aportar
+información sobre patrones estacionales de consumo energético; esta hipótesis todavía no está evaluada.
+
+La evidencia congelada de Spearman permanece intacta. El cargador oficial agrega el indicador al devolver
+la selección vigente y conserva las transformaciones aprendidas originales; en la aplicación de ese
+preprocesamiento congelado, el indicador binario se concatena sin aprender parámetros (28 columnas efectivas).
+El CSV vigente tiene 15 predictoras y el linaje y checksum se actualizan. Las columnas anteriores,
+los índices, los objetivos y las particiones temporales se conservan. Las copias del CSV, linaje y checksums
+previos quedan en `data/processed/seleccion_original_14/`.
+
+Todas las cifras de selección, comparación y Optuna ya publicadas corresponden a las 14 variables originales.
+El estudio de 100 trials, su SQLite, sus métricas y los registros no se modifican ni se sobrescriben.
+Deberán revisarse con las 15 variables antes de elegir un modelo; no se atribuye ninguna mejora a este cambio.
+Las huellas y el contrato de la búsqueda anterior impedirán reanudarla con datos distintos: una futura búsqueda
+requerirá una identidad y almacenamiento nuevos. Los preprocesadores ajustados anteriores siguen siendo
+históricos; no se declara que se hayan reajustado para 15 variables.
+
+Esta modificación no ejecuta Optuna, entrenamientos, pruebas automáticas ni notebooks.

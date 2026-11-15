@@ -1,0 +1,8 @@
+{
+  "results\\xgboost\\detalle.json": "625a1f0db0bdd79715c49aafab9f38af3379e7b0fb6d5e5d08432ef649b16dff",
+  "results\\xgboost\\estudio.sqlite3.zip": "f022f1c00326e350450820c9472b7af50301fea5fa19756161786d3fa1620a3c",
+  "results\\xgboost\\resumen.json": "94b72b166f5a511909ed16c7ce99f8706e24f31f2e8d1ed4fae45ae3110b090a",
+  "results\\xgboost\\trials.csv": "8e604f036d81fc37828337fcb0e779420eb116a434f45754ea81036a9bd8318c",
+  "results\\xgboost\\verificacion_dependencias.json": "a0f065389c4ee4a5e1d63ca0f1328615ee4fe03c6cb99e380d2be6cedb491020",
+  "results\\optuna\\xgboost\\estudio.sqlite3": "d9cbfd1057ca728111929d7bbd8244c6fe54b03056a491d1700789a05a746405"
+}

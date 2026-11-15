@@ -26,6 +26,7 @@ La consigna completa está en [`consigna.md`](consigna.md).
 │   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
+│       ├── dataset_final.csv               (Fase 2: 15 variables sin escalar, objetivo y tramo)
 │       ├── dataset_final.csv               (15 variables oficiales sin escalar, objetivo y tramo)
 │       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
@@ -163,6 +164,82 @@ predicciones diarias (una fila por día, correspondientes al consumo del día D+
 - [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
 
 Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).
+
+## XGBoost: resultados y revisión sin entrenar
+
+El desarrollo de `feature/modeling-xgboost` contiene tres estudios independientes:
+
+| Estudio | Variables | Trials | Mejor trial | MAE CV | MAE validación independiente |
+|---|---:|---:|---:|---:|---:|
+| xgboost-temporal-v1 | 14 | 100 | 88 | 3986.65 | No evaluada |
+| xgboost-temporal-15-features-v1 | 15 | 100 | 56 | 3957.96 | 2221.76 |
+| xgboost-temporal-15-features-refinado-v1 | 15 | 60 | 49 | 3941.22 | 2229.22 |
+
+La validación independiente usa las mismas 171 filas comunes (29/10/2022–26/04/2023),
+con ajuste solo sobre 830 filas de entrenamiento. El menor MAE CV del refinamiento
+no se tradujo en menor MAE de validación. No se eligió un modelo de producción ni
+se reentrenó con entrenamiento más validación; no se evaluó test.
+
+Leer el [ADR 0019](docs/decisions/0019-xgboost-optuna.md), los JSON/CSV bajo
+`results/xgboost*/` y `notebooks/modelado_xgboost.ipynb`. La notebook consulta
+resultados guardados y muestra PNG existentes; su primera sección usa el dataset
+histórico de `data/processed/seleccion_original_14/`. No ejecutar los scripts de
+búsqueda ni evaluación para revisar un PR. Si falta SQLite histórico, la notebook
+lo restaura desde su ZIP; no crea trials. No sobrescribe figuras al consultarlas.
+Las salidas ejecutadas se conservaron; las correcciones de lectura de esta auditoría
+se verificaron estáticamente y no se reejecutó la notebook.
+
+Los scripts de búsqueda son entradas explícitas para experimentos autorizados:
+`src/modelado_xgboost_15.py` y `src/modelado_xgboost_15_refinado.py`.
+`src/modelado_xgboost.py` conserva el identificador histórico de 14 variables,
+pero el validador vigente exige 15: no usar su CLI para reproducir la corrida
+original. El código exacto original está en el commit registrado en su resumen;
+los datos originales están archivados. La reanudación verifica hashes y rechaza
+cambios de datos, versiones o código. Los ZIP y JSON bastan para consultar resultados
+sin reanudar ni restaurar estudios nuevos.
+
+### Entorno y portabilidad
+
+La ejecución registrada usó Python 3.12.14 y las versiones exactas de
+`requirements.txt`, incluidos Optuna 5.0.0, XGBoost 3.4.1 y scikit-learn 1.9.1.
+El nombre `cervecera_env` es convencional y se puede recrear; las rutas se resuelven
+respecto del repositorio, sin depender de la carpeta personal del autor.
+
+```bash
+conda create -n cervecera_env python=3.12.14
+conda activate cervecera_env
+python -m pip install uv==0.13.1
+uv pip install -r requirements.txt
+uv pip check
+```
+
+En OneDrive, `uv pip install --link-mode=copy -r requirements.txt` evita enlaces
+permanentes. Para reproducir hashes históricos del código se requiere conservar
+los finales de línea de Windows (`core.autocrlf=true`), además de datos y versiones.
+La semilla sola no garantiza igualdad entre sistemas o versiones diferentes.
+
+El evaluador de la primera búsqueda de 15 variables lee por defecto los resultados
+ya guardados. Solo si se lo usa expresamente para una nueva evaluación y faltan
+esas salidas necesita la referencia Git `origin/feature/modeling-rf-lineales-experimentos`.
+Esa rama remota no es necesaria para consultar los resultados versionados; no se
+recomienda eliminarla sin revisar ese mecanismo de reproducción.
+
+### Alcance del PR individual
+
+El PR de `feature/modeling-xgboost` apunta a `feature/modeling` y contiene el
+trabajo de XGBoost y los cambios propios vinculados al indicador de fin de año.
+No incorpora implementaciones, notebooks ni commits de Random Forest, Ridge o Lasso.
+`git fetch` solo actualiza referencias remotas; no integra esas ramas.
+
+El log de esta rama contiene cuatro baselines heredados de la base y 139 registros
+propios de XGBoost. Las uniones de logs y los informes generales de auditoría se
+mantienen fuera del repositorio y no forman parte de este PR. La unión del registro
+general corresponde a la integración del equipo, conservando todas las filas originales.
+
+`results/xgboost_15_validacion/referencias_companera.csv` y `comparacion.csv` conservan
+referencias atribuidas utilizadas en la comparación histórica de XGBoost. No son
+implementaciones ni nuevas corridas de los modelos de otra integrante. No se borran
+para aparentar una ejecución distinta de la realizada.
 
 ## Primera búsqueda LightGBM
 

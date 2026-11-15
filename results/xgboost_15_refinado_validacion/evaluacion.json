@@ -1,0 +1,41 @@
+{
+  "estudio": "xgboost-temporal-15-features-refinado-v1",
+  "trial": 49,
+  "configuracion_completa": {
+    "reg_alpha": 0,
+    "reg_lambda": 1,
+    "gamma": 0,
+    "objective": "reg:squarederror",
+    "eval_metric": "mae",
+    "tree_method": "hist",
+    "random_state": 42,
+    "n_jobs": 1,
+    "learning_rate": 0.0020702351473759497,
+    "max_depth": 3,
+    "n_estimators": 1994,
+    "min_child_weight": 4.632253473557002,
+    "subsample": 0.9642293818510409,
+    "colsample_bytree": 0.89176387518403
+  },
+  "filas_ajuste": 830,
+  "filas_validacion": 171,
+  "early_stopping": false,
+  "arboles_entrenados": 1994,
+  "registro": {
+    "fecha_hora": "2026-11-14T19:26:21",
+    "modelo": "xgboost",
+    "tramo": "validacion",
+    "filas": 171,
+    "hiperparametros": "{\"colsample_bytree\": 0.89176387518403, \"eval_metric\": \"mae\", \"gamma\": 0, \"learning_rate\": 0.0020702351473759497, \"max_depth\": 3, \"min_child_weight\": 4.632253473557002, \"n_estimators\": 1994, \"n_jobs\": 1, \"objective\": \"reg:squarederror\", \"random_state\": 42, \"reg_alpha\": 0, \"reg_lambda\": 1, \"subsample\": 0.9642293818510409, \"tree_method\": \"hist\"}",
+    "mae": 2229.2246293631215,
+    "rmse": 2853.130567574821,
+    "r2": 0.4610833242874175,
+    "semilla": 42,
+    "commit": "b80745f5c96012e089ddc076c6bc648922330c2b",
+    "arbol_sin_commitear": false,
+    "notas": "15 features; estudio refinado xgboost-temporal-15-features-refinado-v1; trial 49; ajuste 830 filas; eval_set train y validacion independiente 171; sin early stopping ni reajuste"
+  },
+  "dataset_sha256": "3bda0f26952d01412f5970de0fb5999659c6fb6965c4f28935ed3bc538134dec",
+  "png": "results/xgboost_15_refinado_validacion/mae_entrenamiento_validacion_por_arbol.png",
+  "alcance": "Configuración fijada antes de validación; curvas descriptivas, sin cambio de hiperparámetros; sin prueba"
+}
