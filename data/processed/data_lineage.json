@@ -651,8 +651,7 @@
     ]
   },
   "columnas_auxiliares": [
-    "consumo_dia",
-    "baseline_media_movil"
+    "consumo_dia"
   ],
   "variante_pipeline": "A",
   "alpha_de_referencia": 10,
@@ -670,11 +669,5 @@
       14
     ]
   },
-  "filas_de_frontera_quitadas": 2,
-  "baselines": {
-    "persistencia": "consumo_dia",
-    "media_movil": "baseline_media_movil",
-    "ventana_dias": 7,
-    "minimo_dias_validos": 4
-  }
+  "filas_de_frontera_quitadas": 2
 }
