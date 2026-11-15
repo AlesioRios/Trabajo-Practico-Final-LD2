@@ -1,0 +1,10 @@
+{
+  "residuo_medio": -1274.472770591998,
+  "residuo_mediano": -1334.0936879763121,
+  "desvio_residuo": 3523.089458766908,
+  "error_absoluto_maximo": 14970.715397591302,
+  "p90_error_absoluto": 6133.789649625685,
+  "coeficientes_no_nulos": 6,
+  "residuos_positivos": 58,
+  "residuos_negativos": 118
+}

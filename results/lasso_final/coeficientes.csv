@@ -1,0 +1,15 @@
+variable,coeficiente_estandarizado,magnitud_absoluta,escala_train_validation
+Frio (Kw),2824.7112878823273,2824.7112878823273,7697.9037644244245
+frio_media_7_dias,2166.681866467174,2166.681866467174,7107.1915685711265
+dia_anio_coseno,-1655.2662168794513,1655.2662168794513,0.6958770460254255
+Totalizadores Energia | KW Trafo 9,834.5959620652254,834.5959620652254,5008.384651407425
+Sala Maq (Kw),44.32182008539436,44.32182008539436,8583.132347508665
+Consolidado Agua | Agua Planta (Hl),24.570932067411825,24.570932067411825,8205.78238064093
+Servicios (Kw),0.0,0.0,9993.317550585993
+Frio (Kw) x Consolidado Agua | Agua Planta (Hl),0.0,0.0,408793136.15743464
+Frio (Kw) x frio_hace_2_dias,-0.0,0.0,335156383.4139134
+Frio (Kw) x Totalizadores Energia | KW Trafo 9,0.0,0.0,196509760.6460157
+dia_anio_coseno x Consolidado Agua | Agua Planta (Hl),-0.0,0.0,22783.221369639563
+frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl),0.0,0.0,386417425.4341771
+frio_hace_2_dias,0.0,0.0,7708.971491313293
+KW Gral Planta,0.0,0.0,16857.10731547111

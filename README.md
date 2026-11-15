@@ -389,6 +389,7 @@ Para auditar la versión publicada sin volver a usar test:
 ```powershell
 python src/train_model.py consultar
 python src/train_model.py verificar-entrenamiento
+python src/verificar_cierre_lasso.py
 python src/informe_lasso_final.py
 ```
 
