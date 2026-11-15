@@ -284,6 +284,42 @@ Este PR corresponde al modelado, la optimización y la evaluación. Los puntos d
 entrada genéricos `train_model.py` y `predict.py` siguen siendo plantillas; el
 pipeline final de predicción no se presenta como implementado en este desarrollo.
 
+### Diagnóstico offline de LightGBM (15/11/2026)
+
+El [informe de diagnóstico](results/lightgbm_diagnostico_validacion/informe.md)
+completa los gráficos y residuos de las dos búsquedas LightGBM desde sus predicciones
+de validación guardadas. Se conservan cinco PNG comparativos, residuos por fila y
+mes, errores mayores, parámetros completos y auditoría del tracking. El notebook
+propio es [modelado_lightgbm.ipynb](notebooks/modelado_lightgbm.ipynb); solo consulta
+esos resultados. No carga datasets, modelos ni estudios mutables de Optuna.
+
+Desde la raíz, con Python 3.12 y las dependencias existentes:
+
+```powershell
+python -B src/diagnostico_lightgbm.py
+python -B src/actualizar_notebook_lightgbm.py
+python -B -m pytest tests/test_diagnostico_lightgbm.py -q -p no:cacheprovider
+```
+
+El segundo comando requiere el kernel `cervecera_env`; si falta, registrarlo desde
+ese entorno con `python -m ipykernel install --user --name cervecera_env`.
+No se debe ejecutar la suite de modelado ni los scripts de búsquedas para revisar
+el diagnóstico. Sus pruebas propias no contienen entrenamiento ni predicción.
+Se reutiliza la aritmética pura del diagnóstico XGBoost ya integrado en la base,
+sin modificar su código ni depender de una copia de trabajo externa.
+
+La rama se actualizó sobre `feature/modeling`: el log común ahora incluye otras
+familias, pero los registros LightGBM siguen siendo 86 (84 COMPLETE y dos
+validaciones). La auditoría verifica su firma semántica y los originales por
+SHA-256. La granularidad por experimento, los timestamps sin zona horaria y el
+árbol sucio histórico quedan explícitos; no se fabrican registros retrospectivos.
+Las referencias anteriores a logs separados describen las publicaciones originales.
+
+El diagnóstico descriptivo de 3.3 queda completo para estos candidatos. La
+importancia de variables del ganador global, notebook común, entrenamiento final,
+versionado semántico y registry siguen pendientes de integración. No se abrió
+test ni se modificaron las 15 variables, resultados originales o módulos comunes.
+
 ### Diagnóstico de validación sin ejecutar modelos (15/11/2026)
 
 El [informe de diagnóstico](results/xgboost_diagnostico_validacion/informe.md)
