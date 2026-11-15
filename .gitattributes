@@ -14,3 +14,9 @@ results/lightgbm/** -text
 results/lightgbm_2/** -text
 models/lightgbm/** -text
 models/lightgbm_2/** -text
+
+# Cierre Lasso: conservar huellas y predicciones auditables entre plataformas.
+src/train_model.py -text
+src/informe_lasso_final.py -text
+results/lasso_final/** -text
+models/model_registry.json -text

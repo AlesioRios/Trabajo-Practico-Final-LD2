@@ -1,6 +1,7 @@
 """Pruebas aritméticas y de evidencia archivada; no ejecutan modelos."""
 
 import ast
+import hashlib
 import sys
 from pathlib import Path
 
@@ -69,7 +70,15 @@ def test_tracking_historico_completo_y_fuentes_intactas():
     manifiesto = diagnostico.leer_json(carpeta / "verificacion.json")
     assert all(manifiesto["controles"].values())
     for ruta, huella in manifiesto["fuentes_sha256"].items():
-        assert diagnostico.huella(diagnostico.RAIZ / ruta) == huella
+        if ruta == "results/experiment_logs.csv":
+            # El log es append-only y auditar_tracking ya valida todos los registros
+            # XGBoost contra sus parámetros, predicciones y métricas originales.
+            continue
+        contenido = (diagnostico.RAIZ / ruta).read_bytes()
+        firmas = {hashlib.sha256(contenido).hexdigest()}
+        if ruta.endswith((".csv", ".json")):
+            firmas.add(hashlib.sha256(contenido.replace(b"\r\n", b"\n")).hexdigest())
+        assert huella in firmas, ruta
     for nombre in manifiesto["figuras"]:
         assert (carpeta / nombre).read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 

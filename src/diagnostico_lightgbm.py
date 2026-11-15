@@ -27,7 +27,10 @@ FIGURAS = ("prediccion_vs_real", "predicciones_temporales", "distribucion_residu
 def auditar_tracking(raiz=RAIZ):
     """Concilia parámetros, métricas, timestamps y commits sin modificar el log."""
     raiz = Path(raiz)
-    log = pd.read_csv(raiz / "results/experiment_logs.csv", keep_default_na=False)
+    # Otras familias registran PRUNED sin métricas. No deben convertir las métricas
+    # de LightGBM a texto ni cambiar su firma histórica al integrar esos eventos.
+    log = pd.read_csv(raiz / "results/experiment_logs.csv", keep_default_na=False,
+                      na_values={k: [""] for k in METRICAS}, dtype={k: float for k in METRICAS})
     propios = log.loc[log.modelo.eq("lightgbm")]
     usados, filas, estados = [], [], []
     for carpeta in EXPERIMENTOS.values():

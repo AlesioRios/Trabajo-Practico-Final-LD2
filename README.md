@@ -360,3 +360,66 @@ secciones 3.1–3.4 del PDF oficial de referencias y la ubicación de los entreg
 LightGBM se inspeccionó en su rama sin modificarlo. La integración al notebook
 común, elección global, importancia de variables del ganador y registro semántico
 siguen pendientes. No se presenta la Fase 3 completa como finalizada.
+
+
+## Cierre de Fase 3: Lasso con catorce entradas
+
+El cierre fija Lasso (`alpha=75`, `max_iter=20000`, `random_state=42`) y pipeline A
+(mediana y StandardScaler) sobre las catorce variables del linaje histórico
+`data/processed/seleccion_original_14/data_lineage.json`. El CSV vigente no se cambia.
+La comparación y sus fuentes están en `results/comparacion_modelos_final.md`.
+
+Con Python 3.12, activar `conda activate cervecera_env` y usar las dependencias
+congeladas de `requirements.txt`. Para un cierre nuevo autorizado, con código
+commiteado y sin entrenamiento ni evaluación final previos:
+
+```powershell
+python src/train_model.py entrenar
+python src/train_model.py evaluar-test-una-vez
+python src/informe_lasso_final.py
+python -m pytest tests -q
+```
+
+La segunda orden requiere autorización para consumir test: crea un marcador antes
+de cargar sus observaciones. No borrar ese marcador para reintentar. Si ya existe
+evidencia final, solo se recuperan y verifican los resultados guardados. Las órdenes
+anteriores no deben usarse para crear otra evaluación tras observar el resultado.
+Para auditar la versión publicada sin volver a usar test:
+
+```powershell
+python src/train_model.py consultar
+python src/train_model.py verificar-entrenamiento
+python src/informe_lasso_final.py
+```
+
+La verificación de entrenamiento reproduce exclusivamente train+validation, compara
+sus predicciones archivadas y no modifica el artefacto, logs ni registry. `consultar`
+recalcula aritmética desde predicciones guardadas; no carga el dataset test ni predice.
+El notebook `notebooks/modelado.ipynb`, ejecutado con kernel `cervecera_env`, solo lee
+archivos de evidencia y puede repetirse sin consumir test. El notebook histórico de
+baselines se conserva en Git; las búsquedas por familia y sus ramas se enlazan en el
+informe de comparación.
+
+Para cargar el pipeline final y recuperar su contrato de entrada:
+
+```python
+import joblib
+modelo = joblib.load("models/modelo_v1.0.0.pkl")
+columnas = modelo.cierre_metadata_["columnas"]
+# X_nuevo es una tabla ya preparada con las mismas reglas históricas de Fase 2.
+predicciones = modelo.predict(X_nuevo[columnas])
+```
+
+La ruta efectiva y versión están en `models/model_registry.json`; si 1.0.0 ya estaba
+ocupada se reserva la siguiente versión patch sin sobrescribirla. Se conserva la
+validación original separada del test local y de las métricas de ajuste. El hash
+`commit` del registry identifica el código previo al entrenamiento, también incluido
+en el artefacto. El commit posterior de resultados recibe el tag anotado `v1.0.0`
+(o la versión efectiva); no se intenta incluir el hash de ese commit dentro de sí
+mismo. No se publica ni integra a main automáticamente.
+
+Resultados, predicciones auditables, residuos, coeficientes, gráficos y controles:
+`results/lasso_final/`. El resultado local no acredita el umbral del test oculto.
+Validation fue utilizada antes para selección de variables. DIA puede repetirse y
+el horizonte certificado es el bloque siguiente; la disponibilidad real de cada
+entrada a las 23:59 sigue sin demostrarse. `src/predict.py` y Fase 4 no se modifican.
