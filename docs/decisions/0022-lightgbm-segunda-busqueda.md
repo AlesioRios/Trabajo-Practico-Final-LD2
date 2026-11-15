@@ -200,3 +200,40 @@ conservan solo sus registros propios y los baselines heredados. Los archivos de
 unión y auditoría general se mantienen fuera de ambos repositorios y no se
 proponen para estos PR. No se repitieron entrenamientos ni se asignaron timestamps
 históricos nuevos.
+
+## Cierre del diagnóstico offline de 3.3 (15/11/2026)
+
+Se agregan `src/diagnostico_lightgbm.py` y el notebook específico
+`notebooks/modelado_lightgbm.ipynb`, siguiendo la convención del diagnóstico
+XGBoost integrado en la base. Se reutilizan sus funciones aritméticas puras, sin
+modificar archivos XGBoost. La identidad se conserva por indice_csv y los residuos
+se definen como real menos predicho. Las dos búsquedas comparten las 171 filas.
+
+Los cinco gráficos, tablas e informe se guardan en una carpeta nueva:
+`results/lightgbm_diagnostico_validacion/`. Incluyen predicción frente a real,
+serie temporal real/predicho, histograma de residuos, residuos frente a predicción
+y residuos temporales. No se abren dataset, modelos serializados o SQLite ni se
+ejecutan entrenamientos o predicciones; las fuentes originales permanecen intactas.
+
+El sesgo global pasa de +8,50 a −2,57 kW y el desvío de residuos de 2946,37 a
+2881,57 kW. El percentil 95 del error absoluto baja de 6334,03 a 5742,03 kW.
+El promedio casi nulo oculta patrones: en enero la segunda búsqueda subestima
+1763,20 kW sobre 29 filas; en abril sobreestima 1706,69 kW sobre 22 filas.
+Los errores mayores y su concentración se conservan sin eliminar observaciones.
+La mejora de validación sigue siendo pequeña y no uniforme por mes; no se afirma
+significación estadística, normalidad, independencia ni causalidad operativa.
+
+La auditoría concilia las 86 filas propias con los trials y validaciones originales,
+incluidos hiperparámetros, métricas, timestamps y commits. Tras integrar otras
+familias, el log común dejó de ser exclusivo de LightGBM: la firma por registros
+propios evita confundir esa ampliación con alteración de la evidencia histórica.
+Se conserva el hash completo del log tal como se leyó durante este análisis.
+Sigue siendo parcial la lectura literal del tracking por cada ajuste; no se
+inventan tiempos por pliegue ni métricas finales para los trials podados.
+
+El informe y las salidas del notebook fundamentan la interpretación y quedan
+preparados para el notebook común, que no se modifica. La feature importance
+obligatoria corresponde al ganador global; no se extrae de modelos ni se confunde
+con f-ANOVA de hiperparámetros. La selección global, reentrenamiento final y
+registro semántico permanecen fuera de este cierre. Las pruebas propias solo
+verifican aritmética y evidencia archivada; no se ejecuta la suite de entrenamiento.
