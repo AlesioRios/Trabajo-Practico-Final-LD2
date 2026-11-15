@@ -1,0 +1,40 @@
+{
+  "estudio": "xgboost-temporal-15-features-v1",
+  "trial": 56,
+  "predictoras": [
+    "Frio (Kw)",
+    "Frio (Kw) x frio_hace_2_dias",
+    "frio_media_7_dias",
+    "Sala Maq (Kw)",
+    "Frio (Kw) x Consolidado Agua | Agua Planta (Hl)",
+    "Servicios (Kw)",
+    "Frio (Kw) x Totalizadores Energia | KW Trafo 9",
+    "dia_anio_coseno",
+    "frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl)",
+    "dia_anio_coseno x Consolidado Agua | Agua Planta (Hl)",
+    "KW Gral Planta",
+    "frio_hace_2_dias",
+    "Consolidado Agua | Agua Planta (Hl)",
+    "Totalizadores Energia | KW Trafo 9",
+    "es_fin_de_anio"
+  ],
+  "filas_ajuste": 830,
+  "filas_evaluacion": 171,
+  "dataset_sha256": "3bda0f26952d01412f5970de0fb5999659c6fb6965c4f28935ed3bc538134dec",
+  "referencia_companera": "9832116044b7f9b82cdd041f7b66efdc7338603c",
+  "registro": {
+    "fecha_hora": "2026-11-14T18:35:43",
+    "modelo": "xgboost",
+    "tramo": "validacion",
+    "filas": 171,
+    "hiperparametros": "{\"colsample_bytree\": 0.8086142929785466, \"eval_metric\": \"mae\", \"gamma\": 0, \"learning_rate\": 0.0020702351473759497, \"max_depth\": 3, \"min_child_weight\": 4.49480789319248, \"n_estimators\": 1908, \"n_jobs\": 1, \"objective\": \"reg:squarederror\", \"random_state\": 42, \"reg_alpha\": 0, \"reg_lambda\": 1, \"subsample\": 0.9516935603337213, \"tree_method\": \"hist\"}",
+    "mae": 2221.7606336805557,
+    "rmse": 2844.3074191916603,
+    "r2": 0.4644113105021027,
+    "semilla": 42,
+    "commit": "29597cac53a0b1d5eee69e6da645a48999a01b5b",
+    "arbol_sin_commitear": false,
+    "notas": "15 variables con es_fin_de_anio; validacion independiente; Optuna xgboost-temporal-15-features-v1; trial 56; ajuste 830 filas; sin nueva optimizacion"
+  },
+  "alcance": "Validación independiente; sin test, sin nueva optimización, sin modelo de producción"
+}

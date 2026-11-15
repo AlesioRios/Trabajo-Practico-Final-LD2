@@ -1,0 +1,25 @@
+{
+  "estudio": "gradient_boosting-temporal-v1",
+  "total": 100,
+  "estados": {
+    "COMPLETE": 38,
+    "PRUNED": 62
+  },
+  "commit_codigo": "2e16156fb04078f83518df9d16b7b0507ae2529b",
+  "mejor_trial_provisional": 76,
+  "parametros_provisionales": {
+    "n_estimators": 550,
+    "learning_rate": 0.01592324888670594,
+    "max_depth": 2,
+    "min_samples_leaf": 4,
+    "subsample": 0.8,
+    "max_features": 0.8,
+    "loss": "absolute_error"
+  },
+  "metricas_provisionales": {
+    "mae": 3759.6372538511787,
+    "rmse": 4880.93454909239,
+    "r2": 0.6482178838858881
+  },
+  "sqlite_sha256": "5b21399abd5a17563af040182dff67ed2d864b99f3531ee502bcb03e5ad8615f"
+}

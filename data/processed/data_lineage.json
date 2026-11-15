@@ -197,8 +197,8 @@
         "Totalizadores Agua | Red Paste L3",
         "Totalizadores Agua | FC Lavadora L2",
         "Totalizadores Agua | Red Lavadora L3",
-        "Totalizadores Agua | Dilución A90",
-        "Totalizadores Agua | Dilución A190",
+        "Totalizadores Agua | DiluciÃ³n A90",
+        "Totalizadores Agua | DiluciÃ³n A190",
         "Totalizadores Agua | Red  Bodega Interno",
         "Totalizadores Agua | Agua Planta CO2",
         "Totalizadores Agua | Retorno Planta CO2",
@@ -503,8 +503,8 @@
         "Totalizadores Agua | Red Paste L3": 1427.8574999999998,
         "Totalizadores Agua | FC Lavadora L2": 83321.04999999999,
         "Totalizadores Agua | Red Lavadora L3": 2207.9249999999997,
-        "Totalizadores Agua | Dilución A90": 18776.5,
-        "Totalizadores Agua | Dilución A190": 18168.24999999997,
+        "Totalizadores Agua | DiluciÃ³n A90": 18776.5,
+        "Totalizadores Agua | DiluciÃ³n A190": 18168.24999999997,
         "Totalizadores Agua | Red  Bodega Interno": 1620.9349999999968,
         "Totalizadores Agua | Agua Planta CO2": 2422.9474999999993,
         "Totalizadores Agua | Retorno Planta CO2": 1783.7124999999996,
@@ -634,28 +634,37 @@
     "KW Gral Planta",
     "frio_hace_2_dias",
     "Consolidado Agua | Agua Planta (Hl)",
-    "Totalizadores Energia | KW Trafo 9"
+    "Totalizadores Energia | KW Trafo 9",
+    "es_fin_de_anio"
   ],
   "shapes": {
     "X_train": [
       830,
-      14
+      15
     ],
     "X_val": [
       176,
-      14
+      15
     ],
     "X_test": [
       178,
-      14
+      15
     ]
   },
   "columnas_auxiliares": [
-    "consumo_dia"
+    "consumo_dia",
+    "baseline_media_movil"
   ],
   "variante_pipeline": "A",
   "alpha_de_referencia": 10,
-  "forma_tras_el_pipeline": {
+  "filas_de_frontera_quitadas": 2,
+  "baselines": {
+    "persistencia": "consumo_dia",
+    "media_movil": "baseline_media_movil",
+    "ventana_dias": 7,
+    "minimo_dias_validos": 4
+  },
+  "forma_tras_el_pipeline_original_14": {
     "X_train": [
       830,
       14
@@ -669,5 +678,11 @@
       14
     ]
   },
-  "filas_de_frontera_quitadas": 2
+  "incorporacion_manual": {
+    "variable": "es_fin_de_anio",
+    "definicion": "Indicador de DIA + 1 entre 24/12 y 06/01 inclusive",
+    "adr": "0015",
+    "seleccion_predictoras": 15,
+    "preprocesador_y_modelos_pendientes_de_revision": true
+  }
 }

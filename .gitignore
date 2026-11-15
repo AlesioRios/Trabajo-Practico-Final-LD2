@@ -65,3 +65,20 @@ data/interim/
 
 # Salidas locales de reproducción; el contrato oficial no se ignora.
 /results/seleccion/reproduccion-*/
+
+# Estado mutable de la búsqueda; la evidencia terminada se versiona aparte.
+/results/optuna/xgboost/
+
+# Estudio independiente de 15 predictoras; evidencia final en results/xgboost_15/.
+/results/optuna/xgboost_15/
+
+# Segunda búsqueda independiente de 60 trials.
+/results/optuna/xgboost_15_refinado/
+
+# Estado mutable de Optuna; el log común ya está versionado.
+/results/optuna/lightgbm/
+/.pytest_tmp*/
+
+/results/optuna/lightgbm_2/
+
+/results/optuna/gradient_boosting/

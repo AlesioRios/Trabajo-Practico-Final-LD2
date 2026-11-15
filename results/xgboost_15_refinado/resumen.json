@@ -1,0 +1,22 @@
+{
+  "estudio": "xgboost-temporal-15-features-refinado-v1",
+  "total": 60,
+  "estados": {
+    "COMPLETE": 45,
+    "PRUNED": 15
+  },
+  "commit_codigo": "34aec13cd18372d9cea585cc7ed379fe8e7e85fe",
+  "mejor_trial_provisional": 49,
+  "parametros_provisionales": {
+    "n_estimators": 1994,
+    "min_child_weight": 4.632253473557002,
+    "subsample": 0.9642293818510409,
+    "colsample_bytree": 0.89176387518403
+  },
+  "metricas_provisionales": {
+    "mae": 3941.2233212356905,
+    "rmse": 5183.235606414311,
+    "r2": 0.6032931590269461
+  },
+  "sqlite_sha256": "1da5d3a74adc8f80bbdb94271a98a92933c530e453095471664f2a03dd14b2f6"
+}

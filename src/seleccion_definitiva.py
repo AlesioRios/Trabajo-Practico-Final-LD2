@@ -24,6 +24,13 @@ def cargar_seleccion_definitiva(ruta=ARTEFACTO):
             or not set(prep["indicadores"]).issubset(columnas)
             or reglas["test_utilizado"]):
         raise ValueError("Contrato Spearman inconsistente")
+    # Validar el artefacto congelado no cambia la selección oficial vigente: siempre 15.
+    reglas["variables"] = [*columnas, "es_fin_de_anio"]
+    reglas["cantidad_variables"] = 15
+    reglas["columnas_efectivas"] += 1
+    reglas["incorporacion_manual"] = {"variable": "es_fin_de_anio", "adr": "0015",
+                                    "evaluada": False}
+    reglas["mae_validation_original_14"] = reglas.pop("mae_validation")
     return reglas
 
 
@@ -58,8 +65,11 @@ def reconstruir_conjunto_definitivo(historia, reglas=None):
 def preprocesar_conjunto_definitivo(X, reglas=None):
     """Aplica medianas, escala e indicadores guardados de Train, sin fit.
 
-    Reproduce las 27 columnas del comparador; no entrena un modelo definitivo.
+    Conserva la preparación congelada y agrega el indicador binario; no ajusta parámetros.
     """
     from experimentos_seleccion import aplicar_preparacion
     reglas = cargar_seleccion_definitiva() if reglas is None else reglas
-    return aplicar_preparacion(aplicar_conjunto_definitivo(X, reglas), reglas["preprocesamiento"])
+    seleccion = aplicar_conjunto_definitivo(X, reglas)
+    preparada = aplicar_preparacion(seleccion, reglas["preprocesamiento"])
+    # El indicador binario no necesita aprender mediana ni escala.
+    return np.column_stack([preparada, seleccion["es_fin_de_anio"].to_numpy(dtype=float)])

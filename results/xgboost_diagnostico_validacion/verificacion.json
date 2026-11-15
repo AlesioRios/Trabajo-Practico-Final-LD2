@@ -1,0 +1,87 @@
+{
+  "fuentes_sha256": {
+    "results/experiment_logs.csv": "2b5bc778fb9d8c25ec48b39106ca2b0508789c08adf7d81d38b29084632955f8",
+    "results/xgboost/detalle.json": "625a1f0db0bdd79715c49aafab9f38af3379e7b0fb6d5e5d08432ef649b16dff",
+    "results/xgboost/estudio.sqlite3.zip": "f022f1c00326e350450820c9472b7af50301fea5fa19756161786d3fa1620a3c",
+    "results/xgboost/resumen.json": "94b72b166f5a511909ed16c7ce99f8706e24f31f2e8d1ed4fae45ae3110b090a",
+    "results/xgboost/trials.csv": "8e604f036d81fc37828337fcb0e779420eb116a434f45754ea81036a9bd8318c",
+    "results/xgboost/verificacion_dependencias.json": "a0f065389c4ee4a5e1d63ca0f1328615ee4fe03c6cb99e380d2be6cedb491020",
+    "results/xgboost_15/comparacion_14_vs_15.json": "fb8e902210a1125756f35eb78ac2e35bd8cc06491f3ac05efe1d909430951006",
+    "results/xgboost_15/detalle.json": "5985af87f311cd4dc4405be3030cb7619d497ff5773fb02cab8a2f724871a063",
+    "results/xgboost_15/estudio.sqlite3.zip": "d14a33b1acfc880965ebea82f92554e722007d962c8a7d70845349fa46f96866",
+    "results/xgboost_15/preservacion_originales.json": "bc0ab357318cd00fdb33f2c011e816cd061f9bfd1dbb66a960343e3ff4ca2372",
+    "results/xgboost_15/resumen.json": "8472b80b5bf68a32b446c24ad5df6f3eecc91b4871597c4e4133920c59f2173b",
+    "results/xgboost_15/trials.csv": "d634114693687644f0325b618031a35999d036a6c708d43b85fa93a8091963a8",
+    "results/xgboost_15/graficos/coordenadas_paralelas.png": "d4a59c0647bdf6e26bec800703b4dbab488661b21668f53c21c73898aedd1276",
+    "results/xgboost_15/graficos/historial_optimizacion.png": "cc033230089e740b24bd72971a3ddd847b98e8011c57f7bd2bfeed4b8884f8e1",
+    "results/xgboost_15/graficos/importancia_hiperparametros_fanova.png": "347ffd7afb0ae5143086971fb229890786dee553c68ac61363989dfbe6c34715",
+    "results/xgboost_15_refinado/comparacion.json": "d01ef447f638265c48e0dc342aa7bcf93be6d2d01b2cf693a57ec9015c573534",
+    "results/xgboost_15_refinado/detalle.json": "1c6ec99662f11684aebfacdb73e4c4123cd0eacb89d07a08f213261f34d49181",
+    "results/xgboost_15_refinado/estudio.sqlite3.zip": "74c21dd54994e90808ab2f18d8dbeb640bb0622aa667e4ae8b94226a815d9f06",
+    "results/xgboost_15_refinado/preservacion_originales.json": "f2e621865d241909ddd4a6e6e724432ef4e5890ca6c0087f2fac10fc22a251c6",
+    "results/xgboost_15_refinado/resumen.json": "04d4c876dfbf9f23196e8644339a41f6d6d74d8d37e76f55f54228c67968f91e",
+    "results/xgboost_15_refinado/top10_estudio_anterior.csv": "7d5aa8680d932336f9b24a6e64bd1896a56eff313688a52d92d90fd7051b1640",
+    "results/xgboost_15_refinado/trials.csv": "9316fc3e44fe102fc8926d854559f466d64f5d2a649ab40500adbf550a6dcb51",
+    "results/xgboost_15_validacion/comparacion.csv": "8a353d6b7bf875108c7c5168217ab538f3342b9f10a82c9f2ea87d9b27b13282",
+    "results/xgboost_15_validacion/evaluacion.json": "1d9fdc87cc69b4999ece1d2b30b49133388b9d4bb3753d23f25ca00470e1590b",
+    "results/xgboost_15_validacion/predicciones.csv": "5e1d986ecbe21cae5ab7373c8dc2139f45fbf3c2db296403797c7800be3558d5",
+    "results/xgboost_15_validacion/referencias_companera.csv": "a953cc239d5d52945518a63dcfc6011012d6d2688b5cf18588d72b3eea665438",
+    "results/xgboost_15_refinado_validacion/evaluacion.json": "a57bc2a87356816953910b3170f62e5d615541e789ef9c5e4577fba95e7e0164",
+    "results/xgboost_15_refinado_validacion/mae_entrenamiento_validacion_por_arbol.png": "7b7f79702ef1cf6090ba360ba802062fa6fe49074e18e81756db0ca7aae4da67",
+    "results/xgboost_15_refinado_validacion/mae_por_arbol.csv": "20202a8a8655fe14c0854196a7c71d49913d9341b460a854a8cf11ca98513f6e",
+    "results/xgboost_15_refinado_validacion/predicciones.csv": "1bf39fdb635128743cdfeb25e5e62d3dfc037fdc55533b26601fe51f715762e6"
+  },
+  "figuras": [
+    "prediccion_vs_real.png",
+    "predicciones_temporales.png",
+    "distribucion_residuos.png",
+    "residuos_vs_predicciones.png",
+    "residuos_temporales.png"
+  ],
+  "controles": {
+    "metricas_float32_coinciden_con_evaluaciones": true,
+    "mismas_171_filas_y_objetivos": true,
+    "tracking_complete_y_validaciones_coincide": true,
+    "originales_intactos": true,
+    "sin_importar_bibliotecas_de_modelado": true,
+    "sin_lectura_de_dataset_ni_test": true
+  },
+  "tracking": {
+    "registros_xgboost": 139,
+    "cv_completos": 137,
+    "validaciones": 2,
+    "campos_y_metricas_verificados": true,
+    "estudios": [
+      {
+        "estudio": "xgboost-temporal-v1",
+        "total": 100,
+        "complete": 45,
+        "pruned": 55
+      },
+      {
+        "estudio": "xgboost-temporal-15-features-v1",
+        "total": 100,
+        "complete": 47,
+        "pruned": 53
+      },
+      {
+        "estudio": "xgboost-temporal-15-features-refinado-v1",
+        "total": 60,
+        "complete": 45,
+        "pruned": 15
+      }
+    ],
+    "log_original_modificado": false,
+    "cumplimiento_literal_por_ajuste": "Parcial",
+    "limite": "El CSV agrupa cinco ajustes por COMPLETE; los PRUNED quedan en Optuna/JSON. El timestamp es de registro, sin zona horaria, no el inicio del ajuste. No se inventan filas ni fechas retrospectivas."
+  },
+  "python": "3.12.14",
+  "versiones": {
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "matplotlib": "3.11.2"
+  },
+  "fecha_diagnostico": "2026-11-15",
+  "nota_fecha": "Fecha de este análisis; no reemplaza timestamps históricos de entrenamiento.",
+  "alcance": "Solo aritmética y gráficos desde resultados archivados. Sin modelos ni test."
+}
