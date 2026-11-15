@@ -1,0 +1,146 @@
+{
+  "trial": 76,
+  "mae_cv": 3759.6372538511787,
+  "parametros": {
+    "random_state": 42,
+    "n_iter_no_change": null,
+    "n_estimators": 550,
+    "learning_rate": 0.01592324888670594,
+    "max_depth": 2,
+    "min_samples_leaf": 4,
+    "subsample": 0.8,
+    "max_features": 0.8,
+    "loss": "absolute_error"
+  },
+  "metricas": {
+    "mae": 2316.309953168955,
+    "rmse": 2948.0389023858443,
+    "r2": 0.42463326532370216
+  },
+  "inicio_utc": "2026-11-15T04:16:57.884246+00:00",
+  "fin_utc": "2026-11-15T04:16:59.654228+00:00",
+  "duracion_segundos": 1.7697527999989688,
+  "filas_ajuste": 830,
+  "filas_validacion": 171,
+  "registro": {
+    "fecha_hora": "2026-11-15T01:16:59",
+    "modelo": "gradient_boosting",
+    "tramo": "validacion",
+    "filas": 171,
+    "hiperparametros": "{\"learning_rate\": 0.01592324888670594, \"loss\": \"absolute_error\", \"max_depth\": 2, \"max_features\": 0.8, \"min_samples_leaf\": 4, \"n_estimators\": 550, \"n_iter_no_change\": null, \"random_state\": 42, \"subsample\": 0.8}",
+    "mae": 2316.309953168955,
+    "rmse": 2948.0389023858443,
+    "r2": 0.42463326532370216,
+    "semilla": 42,
+    "commit": "2e16156fb04078f83518df9d16b7b0507ae2529b",
+    "arbol_sin_commitear": true,
+    "notas": "Optuna gradient_boosting-temporal-v1; ganador trial=76; validacion independiente; solo ajuste entrenamiento; estado=COMPLETE"
+  },
+  "configuracion": {
+    "version": 1,
+    "direccion": "minimize",
+    "metrica": "mae",
+    "max_trials": 100,
+    "espacio": {
+      "n_estimators": {
+        "tipo": "int",
+        "low": 100,
+        "high": 600,
+        "step": 50
+      },
+      "learning_rate": {
+        "tipo": "float",
+        "low": 0.01,
+        "high": 0.15,
+        "log": true
+      },
+      "max_depth": {
+        "tipo": "int",
+        "low": 2,
+        "high": 4
+      },
+      "min_samples_leaf": {
+        "tipo": "int",
+        "low": 3,
+        "high": 20
+      },
+      "subsample": {
+        "tipo": "float",
+        "low": 0.6,
+        "high": 1.0,
+        "step": 0.1
+      },
+      "max_features": {
+        "tipo": "float",
+        "low": 0.6,
+        "high": 1.0,
+        "step": 0.1
+      },
+      "loss": {
+        "tipo": "categorical",
+        "choices": [
+          "squared_error",
+          "absolute_error",
+          "huber"
+        ]
+      },
+      "alpha": {
+        "tipo": "float",
+        "low": 0.75,
+        "high": 0.95,
+        "step": 0.05
+      }
+    },
+    "fijos": {
+      "random_state": 42,
+      "n_iter_no_change": null
+    },
+    "pruner": {
+      "n_startup_trials": 5,
+      "n_warmup_steps": 2,
+      "interval_steps": 1,
+      "n_min_trials": 3
+    },
+    "sampler": "TPESampler(seed=42)",
+    "pipeline": "armar_pipeline(A), mediana + StandardScaler + GradientBoostingRegressor",
+    "referencia_optuna": "XGBoost primera busqueda, b964060",
+    "predictoras": [
+      "Frio (Kw)",
+      "Frio (Kw) x frio_hace_2_dias",
+      "frio_media_7_dias",
+      "Sala Maq (Kw)",
+      "Frio (Kw) x Consolidado Agua | Agua Planta (Hl)",
+      "Servicios (Kw)",
+      "Frio (Kw) x Totalizadores Energia | KW Trafo 9",
+      "dia_anio_coseno",
+      "frio_hace_2_dias x Consolidado Agua | Agua Planta (Hl)",
+      "dia_anio_coseno x Consolidado Agua | Agua Planta (Hl)",
+      "KW Gral Planta",
+      "frio_hace_2_dias",
+      "Consolidado Agua | Agua Planta (Hl)",
+      "Totalizadores Energia | KW Trafo 9",
+      "es_fin_de_anio"
+    ],
+    "pliegues": 5,
+    "gap": 1,
+    "dataset_sha256": "3bda0f26952d01412f5970de0fb5999659c6fb6965c4f28935ed3bc538134dec",
+    "linaje_sha256": "a1baa63e31e8d804d1c86056c1dc11963ccd072ba0e4172578e7b6147c326b71",
+    "codigo_sha256": "571044f0aa91d4d5dcc428a955348370a99bceb628119950ce49806019bfd891",
+    "comunes_sha256": {
+      "modelado_comun.py": "67d9f077dde3a38ebfda5253d93e2770f248d7ebe9dff81de80b3856773130b2",
+      "auxiliar_functions.py": "309d29d202665d09eb77a9ec0e66398c5ca69373da6433d319b51260a863b600",
+      "pipeline_sklearn.py": "c6599ebc146d5106ab48857b653f611215797b4d5e4b2f10dddf022cd9c5bad8"
+    },
+    "requirements_sha256": "6351cebd4615a7e8b07a08b6572b0e085f5ce37e31889b1b9d61903e4774c4ea",
+    "python": "3.12.14",
+    "versiones": {
+      "optuna": "5.0.0",
+      "joblib": "1.6.0",
+      "numpy": "2.5.4",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "modelo": "models/gradient_boosting/modelo_validacion.joblib",
+  "alcance": "Modelo para validación; sin reentrenar con validación y sin evaluar test"
+}

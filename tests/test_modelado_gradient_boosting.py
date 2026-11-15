@@ -119,3 +119,28 @@ def test_running_rechazado_y_limite_evaluacion(tmp_path):
     estudio.ask()
     with pytest.raises(ValueError, match='RUNNING'):
         gb.abrir_estudio(tmp_path / 'estudio.sqlite3', {'test': True})
+
+def test_reanuda_con_podas_y_fallos_reales(tmp_path, entrenamiento):
+    class Podador(optuna.pruners.BasePruner):
+        def prune(self, study, trial):
+            return trial.number % 3 == 1 and trial.last_step == 2
+    base = gb.crear_objective(entrenamiento, ModeloCero)
+    def objetivo(trial):
+        if trial.number % 4 == 2:
+            gb.proponer_parametros(trial)
+            trial.set_user_attr('motivo', 'fallo controlado')
+            raise ValueError('fallo controlado')
+        return base(trial)
+    contrato = {'test': 'estados mixtos'}
+    ruta = tmp_path / 'mixto.sqlite3'
+    estudio = gb.abrir_estudio(ruta, contrato)
+    estudio.pruner = Podador()
+    gb.ejecutar_busqueda(estudio, objetivo, total=6, ruta_log=tmp_path / 'mixto/log.csv')
+    estudio = gb.abrir_estudio(ruta, contrato)
+    estudio.pruner = Podador()
+    gb.ejecutar_busqueda(estudio, objetivo, total=12, ruta_log=tmp_path / 'mixto/log.csv')
+    entero = gb.abrir_estudio(tmp_path / 'entero.sqlite3', contrato)
+    entero.pruner = Podador()
+    gb.ejecutar_busqueda(entero, objetivo, total=12, ruta_log=tmp_path / 'entero/log.csv')
+    assert {t.state.name for t in estudio.trials} == {'COMPLETE', 'PRUNED', 'FAIL'}
+    assert [(t.params, t.state, t.value) for t in estudio.trials] == [(t.params, t.state, t.value) for t in entero.trials]

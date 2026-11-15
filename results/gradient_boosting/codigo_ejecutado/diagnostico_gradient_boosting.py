@@ -134,6 +134,11 @@ def generar_diagnostico(estudio):
                     'modelo_sha256': hashlib.sha256((RAIZ / evaluacion['modelo']).read_bytes()).hexdigest()}
     (salida / 'verificacion.json').write_text(json.dumps(verificacion, indent=2), encoding='utf-8')
     peor_mes = meses.loc[meses.mae.idxmax()]
+    representativos = meses.loc[meses.filas >= 20]
+    if representativos.empty:
+        representativos = meses
+    subestima = representativos.loc[representativos.sesgo.idxmax()]
+    sobreestima = representativos.loc[representativos.sesgo.idxmin()]
     mejor_base = comparacion.loc[comparacion.modelo.isin(['persistencia', 'media_movil']), 'mae'].min()
     texto = f'''# Gradient Boosting: estudio y validación del candidato
 
@@ -144,6 +149,8 @@ La validación contiene {len(tabla)} observaciones idénticas por índice, fecha
 El residuo se define como real menos predicho. El sesgo medio es {resumen['sesgo_real_menos_predicho']:.2f} kW; valores positivos indican subestimación. El percentil 95 del error absoluto es {resumen['p95_error_absoluto']:.2f} y el máximo {resumen['max_error_absoluto']:.2f} kW. Los diez mayores errores concentran {100*resumen['fraccion_error_top10']:.2f} % del error absoluto. No se eliminan observaciones extremas.
 
 El mes con mayor MAE es {peor_mes['mes']}: {peor_mes['mae']:.2f} kW en {int(peor_mes['filas'])} filas, sesgo {peor_mes['sesgo']:.2f} kW. residuos_por_mes.csv y los gráficos temporales muestran heterogeneidad: un promedio global no representa todos los meses. Las fechas rotuladas pueden repetirse y estar desfasadas; el índice CSV es la identidad, conforme al ADR 0002. No se infiere causalidad ni independencia de los residuos.
+
+Entre los meses con al menos veinte observaciones, el mayor sesgo positivo aparece en {subestima['mes']}: {subestima['sesgo']:.2f} kW en {int(subestima['filas'])} filas; el menor aparece en {sobreestima['mes']}: {sobreestima['sesgo']:.2f} kW en {int(sobreestima['filas'])} filas. Estos cambios de signo muestran por qué el sesgo global cercano a cero puede ocultar patrones temporales. Octubre contiene solo dos filas y no permite una conclusión mensual estable.
 
 El MAE dentro de entrenamiento es {metricas_train['mae']:.2f} kW en {int(comunes.sum())} filas comunes. La brecha validación menos entrenamiento es {resumen['mae']-metricas_train['mae']:.2f} kW. Es un diagnóstico de sobreajuste limitado por el cambio de período y tamaño de muestra. El MAE CV usa períodos anteriores y ajustes menores; no es directamente comparable con el error de validación. No se asegura ausencia de sobreajuste ni significación estadística de diferencias pequeñas.
 
