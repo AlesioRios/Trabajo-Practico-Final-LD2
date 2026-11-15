@@ -1,0 +1,17 @@
+{
+  "timestamp_utc": "2026-11-15T04:19:13.554365+00:00",
+  "reapertura_y_replay_100_trials": true,
+  "trials_antes": 100,
+  "trials_despues": 100,
+  "parametros_ganador": {
+    "n_estimators": 550,
+    "learning_rate": 0.01592324888670594,
+    "max_depth": 2,
+    "min_samples_leaf": 4,
+    "subsample": 0.8,
+    "max_features": 0.8,
+    "loss": "absolute_error"
+  },
+  "codigo_entrenamiento_sha256": "571044f0aa91d4d5dcc428a955348370a99bceb628119950ce49806019bfd891",
+  "contrato_coincide": true
+}

@@ -80,3 +80,5 @@ data/interim/
 /.pytest_tmp*/
 
 /results/optuna/lightgbm_2/
+
+/results/optuna/gradient_boosting/
