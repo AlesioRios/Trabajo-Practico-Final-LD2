@@ -4,7 +4,7 @@ Uso: python src/predict.py <ruta_al_excel>
 Genera results/predicciones.csv con una fila por día: `fecha` es el día D y `prediccion_frio_kw`, el consumo
 previsto para el día D+1.
 
-Cómo funciona (ADR 0022):
+Cómo funciona (ADR 0025):
   1. `load_model` busca la versión en models/model_registry.json y carga el Pipeline completo (imputación,
      escalado si corresponde, y modelo) con joblib.
   2. `load_and_preprocess` reusa preprocessing_pipeline.py con las reglas aprendidas en entrenamiento

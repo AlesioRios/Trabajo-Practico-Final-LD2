@@ -1,4 +1,4 @@
-# ADR 0022: pipeline de predicción sobre un Excel nuevo
+# ADR 0025: pipeline de predicción sobre un Excel nuevo
 
 - **Fecha:** 14/11/2026
 - **Estado:** aceptada
