@@ -22,12 +22,11 @@ La consigna completa está en [`consigna.md`](consigna.md).
 ```
 .
 ├── data/
-│   ├── Totalizadores Planta de Cerveza*.xlsx   (NO versionados, ver "Datos")
+│   ├── Totalizadores Planta *.xlsx            (NO versionados, ver "Datos")
 │   ├── checksums.json                          (huellas SHA-256 de los Excel y del CSV inicial)
 │   └── processed/
 │       ├── dataset_unificado_inicial.csv   (Fase 1: solo Consolidado EE, una fila por día)
 │       ├── dataset_final.csv               (Fase 2: 15 variables sin escalar, objetivo y tramo)
-│       ├── dataset_final.csv               (15 variables oficiales sin escalar, objetivo y tramo)
 │       └── data_lineage.json               (Fase 2: reglas aprendidas, columnas y dimensiones)
 ├── models/
 │   ├── modelo_v1.0.0.pkl
@@ -89,6 +88,17 @@ Los archivos se van agregando a medida que avanzan las fases (ver "Estado por fa
    uv pip install -r requirements.txt
    ```
 
+   Ante errores de enlaces permanentes en Windows / OneDrive, la alternativa comprobada es:
+
+   ```powershell
+   uv pip install --link-mode copy --no-cache -r requirements.txt
+   ```
+
+   La instalación se comprobó en Conda con `cervecera_env` y Python 3.12.16.
+   Una advertencia aislada de `Invalid RECORD entry in pip` no impidió completarla
+   y no requiere cambiar `requirements.txt`. Las corridas históricas de modelado
+   registraron Python 3.12.14; sus versiones se conservan en los manifiestos.
+
 4. Conseguir los datos y ubicarlos en `data/` (siguiente sección).
 
 ## Datos
@@ -96,7 +106,25 @@ Los archivos se van agregando a medida que avanzan las fases (ver "Estado por fa
 Los archivos Excel con los totalizadores horarios de la planta **no están en el
 repositorio** (están excluidos en `.gitignore`). Se obtienen del aula virtual de la
 cátedra (E-FICH, Laboratorio de Datos II, sección del Trabajo Práctico Final). Hay que
-copiarlos tal cual, sin renombrarlos ni abrirlos y guardarlos, dentro de la carpeta `data/`.
+ubicarlos en `data/` con estos nombres literales:
+
+```text
+data/Totalizadores Planta 2020-2022.xlsx
+data/Totalizadores Planta 2021-2023.xlsx
+data/Totalizadores Planta 2022-2023.xlsx
+```
+
+Si la descarga tiene otro nombre, renombrar el archivo sin editar su contenido
+ni abrirlo y guardarlo desde Excel. No adaptar las celdas del EDA a otros nombres.
+
+| Nombre descargado | Nombre requerido en `data/` |
+|---|---|
+| `Totalizadores Planta 2020_2022.xlsx` | `Totalizadores Planta 2020-2022.xlsx` |
+| `Totalizadores Planta - 2021_2023.xlsx` | `Totalizadores Planta 2021-2023.xlsx` |
+| `Totalizadores Planta 2022_2023.xlsx` | `Totalizadores Planta 2022-2023.xlsx` |
+
+En la prueba de reproducibilidad, los bytes de los tres originales coincidieron
+con sus SHA-256 archivados: el problema era el nombre del archivo.
 
 Para comprobar que se tienen exactamente los mismos archivos que el equipo, el repositorio
 versiona `data/checksums.json`, con el hash SHA-256 de cada archivo. Si alguna huella no
@@ -106,325 +134,289 @@ coincide, el archivo es distinto y los resultados no serán comparables.
 
 ## Cómo ejecutar el proyecto
 
-Siempre con el entorno activado (`conda activate cervecera_env`) y desde la raíz del
-repositorio.
+Activar `conda activate cervecera_env` y ejecutar desde la raíz del repositorio.
+Antes de ejecutar cualquier notebook en JupyterLab, verificá que esté seleccionado
+el entorno/kernel del proyecto (`cervecera_env`).
 
-| Qué | Comando | Disponible desde |
+| Tarea | Comando | Alcance |
 |---|---|---|
-| Análisis exploratorio | `jupyter lab notebooks/eda.ipynb` | Fase 1 |
-| Preprocesamiento | `jupyter lab notebooks/preprocesamiento.ipynb` y `python src/preprocessing_pipeline.py` | Fase 2 |
-| Modelado y entrenamiento | `jupyter lab notebooks/modelado.ipynb` y `python src/train_model.py` | Fase 3 |
-| Predicción sobre un Excel nuevo | `python src/predict.py "<ruta al archivo .xlsx>"` | Fase 4 |
+| Análisis exploratorio | `jupyter lab notebooks/eda.ipynb` | Fase 1; requiere los Excel |
+| Preprocesamiento | `python src/preprocessing_pipeline.py` | Fase 2; regenera datos, huellas y linaje |
+| Consulta del cierre publicado | `python src/train_model.py consultar` | Lee predicciones y métricas archivadas |
+| Reproducción del entrenamiento | `python src/train_model.py verificar-entrenamiento` | Reajusta solo train+validation; exige el hash histórico del dataset |
+| Auditoría histórica sin escritura | `python src/verificar_cierre_lasso.py --historico --sin-guardar` | Contrasta el cierre y los archivos del commit de referencia |
+| Predicción sobre un Excel nuevo | `python src/predict.py "<ruta al archivo .xlsx>"` | Fase 4; usa el modelo publicado |
 
-`python src/preprocessing_pipeline.py` recorre toda la Fase 2: arma la tabla de 337 columnas, aplica las 15
-variables oficiales (incluida `es_fin_de_anio`), ajusta el `Pipeline` solo con entrenamiento y guarda `data/processed/dataset_final.csv` (sin escalar),
-su huella en `data/checksums.json` y `data/processed/data_lineage.json`. Con `--sin-guardar` hace las mismas
-comprobaciones sin escribir archivos. La primera vez reconstruye la tabla desde los Excel (unos 6 minutos) y
-después reutiliza la copia de trabajo de `data/interim/`.
+`notebooks/preprocesamiento.ipynb` explica la Fase 2 y
+`notebooks/modelado.ipynb` consulta la evidencia del cierre. La predicción normal
+no requiere ejecutar notebooks ni volver a entrenar.
 
-`predict.py` carga el modelo desde `models/model_registry.json` (por defecto la versión más alta, hoy la
-1.0.0: Lasso con 14 variables) y escribe las
-predicciones diarias (una fila por día, correspondientes al consumo del día D+1) en
-`results/predicciones.csv`. Lee del Excel solo las hojas y columnas que usan las variables del modelo,
-siempre por nombre, e ignora las demás. Si falta alguna, termina con un mensaje que dice cuál (código de salida 1,
-sin escribir el CSV). Predice todos los días y avisa por consola cuáles tenían datos incompletos, por
-ejemplo los primeros del archivo, que no tienen historia para los rezagos (ADR 0025). No usa internet.
+`train_model.py` requiere una acción explícita. `python src/train_model.py entrenar`
+es una entrada para un entrenamiento nuevo autorizado, no un paso de consulta;
+protege los artefactos ya publicados. `python src/train_model.py evaluar-test-una-vez`
+es la evaluación test protegida e irrepetible: **no ejecutarla para consultar o
+auditar**. No borrar `results/lasso_final/test_consumido.json` para reintentar.
 
-## Reproducibilidad
+### Preprocesamiento y exportación reproducible
 
-- Semilla fija: `SEMILLA = 42`, usada en toda partición y en todo estimador que acepte
-  `random_state`. Dos ejecuciones sucesivas deben dar los mismos números.
-- Las dependencias están congeladas con `uv pip freeze` en `requirements.txt`.
-- El modelo serializado lleva versión semántica (`models/modelo_v1.0.0.pkl`) y el commit
-  correspondiente se etiqueta con `git tag -a v1.0.0`, de modo que la versión del registro
-  y la del repositorio sean la misma.
+El preprocesamiento genera 337 columnas tras limpieza y creación de variables,
+aplica las **15 predictoras oficiales** (incluida `es_fin_de_anio`) y ajusta el preprocesador solo con entrenamiento.
+Guarda `data/processed/dataset_final.csv` sin escalar, su huella en
+`data/checksums.json` y `data/processed/data_lineage.json`. La primera reconstrucción
+desde Excel tarda unos seis minutos; las siguientes reutilizan `data/interim/`.
+`--sin-guardar` omite el CSV final y el linaje, pero la carga puede crear la caché
+intermedia; para preservar toda la evidencia, usar una copia de ejecución separada.
 
-## Estrategia de ramas (Git Flow)
+El CSV histórico tiene 1184 filas y 20 columnas. En su orden físico, las posiciones
+16–18 son `consumo_dia`, `baseline_media_movil`, `es_fin_de_anio`, seguidas por
+`objetivo` y `tramo`. La exportación conserva ese orden sin cambiar valores ni el
+contrato de las 15 predictoras. SHA-256 esperado:
 
-- `main` permanece siempre estable. No se commitea directo sobre ella después del commit inicial.
-- Cada fase se desarrolla en su propia rama y se integra a `main` mediante Pull Request:
-
-| Fase | Rama |
-|---|---|
-| 1 - EDA | `feature/eda` |
-| 2 - Preprocesamiento | `feature/preprocessing` |
-| 3 - Modelado | `feature/modeling` |
-| 4 - Pipeline de predicción | `feature/prediction-pipeline` |
-
-- Cada integrante commitea con su propio usuario, y `git log --oneline` debe mostrar los
-  commits de todos, distribuidos en el tiempo.
-
-## Estado por fase
-
-- [x] Fase 0 - Entorno, control de versiones y trazabilidad
-- [x] Fase 1 - Análisis exploratorio de datos (EDA)
-- [x] Fase 2 - Preprocesamiento y selección de variables
-- [x] Fase 3 - Entrenamiento y versionado de modelos
-- [x] Fase 4 - Pipeline de predicción
-
-## Decisiones y acuerdos
-
-- [`docs/acuerdos-de-datos.md`](docs/acuerdos-de-datos.md): formato de los datos, funciones compartidas y reglas de trabajo del equipo.
-- [`docs/decisions/`](docs/decisions/): decisiones de diseño con su justificación, una por archivo.
-
-Selección de variables: [ADR 0015](docs/decisions/0015-seleccion-de-variables.md).
-
-## XGBoost: resultados y revisión sin entrenar
-
-El desarrollo de `feature/modeling-xgboost` contiene tres estudios independientes:
-
-| Estudio | Variables | Trials | Mejor trial | MAE CV | MAE validación independiente |
-|---|---:|---:|---:|---:|---:|
-| xgboost-temporal-v1 | 14 | 100 | 88 | 3986.65 | No evaluada |
-| xgboost-temporal-15-features-v1 | 15 | 100 | 56 | 3957.96 | 2221.76 |
-| xgboost-temporal-15-features-refinado-v1 | 15 | 60 | 49 | 3941.22 | 2229.22 |
-
-La validación independiente usa las mismas 171 filas comunes (29/10/2022–26/04/2023),
-con ajuste solo sobre 830 filas de entrenamiento. El menor MAE CV del refinamiento
-no se tradujo en menor MAE de validación. No se eligió un modelo de producción ni
-se reentrenó con entrenamiento más validación; no se evaluó test.
-
-Leer el [ADR 0019](docs/decisions/0019-xgboost-optuna.md), los JSON/CSV bajo
-`results/xgboost*/` y `notebooks/modelado_xgboost.ipynb`. La notebook consulta
-resultados guardados y muestra PNG existentes; su primera sección usa el dataset
-histórico de `data/processed/seleccion_original_14/`. No ejecutar los scripts de
-búsqueda ni evaluación para revisar un PR. Si falta SQLite histórico, la notebook
-lo restaura desde su ZIP; no crea trials. No sobrescribe figuras al consultarlas.
-Las salidas ejecutadas se conservaron; las correcciones de lectura de esta auditoría
-se verificaron estáticamente y no se reejecutó la notebook.
-
-Los scripts de búsqueda son entradas explícitas para experimentos autorizados:
-`src/modelado_xgboost_15.py` y `src/modelado_xgboost_15_refinado.py`.
-`src/modelado_xgboost.py` conserva el identificador histórico de 14 variables,
-pero el validador vigente exige 15: no usar su CLI para reproducir la corrida
-original. El código exacto original está en el commit registrado en su resumen;
-los datos originales están archivados. La reanudación verifica hashes y rechaza
-cambios de datos, versiones o código. Los ZIP y JSON bastan para consultar resultados
-sin reanudar ni restaurar estudios nuevos.
-
-### Entorno y portabilidad
-
-La ejecución registrada usó Python 3.12.14 y las versiones exactas de
-`requirements.txt`, incluidos Optuna 5.0.0, XGBoost 3.4.1 y scikit-learn 1.9.1.
-El nombre `cervecera_env` es convencional y se puede recrear; las rutas se resuelven
-respecto del repositorio, sin depender de la carpeta personal del autor.
-
-```bash
-conda create -n cervecera_env python=3.12.14
-conda activate cervecera_env
-python -m pip install uv==0.13.1
-uv pip install -r requirements.txt
-uv pip check
+```text
+3bda0f26952d01412f5970de0fb5999659c6fb6965c4f28935ed3bc538134dec
 ```
 
-En OneDrive, `uv pip install --link-mode=copy -r requirements.txt` evita enlaces
-permanentes. Para reproducir hashes históricos del código se requiere conservar
-los finales de línea de Windows (`core.autocrlf=true`), además de datos y versiones.
-La semilla sola no garantiza igualdad entre sistemas o versiones diferentes.
+Regenerar en otra copia y ejecutar luego `python src/train_model.py verificar-entrenamiento`
+permite comprobar el ajuste histórico: 1006 filas train+validation,
+`reproduce_train_validation: true`, `test_usado: false`. Esa verificación no modifica
+el modelo, registry ni logs; requiere el dataset compatible con la huella archivada.
+No incorporar salidas regeneradas ni sustituir las huellas históricas para forzar
+una comprobación.
 
-El evaluador de la primera búsqueda de 15 variables lee por defecto los resultados
-ya guardados. Solo si se lo usa expresamente para una nueva evaluación y faltan
-esas salidas necesita la referencia Git `origin/feature/modeling-rf-lineales-experimentos`.
-Esa rama remota no es necesaria para consultar los resultados versionados; no se
-recomienda eliminarla sin revisar ese mecanismo de reproducción.
+### Predicción habitual
 
-### Alcance del PR individual
+`predict.py` lee `models/model_registry.json` y usa por defecto la versión más alta,
+actualmente 1.0.0 (Lasso con 14 entradas). Escribe `results/predicciones.csv`, una
+predicción por día para el consumo del bloque siguiente (D+1 nominal). Lee por
+nombre solo las hojas y columnas necesarias; si falta alguna, informa cuál y sale
+con código 1 sin escribir el CSV. Predice también las filas con datos incompletos
+y las advierte por consola, por ejemplo al faltar historia para rezagos. No usa
+internet. El contrato y los límites están en el [ADR 0025](docs/decisions/0025-pipeline-de-prediccion.md).
 
-El PR de `feature/modeling-xgboost` apunta a `feature/modeling` y contiene el
-trabajo de XGBoost y los cambios propios vinculados al indicador de fin de año.
-No incorpora implementaciones, notebooks ni commits de Random Forest, Ridge o Lasso.
-`git fetch` solo actualiza referencias remotas; no integra esas ramas.
+## Reproducibilidad y modos de auditoría
 
-El log de esta rama contiene cuatro baselines heredados de la base y 139 registros
-propios de XGBoost. Las uniones de logs y los informes generales de auditoría se
-mantienen fuera del repositorio y no forman parte de este PR. La unión del registro
-general corresponde a la integración del equipo, conservando todas las filas originales.
-
-`results/xgboost_15_validacion/referencias_companera.csv` y `comparacion.csv` conservan
-referencias atribuidas utilizadas en la comparación histórica de XGBoost. No son
-implementaciones ni nuevas corridas de los modelos de otra integrante. No se borran
-para aparentar una ejecución distinta de la realizada.
-
-## Primera búsqueda LightGBM
-
-Configuración, ejecución y límites: [ADR 0021](docs/decisions/0021-lightgbm-optuna.md).
-Ejecutar `python src/modelado_lightgbm.py` en esta copia con Python 3.12.
-Produce 100 trials totales, evaluación del ganador en validación y tres PNG.
-Resultados: `results/lightgbm/`; modelo: `models/lightgbm/`. No evalúa test.
-
-## Segunda búsqueda LightGBM
-
-Metodología y auditoría: [ADR 0022](docs/decisions/0022-lightgbm-segunda-busqueda.md).
-Ejecutar python src/modelado_lightgbm_2.py con Python 3.12.
-Resultados, comparación y PNG: results/lightgbm_2/. Modelo: models/lightgbm_2/.
-Se conservan los 100 trials de la primera búsqueda y todos sus artefactos.
-
-
-### Revisión de LightGBM sin entrenar
-
-Leer `results/lightgbm_2/informe.md`, `comparacion.csv`, `validacion.json` y los
-PNG de `results/lightgbm_2/graficos/`; la primera búsqueda permanece en
-`results/lightgbm/`. No ejecutar los scripts de búsqueda para consultar resultados.
-Las copias `codigo_ejecutado/` documentan lo ejecutado; se corre el código de `src/`.
-Las huellas y versiones registradas permiten auditar las corridas históricas;
-la semilla por sí sola no garantiza igualdad entre sistemas y versiones diferentes.
-
-El PR individual de `feature/modeling-lightgbm` apunta a `feature/modeling` y
-contiene únicamente LightGBM y su soporte de datos de 15 variables. No incorpora
-implementaciones ni commits de RF/Ridge/Lasso. Su log tiene cuatro baselines
-heredados y 86 registros propios. Las uniones de logs de todos los modelos y los
-informes de auditoría general están fuera del repositorio; no entran en este PR.
-
-### Conjunto oficial definitivo
-
-El conjunto oficial del proyecto tiene **15 variables**, incluida `es_fin_de_anio`,
-con idénticos nombres y orden que XGBoost y que `data/processed/data_lineage.json`.
-`src/seleccion_definitiva.py` devuelve siempre esas 15 variables. El preprocesamiento
-que lo consulta, los ejecutores de entrenamiento y evaluación y los modelos de
-validación guardados utilizan el mismo conjunto. No se implementa compatibilidad
-permanente con otra selección ni se modifican los artefactos históricos.
-
-Esta sección corresponde al modelado, la optimización y la evaluación. `train_model.py`
-entrena y evalúa el modelo final (ver "Cierre de Fase 3: Lasso con catorce entradas") y
-`predict.py` es el pipeline de predicción de la Fase 4 (ADR 0025).
-
-### Diagnóstico offline de LightGBM (15/11/2026)
-
-El [informe de diagnóstico](results/lightgbm_diagnostico_validacion/informe.md)
-completa los gráficos y residuos de las dos búsquedas LightGBM desde sus predicciones
-de validación guardadas. Se conservan cinco PNG comparativos, residuos por fila y
-mes, errores mayores, parámetros completos y auditoría del tracking. El notebook
-propio es [modelado_lightgbm.ipynb](notebooks/modelado_lightgbm.ipynb); solo consulta
-esos resultados. No carga datasets, modelos ni estudios mutables de Optuna.
-
-Desde la raíz, con Python 3.12 y las dependencias existentes:
-
-```powershell
-python -B src/diagnostico_lightgbm.py
-python -B src/actualizar_notebook_lightgbm.py
-python -B -m pytest tests/test_diagnostico_lightgbm.py -q -p no:cacheprovider
-```
-
-El segundo comando requiere el kernel `cervecera_env`; si falta, registrarlo desde
-ese entorno con `python -m ipykernel install --user --name cervecera_env`.
-No se debe ejecutar la suite de modelado ni los scripts de búsquedas para revisar
-el diagnóstico. Sus pruebas propias no contienen entrenamiento ni predicción.
-Se reutiliza la aritmética pura del diagnóstico XGBoost ya integrado en la base,
-sin modificar su código ni depender de una copia de trabajo externa.
-
-La rama se actualizó sobre `feature/modeling`: el log común ahora incluye otras
-familias, pero los registros LightGBM siguen siendo 86 (84 COMPLETE y dos
-validaciones). La auditoría verifica su firma semántica y los originales por
-SHA-256. La granularidad por experimento, los timestamps sin zona horaria y el
-árbol sucio histórico quedan explícitos; no se fabrican registros retrospectivos.
-Las referencias anteriores a logs separados describen las publicaciones originales.
-
-El diagnóstico descriptivo de 3.3 queda completo para estos candidatos. La
-importancia de variables del ganador global, notebook común, entrenamiento final,
-versionado semántico y registry siguen pendientes de integración. No se abrió
-test ni se modificaron las 15 variables, resultados originales o módulos comunes.
-
-### Diagnóstico de validación sin ejecutar modelos (15/11/2026)
-
-El [informe de diagnóstico](results/xgboost_diagnostico_validacion/informe.md)
-completa los gráficos de predicción frente a real y el análisis de residuos de
-las dos búsquedas vigentes usando exclusivamente sus CSV de validación guardados.
-La carpeta contiene cinco PNG comparativos, residuos por fila y mes, errores
-mayores, parámetros completos, espacios de búsqueda y auditoría del tracking.
-`verificacion.json` registra las huellas de los originales y el entorno del análisis.
-No se abre `dataset_final.csv`, no se cargan estimadores y no se escribe en el log.
-
-Desde la raíz del repositorio, con `cervecera_env` (Python 3.12):
-
-```powershell
-python -B src/diagnostico_xgboost.py
-python -B src/actualizar_diagnostico_notebook.py
-python -B -m pytest tests/test_diagnostico_xgboost.py -q -p no:cacheprovider
-```
-
-El segundo comando requiere el kernel Jupyter `cervecera_env`: ejecuta únicamente
-el apéndice autónomo de las secciones 13–16 de `notebooks/modelado_xgboost.ipynb`.
-Si el entorno todavía no está registrado en Jupyter, hacerlo desde ese entorno con
-`python -m ipykernel install --user --name cervecera_env --display-name cervecera_env`.
-Preserva las fuentes y salidas de las 33 celdas históricas; no ejecuta el notebook
-completo ni restaura estudios de Optuna. La lectura del informe y de los PNG no
-requiere Jupyter. El archivo de pruebas indicado no contiene entrenamiento.
-No ejecutar la suite completa ni los evaluadores para esta consulta: contienen
-ajustes de modelos. No se agregaron dependencias a `requirements.txt`.
-
-El log conserva 139 registros XGBoost, con parámetros, métricas y timestamps
-originales verificados. La granularidad es por experimento completo, no por
-ajuste de pliegue; los trials podados se conservan fuera del CSV. Esta limitación
-de la sección 3.2 queda documentada, sin inventar registros ni tiempos históricos.
-La diferencia entre métricas del CSV decimal y del log se explica por float32;
-su recuperación reproduce las métricas históricas sin modificar predicciones.
-
-La [auditoría de ambos modelos](docs/auditoria-fase3-modelos.md) contrasta las
-secciones 3.1–3.4 del PDF oficial de referencias y la ubicación de los entregables.
-LightGBM se inspeccionó en su rama sin modificarlo. La integración al notebook
-común, elección global, importancia de variables del ganador y registro semántico
-siguen pendientes. No se presenta la Fase 3 completa como finalizada.
-
-
-## Cierre de Fase 3: Lasso con catorce entradas
-
-El cierre fija Lasso (`alpha=75`, `max_iter=20000`, `random_state=42`) y pipeline A
-(mediana y StandardScaler) sobre las catorce variables del linaje histórico
-`data/processed/seleccion_original_14/data_lineage.json`. El CSV vigente no se cambia.
-La comparación y sus fuentes están en `results/comparacion_modelos_final.md`.
-
-Con Python 3.12, activar `conda activate cervecera_env` y usar las dependencias
-congeladas de `requirements.txt`. Para un cierre nuevo autorizado, con código
-commiteado y sin entrenamiento ni evaluación final previos:
-
-```powershell
-python src/train_model.py entrenar
-python src/train_model.py evaluar-test-una-vez
-python src/informe_lasso_final.py
-python -m pytest tests -q
-```
-
-La segunda orden requiere autorización para consumir test: crea un marcador antes
-de cargar sus observaciones. No borrar ese marcador para reintentar. Si ya existe
-evidencia final, solo se recuperan y verifican los resultados guardados. Las órdenes
-anteriores no deben usarse para crear otra evaluación tras observar el resultado.
-Para auditar la versión publicada sin volver a usar test:
+La semilla compartida es `SEMILLA = 42`; las dependencias están congeladas en
+`requirements.txt`. La semilla sola no garantiza igualdad entre sistemas o versiones.
+Los manifiestos conservan versiones y SHA-256; los hashes históricos de código
+pueden depender de CRLF/LF (`core.autocrlf=true` en las corridas Windows).
 
 ```powershell
 python src/train_model.py consultar
 python src/train_model.py verificar-entrenamiento
-python src/verificar_cierre_lasso.py
-python src/informe_lasso_final.py
+python src/verificar_cierre_lasso.py --historico --sin-guardar
 ```
 
-La verificación de entrenamiento reproduce exclusivamente train+validation, compara
-sus predicciones archivadas y no modifica el artefacto, logs ni registry. `consultar`
-recalcula aritmética desde predicciones guardadas; no carga el dataset test ni predice.
-El notebook `notebooks/modelado.ipynb`, ejecutado con kernel `cervecera_env`, solo lee
-archivos de evidencia y puede repetirse sin consumir test. El notebook histórico de
-baselines se conserva en Git; las búsquedas por familia y sus ramas se enlazan en el
-informe de comparación.
+El auditor conserva dos comprobaciones distintas:
 
-Para cargar el pipeline final y recuperar su contrato de entrada:
+| Modo | Qué compara | Interpretación |
+|---|---|---|
+| Estricto (predeterminado): `python src/verificar_cierre_lasso.py --sin-guardar` | Archivos actuales contra firmas de `preparacion_cierre.json` | Puede fallar legítimamente si código o JSON cambiaron después del cierre |
+| Histórico: `python src/verificar_cierre_lasso.py --historico --sin-guardar` | Archivos protegidos recuperados con `git show` desde `commit_base`, considerando la representación histórica CRLF | Comprueba la evidencia de referencia; no afirma que el árbol actual sea idéntico |
+
+Ambos conservan los controles de modelo, dataset, predicciones archivadas, métricas,
+registry, logs y dependencias. La salida identifica `modo_auditoria`. Sin
+`--sin-guardar`, el auditor escribe `results/lasso_final/verificacion_final.json`;
+para consultar sin alterar evidencia usar siempre esa opción. Requiere los commits
+históricos disponibles: una clonación superficial incompleta puede no alcanzarlos.
+El bloque `pruebas` procede del XML archivado de 219 pruebas; **el auditor no vuelve
+a ejecutarlas**. Sus textos históricos describen el alcance del cierre original.
+
+## Modelos y comparación de validación
+
+Se estudiaron XGBoost, LightGBM, Random Forest, Ridge y Lasso. El
+[informe de comparación](results/comparacion_modelos_final.md) y su
+[CSV de fuentes](results/comparacion_modelos_fuentes.csv) conservan el ranking,
+configuraciones completas, timestamps y procedencia por commit. También se mantiene
+el experimento adicional de [Gradient Boosting](docs/decisions/0023-gradient-boosting-optuna.md).
+
+La tabla resume el mejor candidato de Fase 3 de cada una de las cinco familias,
+con ajuste sobre 830 filas y evaluación sobre las mismas **171 filas comunes** de
+validación (29/10/2022–26/04/2023). Se comparan configuraciones completas de 14 o 15
+entradas, no métricas de CV contra validación. Las cifras se redondean aquí; las
+fuentes conservan todos los decimales.
+
+| Familia | Entradas | Configuración identificadora | MAE validación (kW) | RMSE validación (kW) | R² |
+|---|---:|---|---:|---:|---:|
+| Lasso | 14 | Pipeline A, `alpha=75`, `max_iter=20000` | 2215.7964 | 2835.8038 | 0.467609 |
+| XGBoost | 15 | Búsqueda inicial, trial 56, 1908 árboles, profundidad 3 | 2221.7606 | 2844.3074 | 0.464411 |
+| Ridge | 14 | Pipeline A, `alpha=30` | 2225.4432 | 2863.2289 | 0.457262 |
+| LightGBM | 15 | Segunda búsqueda, trial 99, 200 árboles, 8 hojas | 2276.7354 | 2873.1357 | 0.453499 |
+| Random Forest | 15 | 200 árboles, profundidad 10, `min_samples_leaf=12`, `max_features=0.5` | 2284.5211 | 2954.7497 | 0.422011 |
+
+Todos usan `random_state=42`. La validación ya se utilizó en selección de variables
+y familias; no es una estimación final independiente. La ventaja de Lasso frente
+a XGBoost es pequeña y no demuestra superioridad estadística. El ranking se limita
+a candidatos de Fase 3: los antecedentes Ridge de Fase 2 con selección Pearson o
+Spearman tienen errores menores en el mismo soporte de 171 filas y se documentan
+en el informe. Los resultados sobre 176 filas y los MAE de CV no se mezclan con
+esta tabla. No se afirma que Lasso sea el mejor de toda la historia del proyecto.
+
+### XGBoost
+
+Se conservan tres estudios: 100 trials con 14 variables (mejor trial 88, MAE CV
+3986.65, sin validación independiente); 100 con 15 (trial 56, CV 3957.96,
+validación 2221.76); y 60 de refinamiento (trial 49, CV 3941.22, validación 2229.22).
+El refinamiento redujo CV pero no mejoró validación. El ganador de esta familia
+usa `learning_rate=0.0020702351473759497` y profundidad 3; sus parámetros completos
+están en [evaluacion.json](results/xgboost_15_validacion/evaluacion.json).
+
+El [ADR 0019](docs/decisions/0019-xgboost-optuna.md),
+[notebook](notebooks/modelado_xgboost.ipynb), JSON/CSV en `results/xgboost*/` y el
+[informe de diagnóstico](results/xgboost_diagnostico_validacion/informe.md) conservan
+búsquedas, predicciones, residuos, gráficos y auditoría. El notebook consulta
+resultados guardados; la sección histórica usa `data/processed/seleccion_original_14/`.
+Puede restaurar el SQLite histórico desde ZIP, sin crear trials. Para revisar basta
+leer informes y PNG; no ejecutar búsquedas ni evaluadores. El CLI histórico de
+`src/modelado_xgboost.py` usa un contrato anterior de 14 entradas frente al validador
+vigente de 15; el commit original está en su resumen. Los ejecutores actuales de
+15 son `src/modelado_xgboost_15.py` y `src/modelado_xgboost_15_refinado.py`.
+
+El evaluador inicial consulta resultados guardados; su reproducción explícita si
+faltan salidas depende de `origin/feature/modeling-rf-lineales-experimentos`.
+`results/xgboost_15_validacion/referencias_companera.csv` y `comparacion.csv`
+conservan referencias atribuidas, no nuevas corridas de otras familias. El tracking
+histórico conserva 139 registros XGBoost con granularidad por experimento; los
+trials podados quedan fuera del CSV. El diagnóstico explica las diferencias por
+float32 sin alterar predicciones ni fabricar registros retrospectivos.
+
+### LightGBM
+
+Las dos búsquedas de 100 trials usan 15 entradas: la inicial eligió el trial 72
+(MAE CV 3982.2353; validación 2321.0388) y la segunda el 99 (CV 3948.7261;
+validación 2276.7354). El segundo candidato usa profundidad 3, 8 hojas,
+`min_child_samples=31` y `learning_rate=0.036985470389312915`.
+Las configuraciones completas y modelos de validación permanecen en
+[primera búsqueda](results/lightgbm/validacion.json),
+[segunda búsqueda](results/lightgbm_2/validacion.json), `models/lightgbm/` y
+`models/lightgbm_2/`; no son el modelo de producción publicado.
+
+El [ADR 0021](docs/decisions/0021-lightgbm-optuna.md),
+[ADR 0022](docs/decisions/0022-lightgbm-segunda-busqueda.md),
+[informe de búsqueda](results/lightgbm_2/informe.md),
+[comparación](results/lightgbm_2/comparacion.csv),
+[informe de diagnóstico](results/lightgbm_diagnostico_validacion/informe.md) y
+[notebook](notebooks/modelado_lightgbm.ipynb) permiten revisar sin entrenar.
+Se conservan los resultados y gráficos de ambas búsquedas. El notebook solo lee
+el diagnóstico; no carga datasets, modelos ni estudios mutables. Las copias
+`codigo_ejecutado/` documentan las corridas y sus huellas; los scripts de nuevas
+búsquedas están en `src/`. El tracking mantiene 86 registros propios (84 COMPLETE
+y dos validaciones), timestamps originales sin zona horaria y la limitación del
+árbol modificado durante la ejecución.
+
+### Random Forest
+
+La búsqueda inicial probó 20 configuraciones; se conservaron estudios iniciales
+y Optuna con 14 y 15 entradas. El mejor bosque de validación fue el inicial de 15:
+200 árboles, profundidad 10, hoja mínima 12 y mitad de variables por división,
+`n_jobs=1`. La configuración inicial de 14 obtuvo MAE 2293.7033; Optuna obtuvo
+2305.9525 con 14 y 2319.0805 con 15, sin mejorar el candidato inicial.
+
+Sus artefactos de evidencia son el [log consolidado](results/experiment_logs.csv),
+el [CSV de procedencia](results/comparacion_modelos_fuentes.csv) y los notebooks
+[de búsqueda inicial](https://github.com/AlesioRios/Trabajo-Practico-Final-LD2/blob/9832116044b7f9b82cdd041f7b66efdc7338603c/notebooks/modelado_rf_lineales.ipynb)
+y [Optuna](https://github.com/AlesioRios/Trabajo-Practico-Final-LD2/blob/9832116044b7f9b82cdd041f7b66efdc7338603c/notebooks/modelado_rf_lineales_optuna.ipynb)
+de la rama histórica. No hay CSV independientes de sus predicciones de validación
+ni un bosque publicado en el registry actual: las métricas se respaldan con el log
+y los notebooks ejecutados, sin atribuirles una reproducción nueva.
+
+### Ridge
+
+Los lineales compararon diez valores de alpha en la búsqueda inicial y luego
+Optuna, tanto con 14 como con 15 entradas. Ridge usa pipeline A (mediana y
+StandardScaler aprendidos dentro de cada ajuste), `alpha=30` y semilla 42.
+Con 14 entradas, búsqueda inicial y Optuna dieron MAE 2225.4432; con 15,
+2284.2013. Comparte los notebooks y la procedencia histórica de Random Forest;
+el [ADR 0020 histórico](https://github.com/AlesioRios/Trabajo-Practico-Final-LD2/blob/9832116044b7f9b82cdd041f7b66efdc7338603c/docs/decisions/0020-random-forest-y-modelos-lineales.md)
+explica su preparación y espacios de búsqueda. No se publicó un Ridge final ni
+predicciones individuales de validación en esta rama. El Ridge usado como juez
+en Fase 2 y sus métricas pertenecen a otro alcance, detallado en el informe comparativo.
+
+### Lasso y contrato de entradas
+
+Lasso comparte las cuatro búsquedas de los lineales: la configuración de 14 entradas
+con `alpha=75`, `max_iter=20000` y semilla 42 alcanzó MAE 2215.7964 tanto en la
+búsqueda inicial como en Optuna; con 15 entradas alcanzó 2265.6207. El cierre
+publica el candidato de 14 que ganó en Fase 3, sin atribuirle las métricas del de 15.
+
+La selección oficial vigente de `src/seleccion_definitiva.py` tiene **15 predictoras**,
+incluida `es_fin_de_anio`. El modelo publicado conserva las **14 entradas históricas**
+de `data/processed/seleccion_original_14/data_lineage.json` por decisión explícita
+del [ADR 0024](docs/decisions/0024-cierre-lasso.md). El indicador adicional queda en
+el dataset, pero no se pasa a Lasso; su orden real se recupera del artefacto y del
+registry. Las búsquedas vigentes de 15 y la predicción del cierre de 14 tienen
+contratos explícitos diferentes; no se altera ninguno para igualarlos.
+
+## Cierre de Fase 3: Lasso con catorce entradas
+
+El [informe final](results/lasso_final/informe_final.md) describe el cierre ya
+realizado: mediana, StandardScaler y Lasso reajustados con 1006 filas train+validation,
+versión 1.0.0 en [registry](models/model_registry.json) y
+`models/modelo_v1.0.0.pkl`. La validación original se conserva separada de las
+métricas de ajuste y del test local. Predicciones archivadas, coeficientes, residuos,
+gráficos y controles están en `results/lasso_final/` y el notebook común los consulta.
+No volver a entrenar ni evaluar test para revisar esta entrega.
+
+Para recuperar el contrato del pipeline final:
 
 ```python
 import joblib
 modelo = joblib.load("models/modelo_v1.0.0.pkl")
 columnas = modelo.cierre_metadata_["columnas"]
-# X_nuevo es una tabla ya preparada con las mismas reglas históricas de Fase 2.
+# X_nuevo debe prepararse con las mismas reglas históricas de Fase 2.
 predicciones = modelo.predict(X_nuevo[columnas])
 ```
 
-La ruta efectiva y versión están en `models/model_registry.json`; si 1.0.0 ya estaba
-ocupada se reserva la siguiente versión patch sin sobrescribirla. Se conserva la
-validación original separada del test local y de las métricas de ajuste. El hash
-`commit` del registry identifica el código previo al entrenamiento, también incluido
-en el artefacto. El commit posterior de resultados recibe el tag anotado `v1.0.0`
-(o la versión efectiva); no se intenta incluir el hash de ese commit dentro de sí
-mismo. No se publica ni integra a main automáticamente.
+El `commit` del registry identifica el código previo al entrenamiento y coincide
+con el incluido en el artefacto. El commit posterior de resultados recibe el tag
+anotado de versión; no se incluye su propio hash dentro de sí mismo. Para versiones
+nuevas se reserva el siguiente patch sin sobrescribir artefactos anteriores.
+`src/informe_lasso_final.py` genera informes desde evidencia y escribe salidas;
+no hace falta ejecutarlo para consultar el informe publicado.
 
-Resultados, predicciones auditables, residuos, coeficientes, gráficos y controles:
-`results/lasso_final/`. El resultado local no acredita el umbral del test oculto.
-Validation fue utilizada antes para selección de variables. DIA puede repetirse y
-el horizonte certificado es el bloque siguiente; la disponibilidad real de cada
-entrada a las 23:59 sigue sin demostrarse. La Fase 4 usa este modelo desde `src/predict.py` (ADR 0025).
+El resultado local no acredita el umbral del test oculto. Validation intervino antes
+en selección; `DIA` puede repetirse y el horizonte certificado es el bloque siguiente.
+La disponibilidad física de las entradas a las 23:59 no está demostrada. Estos
+límites se mantienen aunque los controles técnicos de reproducibilidad sean correctos.
+
+## Estado por fase y trazabilidad
+
+Estado de `main` revisado al 15/11/2026, después de integrar el cierre Lasso y la
+predicción (PR #27):
+
+- [x] Fase 0: entorno, control de versiones y trazabilidad.
+- [x] Fase 1: EDA.
+- [x] Fase 2: preprocesamiento y selección oficial de 15 predictoras.
+- [x] Fase 3: comparación, cierre Lasso de 14 entradas, serialización y registry.
+- [x] Fase 4: pipeline de predicción desde un Excel nuevo.
+
+Las menciones a integración, ganador global, notebook común o Fase 4 pendientes en
+los informes históricos describen su fecha y alcance originales, anteriores al
+cierre; no son tareas pendientes del código actual. Se preservan esos informes
+como evidencia. El [informe comparativo](results/comparacion_modelos_final.md)
+termina en la selección provisional; el [informe final](results/lasso_final/informe_final.md)
+y el ADR 0025 documentan las etapas posteriores. La
+[auditoría de modelos](docs/auditoria-fase3-modelos.md) conserva la revisión previa
+de las secciones 3.1–3.4 y sus límites. El test oculto y la certificación operativa
+siguen fuera de lo demostrado por estas entregas.
+
+Los PR individuales XGBoost y LightGBM describían sus ramas antes de la integración:
+contenían sus propias búsquedas y cuatro baselines heredados. El log común actual
+conserva la unión histórica y el cierre, con procedencia en el CSV de fuentes; no
+se deben interpretar aquellas descripciones como el contenido actual de `main`.
+Los diagnósticos conservan gráficos y auditorías de tracking sin fabricar corridas.
+Sus scripts `src/diagnostico_xgboost.py`, `src/diagnostico_lightgbm.py` y los
+actualizadores de notebooks escriben salidas; para consulta leer los informes y PNG.
+Las pruebas focalizadas de esos diagnósticos están en
+`tests/test_diagnostico_xgboost.py` y `tests/test_diagnostico_lightgbm.py`.
+
+## Estrategia de ramas y acuerdos
+
+`main` permanece estable: cada cambio se desarrolla en una rama y se integra por
+Pull Request revisado. Las ramas históricas por fase son `feature/eda`,
+`feature/preprocessing`, `feature/modeling` y `feature/prediction-pipeline`.
+Cada integrante registra sus propios commits. Crear un PR no autoriza su merge.
+
+- [Consigna](consigna.md).
+- [Acuerdos de datos](docs/acuerdos-de-datos.md): formatos y funciones compartidas.
+- [Decisiones de diseño](docs/decisions/): justificación y alcance por etapa.
+- [Selección de variables, ADR 0015](docs/decisions/0015-seleccion-de-variables.md).

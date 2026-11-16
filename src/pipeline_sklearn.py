@@ -109,6 +109,9 @@ def guardar_dataset_final(tabla_con_variables, columnas, carpeta_salida, columna
     salida = Path(carpeta_salida)
     salida.mkdir(parents=True, exist_ok=True)
     campos = ["DIA", *columnas, *columnas_auxiliares, "objetivo"]
+    if "es_fin_de_anio" in columnas:
+        campos.remove("es_fin_de_anio")
+        campos.insert(-1, "es_fin_de_anio")
     nombres = ("entrenamiento", "validacion", "prueba")
     partes = [
         tramo.loc[tramo["objetivo"].notna(), campos].assign(tramo=nombre)
