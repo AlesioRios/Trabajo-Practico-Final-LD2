@@ -134,3 +134,20 @@ def test_un_producto_con_el_coseno_no_es_ciclico():
     grupos = aprender_reglas_de_grupos(X, list(X))
     assert grupos["ciclicas"] == ["dia_anio_coseno"]
     assert grupos["numericas"] == ["dia_anio_coseno x Agua", "medicion"]
+
+
+def test_exportacion_respeta_orden_historico_con_fin_de_anio(tmp_path):
+    tabla = _tabla_diaria(20)
+    tabla["es_fin_de_anio"] = 0
+    tabla["baseline_media_movil"] = tabla["consumo_dia"].rolling(7, min_periods=4).mean()
+    columnas = ["x", "es_fin_de_anio"]
+    original = tabla.copy(deep=True)
+    ruta = guardar_dataset_final(
+        tabla, columnas, tmp_path / "processed", ("consumo_dia", "baseline_media_movil"))
+    guardada = pd.read_csv(ruta, parse_dates=["DIA"])
+    assert list(guardada) == ["DIA", "x", "consumo_dia", "baseline_media_movil",
+                              "es_fin_de_anio", "objetivo", "tramo"]
+    pd.testing.assert_frame_equal(guardada.drop(columns="tramo"),
+                                  tabla.loc[tabla.objetivo.notna(), guardada.columns[:-1]].reset_index(drop=True))
+    pd.testing.assert_frame_equal(tabla, original)
+    assert columnas == ["x", "es_fin_de_anio"]

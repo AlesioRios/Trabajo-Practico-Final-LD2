@@ -1,4 +1,5 @@
 """Verificación final de evidencia, sin ajustar ni predecir sobre test."""
+import argparse
 import csv
 import hashlib
 import importlib.metadata
@@ -12,6 +13,11 @@ import joblib
 import numpy as np
 import pandas as pd
 from packaging.requirements import Requirement
+
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--historico',action='store_true',help='verificar los archivos del commit_base contra las firmas historicas')
+parser.add_argument('--sin-guardar',action='store_true',help='mostrar los controles sin escribir verificacion_final.json')
+args=parser.parse_args()
 
 r=Path.cwd()
 s=r/'results/lasso_final'
@@ -42,7 +48,13 @@ checks={
  **meta['reproducibilidad'],
 }
 for ruta,firma in prep['archivos_protegidos_sha256'].items():
- checks['preservado:'+ruta]=sha(r/ruta)==firma
+ if args.historico:
+  contenido=subprocess.check_output(['git','show',prep['commit_base']+':'+ruta])
+  # Las firmas del cierre incluyen archivos de Windows con CRLF; Git puede conservar LF.
+  historico_crlf=contenido.replace(b'\r\n',b'\n').replace(b'\n',b'\r\n')
+  checks['preservado_historico:'+ruta]=firma in {hashlib.sha256(contenido).hexdigest(),hashlib.sha256(historico_crlf).hexdigest()}
+ else:
+  checks['preservado:'+ruta]=sha(r/ruta)==firma
 code=subprocess.check_output(['git','show',meta['commit']+':src/train_model.py'])
 checks['codigo_entrenado_recuperable']=hashlib.sha256(code).hexdigest()==sha(r/'src/train_model.py')
 checks['commit_registry_artefacto']=meta['commit']==entrada['commit']==modelo.cierre_metadata_['commit_entrenamiento']
@@ -73,14 +85,15 @@ tests={k:sum(int(t.attrib.get(k,0)) for t in suites) for k in ['tests','failures
 tests['aprobadas']=tests['tests']-tests['failures']-tests['errors']-tests['skipped']
 tests['motivos_omitidas']=[x.attrib for x in xml.iter('skipped')]
 checks['suite_completa_sin_fallos']=tests['failures']==tests['errors']==0
-resultado={'controles':{k:bool(v) for k,v in checks.items()},'todos_los_controles':all(checks.values()),
+resultado={'modo_auditoria':'historico' if args.historico else 'estricto','controles':{k:bool(v) for k,v in checks.items()},'todos_los_controles':all(checks.values()),
  'pruebas':tests,'dependencias_discrepantes':faltantes,'modelo_sha256':meta['modelo_sha256'],'commit_entrenamiento':meta['commit'],
  'version':meta['version'],'tag_anotado_previsto':'v'+meta['version'],'metricas_auditadas':metricas,
  'limite_fuga':'Ausencia de test en ajuste y fronteras verificadas; disponibilidad operativa y fechas físicas no certificadas.',
- 'fase4':'src/predict.py preservado byte a byte; no implementada.',
+ 'fase4':'Se verifica src/predict.py del commit_base.' if args.historico else 'Se exige preservar src/predict.py del cierre en la copia de trabajo.',
  'revision_visual':'Figuras de coeficientes y residuos inspeccionadas: textos legibles y sin recortes.',
  'faltantes_consigna':'Test oculto y Fase 4 fuera de alcance; conclusiones generales y PR de integración del equipo pendientes.'}
-(s/'verificacion_final.json').write_text(json.dumps(resultado,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-print(json.dumps({k:resultado[k] for k in ['todos_los_controles','pruebas','dependencias_discrepantes']},ensure_ascii=True,indent=2))
+if not args.sin_guardar:
+ (s/'verificacion_final.json').write_text(json.dumps(resultado,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps({k:resultado[k] for k in ['modo_auditoria','todos_los_controles','pruebas','dependencias_discrepantes']},ensure_ascii=True,indent=2))
 print('Controles fallidos:',[k for k,v in checks.items() if not v])
 assert all(checks.values())
